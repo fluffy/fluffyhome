@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2009, Cullen Jennings
+# Copyright (c) 2010, Cullen Jennings
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
 # 
 # * Redistributions of source code must retain the above copyright notice, this list
-# of conditions and the following disclaimer.
+#   of conditions and the following disclaimer.
 # 
 # * Redistributions in binary form must reproduce the above copyright notice, this
-# list of conditions and the following disclaimer in the documentation and/or
-# other materials provided with the distribution.
+#   list of conditions and the following disclaimer in the documentation and/or
+#   other materials provided with the distribution.
 # 
 # * Neither the name of Cullen Jennings nor the names of its contributors may be
-# used to endorse or promote products derived from this software without specific
-# prior written permission.
+#   used to endorse or promote products derived from this software without specific
+#   prior written permission.
 # 
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -84,7 +84,6 @@ class TedRelay:
             resp.close()
             return
 
-        #data = resp.read()
         self.tree = ElementTree()
         self.tree.parse( resp )
         resp.close()
@@ -95,33 +94,54 @@ class TedRelay:
         mtu = power.find("MTU%d"%mtuNum)
         p = mtu.find("PowerNow")
         v = float( p.text )
-        print "found power mtu%d = %f"%(mtuNum,v)
-
+        #print "found power mtu%d = %f"%(mtuNum,v)
+        return v
 
     def shutdown(self):
         pass
 
 
+def post( mtu, power ):
+    print "Post %f to mtu %d"%(power,mtu)
+
+
+
 def main():
     usage = "usage: %prog [options]"
-    parser = OptionParser(usage)
+    parser = OptionParser(usage, version="%prog 0.1")
     parser.add_option("-a", "--ted", dest="ip",
                       help="IP address of TED")
     parser.add_option("-v", "--verbose",
                       action="store_true", dest="verbose")
+    parser.add_option("-n", "--numMTU",
+                       dest="numMTU", type="int" , default=1, 
+                      help = "Number of MTU units on TED. Defaults to 1" )
 
     (options, args) = parser.parse_args()
     if len(args) != 0:
         parser.error("incorrect number of arguments")
-    if options.verbose:
-        print "reading %s..." % options.filename
+ 
 
     relay = TedRelay(options.ip)
     relay.find()
-    relay.fetch()
-    relay.power(1)
-    relay.power(2)
 
+    prev = [0,0,0,0,0,0,0]
+    while True:
+        relay.fetch()
+        for mtu in range(1, options.numMTU+1 ):
+            p = relay.power(mtu)
+            d = p - prev[mtu]
+            if d < 0.0:
+                d = -d
+
+            if options.verbose:
+                print "Got MTU%d is at %f watts (delta=%f)"%(mtu,p,d)
+
+            if d > 10.0 :
+                post( mtu , p )
+
+            prev[mtu] = p
+        time.sleep(1)
     
     relay.shutdown()
     return 0
