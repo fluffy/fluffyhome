@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- copy this to  /Library/LaunchDaemons -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>KeepAlive</key>
+	<true/>
+	<key>Label</key>
+	<string>com.fluffyhome.ted5000</string>
+	<key>Program</key>
+	<string>/usr/bin/ted5000.py</string>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>ProgramArguments</key>
+	<array>
+		<string>-t</string>
+		<string>5</string>
+		<string>http://www.fluffyhome.com/sensor/fluffy/ted5000mtu1/value/</string>
+	</array>
+</dict>
+</plist>

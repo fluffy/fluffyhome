@@ -36,9 +36,10 @@ import struct
 import httplib
 from optparse import OptionParser
 from xml.etree.ElementTree import ElementTree
+from urlparse import urlparse
 
 
-class TedRelay:
+class TedClient:
     port = 30303
     num = 1000
     sock = None
@@ -101,35 +102,48 @@ class TedRelay:
         pass
 
 
-def post( mtu, power ):
-    print "Post %f to mtu %d"%(power,mtu)
+def post( mtu, power, url, headers ):
+    u = urlparse( url )
+    data = str( power )
 
+    conn = httplib.HTTPConnection( u.netloc )
+    conn.request("PUT", u.path , data , headers )
+    resp = conn.getresponse()
+
+    if resp.status != 200:
+        print "Problem posting to htp://%s%s"%(u.netloc,u.path)
+        print "%s %s"%(resp.status, resp.reason)
 
 
 def main():
-    usage = "usage: %prog [options]"
+    usage = "usage: %prog [options] URL"
     parser = OptionParser(usage, version="%prog 0.1")
+    parser.add_option("-t", "--loopTime", dest="loopTime", type="int", default=30,
+                      help="How often in seconds to poll the TED")
     parser.add_option("-a", "--ted", dest="ip",
                       help="IP address of TED")
     parser.add_option("-v", "--verbose",
                       action="store_true", dest="verbose")
+    parser.add_option("-x", "--headerName", dest="headerName", default=None,
+                      help="HTTP Header Name to add to PUT request")
+    parser.add_option("-y", "--headerValue", dest="headerValue", default="",
+                      help="HTTP Header Value to add to PUT request")
     parser.add_option("-n", "--numMTU",
                        dest="numMTU", type="int" , default=1, 
                       help = "Number of MTU units on TED. Defaults to 1" )
 
     (options, args) = parser.parse_args()
-    if len(args) != 0:
+    if len(args) != 1:
         parser.error("incorrect number of arguments")
  
-
-    relay = TedRelay(options.ip)
-    relay.find()
+    tedClient = TedClient(options.ip)
+    tedClient.find()
 
     prev = [0,0,0,0,0,0,0]
     while True:
-        relay.fetch()
+        tedClient.fetch()
         for mtu in range(1, options.numMTU+1 ):
-            p = relay.power(mtu)
+            p = tedClient.power(mtu)
             d = p - prev[mtu]
             if d < 0.0:
                 d = -d
@@ -137,13 +151,19 @@ def main():
             if options.verbose:
                 print "Got MTU%d is at %f watts (delta=%f)"%(mtu,p,d)
 
-            if d > 10.0 :
-                post( mtu , p )
+            if (d > 10.0) :
+                h = {} 
+                if options.headerName is not None:
+                    h = { options.headerName : options.headerValue }
+
+                if True: # options.verbose:
+                    print "Post %f to %s"%(p,args[0]) 
+                post( mtu , p , args[0], h )
 
             prev[mtu] = p
-        time.sleep(1)
+        time.sleep(options.loopTime)
     
-    relay.shutdown()
+    tedClient.shutdown()
     return 0
 
 
