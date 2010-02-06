@@ -39,12 +39,14 @@ from xml.etree.ElementTree import ElementTree
 from urlparse import urlparse
 
 
+
 class TedClient:
     port = 30303
     num = 1000
     sock = None
     tedIP = None
     tree = None
+    tedName = "TED5000"
 
     def __init__(self, pTedIP):
         if pTedIP is not None:
@@ -66,10 +68,22 @@ class TedClient:
 	    data,(ip,port) = self.sock.recvfrom(1500)
 	    magic = struct.unpack('!7s',data[0:7])
 	    #print "magic header = '%s' from ip=%s"%(magic[0],ip)
+
+            #i = 0
+            #for d in data:
+            #    print "data[%d] = %s"%(i,str(d) ) 
+            #    i = i+1
+
             if magic[0] == "TED5000" :
                 print "Found TED5000 at IP Address %s"%ip
                 self.tedIP = ip
                 found = True
+                
+                mac = struct.unpack('!17s',data[19:36])
+                print "Mac address is %s"%mac
+                self.tedName = "TED5000-%s"%mac
+
+
         self.sock.close()
 	self.sock = None
 
@@ -89,34 +103,44 @@ class TedClient:
         self.tree.parse( resp )
         resp.close()
         
+    def numMTU(self):
+        system = self.tree.find("System")
+        nmtu =  system.find("NumberMTU")
+        n = int( nmtu.text )
+        return n
 
     def power( self, mtuNum ):
         power = self.tree.find("Power")
         mtu = power.find("MTU%d"%mtuNum)
-        p = mtu.find("PowerNow")
-        v = float( p.text )
-        #print "found power mtu%d = %f"%(mtuNum,v)
-        return v
+        power = mtu.find("PowerNow")
+        energy = mtu.find("PowerMTD")
+        vpower = float( power.text )
+        venergy = float( energy.text )
+        #print "found power mtu%d power=%f energ=%f J"%(mtuNum,vpower,venergy)
+        return (vpower,venergy)
 
     def shutdown(self):
         pass
 
+    def name(self):
+        return str(self.tedName)
 
-def post( mtu, power, url, headers ):
+
+def postJson( mtu, data, url, headers={} ):
     u = urlparse( url )
-    data = str( power )
 
+    headers["Content-Type"]="application/json"
     conn = httplib.HTTPConnection( u.netloc )
-    conn.request("PUT", u.path , data , headers )
+    conn.request("POST", u.path , data , headers )
     resp = conn.getresponse()
 
     if resp.status != 200:
-        print "Problem posting to htp://%s%s"%(u.netloc,u.path)
+        print "Problem posting to http://%s%s"%(u.netloc,u.path)
         print "%s %s"%(resp.status, resp.reason)
 
 
 def main():
-    usage = "usage: %prog [options] URL"
+    usage = "usage: %prog [options] [URL]"
     parser = OptionParser(usage, version="%prog 0.1")
     parser.add_option("-t", "--loopTime", dest="loopTime", type="int", default=30,
                       help="How often in seconds to poll the TED")
@@ -128,39 +152,46 @@ def main():
                       help="HTTP Header Name to add to PUT request")
     parser.add_option("-y", "--headerValue", dest="headerValue", default="",
                       help="HTTP Header Value to add to PUT request")
-    parser.add_option("-n", "--numMTU",
-                       dest="numMTU", type="int" , default=1, 
-                      help = "Number of MTU units on TED. Defaults to 1" )
+
+    url = "http://www.fluffyhome.com/sensorValues/"
 
     (options, args) = parser.parse_args()
-    if len(args) != 1:
+    if len(args) > 1:
         parser.error("incorrect number of arguments")
+    if len(args) == 1:
+        url = args[0]
  
     tedClient = TedClient(options.ip)
     tedClient.find()
 
-    prev = [0,0,0,0,0,0,0]
+    prev = [None,None,None,None,None,None,None]
     while True:
         tedClient.fetch()
-        for mtu in range(1, options.numMTU+1 ):
-            p = tedClient.power(mtu)
-            d = p - prev[mtu]
-            if d < 0.0:
-                d = -d
+        for mtu in range(1, tedClient.numMTU() + 1 ):
+            (p,e) = tedClient.power(mtu)
+
+            d=1000.0
+            if prev[mtu] != None:
+                d = float( p - prev[mtu] )
+                if d < 0.0:
+                    d = -d
+            prev[mtu] = p
 
             if options.verbose:
                 print "Got MTU%d is at %f watts (delta=%f)"%(mtu,p,d)
 
             if (d > 10.0) :
-                h = {} 
+                headers = {}
                 if options.headerName is not None:
-                    h = { options.headerName : options.headerValue }
+                    headers[options.headerName] = options.headerValue 
 
-                if True: # options.verbose:
-                    print "Post %f to %s"%(p,args[0]) 
-                post( mtu , p , args[0], h )
+                #post( mtu , p , args[0], h )
+                data = '[ { "n":"%s-MTU%d" , "t":0, "v":%f, "s":%f } ]'%( tedClient.name(),mtu,p,e )
+                                                                 
+                if options.verbose:
+                    print "Post %s to %s"%(data,url) 
+                postJson( mtu , data , url, headers )
 
-            prev[mtu] = p
         time.sleep(options.loopTime)
     
     tedClient.shutdown()
