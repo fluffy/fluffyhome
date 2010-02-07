@@ -6,7 +6,7 @@
 	<key>KeepAlive</key>
 	<true/>
 	<key>Label</key>
-	<string>com.fluffyhome.ecm1240</string>
+	<string>com.fluffyhome.ecm1240-1</string>
 	<key>Program</key>
 	<string>/usr/bin/ecm-server</string>
 	<key>RunAtLoad</key>
