@@ -7,8 +7,6 @@
 	<true/>
 	<key>Label</key>
 	<string>com.fluffyhome.ted5000</string>
-	<key>Program</key>
-	<string>/usr/bin/ted5000.py</string>
 	<key>RunAtLoad</key>
 	<true/>
 	<key>ProgramArguments</key>
