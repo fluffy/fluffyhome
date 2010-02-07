@@ -194,17 +194,26 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
    float value;
    len += snprintf(bufData+len,sizeof(bufData)-len,"[\n");
    
-   len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-time\", \"v\":%d },\n",
+   len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-time\", \"v\":1.0 \"s\":%d },\n",
                    current->serial,current->time);
 
+   int deltaTime = current->time - delta->time;
+   
    for( i=0; i < 2 ; i++)
    {
       value = (float)(current->currentX100[i]) / 100.0;
       len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-current%d\", \"v\":%f },\n",
                       current->serial,i+1,value);
 
-      len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%d\", \"s\":%ld },\n",
-                      current->serial,i+1,current->energy[i]);
+      len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%d\", ",
+                      current->serial,i+1);
+      if ( deltaTime > 0 )
+      {
+         len += snprintf(bufData+len,sizeof(bufData)-len,"\"v\":%f, ",
+                         (float)(current->energy[i] - delta->energy[i])/(float)deltaTime );
+      }
+      len += snprintf(bufData+len,sizeof(bufData)-len,"\"s\":%ld },\n",
+                      current->energy[i]);
 
       len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%dPolar\", \"s\":%ld },\n",
                       current->serial,i+1,current->energyPolar[i]);
