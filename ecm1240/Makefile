@@ -6,7 +6,7 @@ clean:
 
 install: ecm-server
 	cp ecm-server /usr/bin/ecm-server
-	cp com.fluffyhome.ecm1240.plist /Library/LaunchDaemons/com.fluffyhome.ecm1240.plist
+	cp com.fluffyhome.ecm1240-1.plist /Library/LaunchDaemons/com.fluffyhome.ecm1240-1.plist
 
 
 ecm-server:  ecm-server.c

@@ -32,17 +32,17 @@ unsigned char checkSum = 0;
 
 typedef struct
 {
-      int serial;
-      int time; // seconds
+      unsigned int serial;
+      unsigned int time; // seconds
 
-      int voltageX10; // volts times 10 
-      int dcVoltageX100; // voltes times 100 
+      unsigned int voltageX10; // volts times 10 
+      unsigned int dcVoltageX100; // voltes times 100 
 
-      int currentX100[2]; // amps times 100
-      long energy[2]; // Joules
-      long energyPolar[2]; // Joules
+      unsigned int currentX100[2]; // amps times 100
+      unsigned long long energy[2]; // Joules
+      unsigned long long energyPolar[2]; // Joules
 
-      int auxEnergy[5]; // Joules
+      unsigned int auxEnergy[5]; // Joules
 } Value;
 
 
@@ -194,10 +194,19 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
    float value;
    len += snprintf(bufData+len,sizeof(bufData)-len,"[\n");
    
-   len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-time\", \"v\":1.0, \"s\":%d },\n",
+   len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-time\", \"v\":1.0, \"s\":%u },\n",
                    current->serial,current->time);
 
    int deltaTime = current->time - delta->time;
+   if ( deltaTime > 5 ) // don't use delta time if it is big or ngative
+   {
+      deltaTime = 0 ;
+   }
+   if ( deltaTime < 0 ) // don't use delta time if it is big or ngative
+   {
+      deltaTime = 0 ;
+   }
+   
    
    for( i=0; i < 2 ; i++)
    {
@@ -212,7 +221,7 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
          len += snprintf(bufData+len,sizeof(bufData)-len,"\"v\":%f, ",
                          (float)(current->energy[i] - delta->energy[i])/(float)deltaTime );
       }
-      len += snprintf(bufData+len,sizeof(bufData)-len,"\"s\":%ld },\n",
+      len += snprintf(bufData+len,sizeof(bufData)-len,"\"s\":%llu },\n",
                       current->energy[i]);
    }
 
@@ -225,7 +234,7 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
          len += snprintf(bufData+len,sizeof(bufData)-len,"\"v\":%f, ",
                          (float)(current->energyPolar[i] - delta->energyPolar[i])/(float)deltaTime );
       }
-      len += snprintf(bufData+len,sizeof(bufData)-len,"\"s\":%ld },\n",
+      len += snprintf(bufData+len,sizeof(bufData)-len,"\"s\":%llu },\n",
                       current->energyPolar[i]);
    }
 
@@ -238,7 +247,7 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
          len += snprintf(bufData+len,sizeof(bufData)-len," \"v\":%f, ",
                         (float)(current->auxEnergy[i] - delta->auxEnergy[i])/(float)deltaTime );
       }
-      len += snprintf(bufData+len,sizeof(bufData)-len," \"s\":%d },\n",current->auxEnergy[i]);
+      len += snprintf(bufData+len,sizeof(bufData)-len," \"s\":%u },\n",current->auxEnergy[i]);
    }
 
    value = (float)(current->voltageX10) / 10.0;
@@ -276,23 +285,22 @@ void parseMsg( int len,  unsigned char msg[] , Value* current )
       at the location in question and send it to the normal ECM software and see
       where it shows up in the output data */
 
-      // todo relace mult with shits 
-      current->serial = msg[27] + msg[28]*256 ;
-      current->time = msg[35] + msg[36]*256 + msg[37]*256*256;
-      current->currentX100[0] = msg[31] + msg[32]*256;
-      current->currentX100[1]  = msg[33] + msg[34]*256;
-      current->voltageX10 = msg[1]*256 + msg[2];
-      current->dcVoltageX100 = msg[58] + msg[59]*256;
+      current->voltageX10     = (msg[1]<<8) + msg[2];
+      current->serial         = msg[27] + (msg[28]<<8) ;
+      current->time           = msg[35] + (msg[36]<<8) + (msg[37]<<16);
+      current->currentX100[0] = msg[31] + (msg[32]<<8) ;
+      current->currentX100[1] = msg[33] + (msg[34]<<8) ;
+      current->dcVoltageX100  = msg[58] + (msg[59]<<8) ;
 
-      current->energy[0] = msg[3] + msg[4]*256 + msg[5]*256*256 + msg[6]*256*256*256 ; //+ msg[7]*256*256*256*256;
-      current->energy[1] = msg[8] + msg[9]*256 + msg[10]*256*256 + msg[11]*256*256*256 ; //+ msg[12]*256*256*256*256;
-      current->energyPolar[0] = msg[13] + msg[14]*256 + msg[15]*256*256 + msg[16]*256*256*256 ; //+ msg[17]*256*256*256*256;
-      current->energyPolar[1] = msg[18] + msg[19]*256 + msg[20]*256*256 + msg[21]*256*256*256 ; //+ msg[22]*256*256*256*256;
+      current->energy[0]      = msg[3 ] + (msg[4 ]<<8) + (msg[5 ]<<16) + (msg[6 ]<<24) + ( ((long long)msg[ 7])<<32);
+      current->energy[1]      = msg[8 ] + (msg[9 ]<<8) + (msg[10]<<16) + (msg[11]<<24) + ( ((long long)msg[12])<<32);
+      current->energyPolar[0] = msg[13] + (msg[14]<<8) + (msg[15]<<16) + (msg[16]<<24) + ( ((long long)msg[17])<<32);
+      current->energyPolar[1] = msg[18] + (msg[19]<<8) + (msg[20]<<16) + (msg[21]<<24) + ( ((long long)msg[22])<<32);
        
       for ( i=0; i<5; i++ )
       {
          int mOff = 38+4*i;
-         current->auxEnergy[i] = msg[mOff] + msg[mOff+1]*256 + msg[mOff+2]*256*256 + msg[mOff+3]*256*256*256;
+         current->auxEnergy[i] = msg[mOff] + (msg[mOff+1]<<8) + (msg[mOff+2]<<16) + (msg[mOff+3]<<24);
       }
    }
 }
@@ -302,9 +310,6 @@ void
 processData( int sock , char* url )
 {
    int c;
-   
-   assert( sizeof(int) >= 4 );
-   assert( sizeof(long) > 4 );
    
    Value prev,delta,current;
    prev.time = 0;
@@ -452,6 +457,10 @@ int
 main(int argc, char* argv[] )
 {
    syslog(LOG_INFO,"Starting ECM 1240 Monitor");
+
+   assert( sizeof(int) >= 4 );
+   assert( sizeof(long long) > 4 );
+   assert( sizeof(long long) <= 8 );
    
    int port = 0;
    char* dev = "/dev/cu.KeySerial1";
