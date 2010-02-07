@@ -6,13 +6,13 @@
 	<key>KeepAlive</key>
 	<true/>
 	<key>Label</key>
-	<string>com.fluffyhome.ecm1240-1</string>
+	<string>com.fluffyhome.ecm1240-2</string>
 	<key>RunAtLoad</key>
 	<true/>
 	<key>ProgramArguments</key>
 	<array>
 	  <string>/usr/bin/ecm-server</string>
-	  <string>/dev/cu.USA19H1d1P1.1</string>
+	  <string>/dev/cu.USA19H3d1P1.1</string>
 	  <string>http://www.fluffyhome.com/sensorValues/</string>
 	</array>
 </dict>
