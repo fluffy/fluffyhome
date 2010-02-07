@@ -74,18 +74,11 @@ postValue( char* name , float value )
 #else
 
 void
-postValue( char* name , float value )
+postValue( char* bufUrl , char* bufData )
 {
    CURLcode ret;
    CURL *hnd = curl_easy_init();
-   char bufUrl[1024];
-   char bufData[1024];
-   
-   fprintf(stderr,"Post %s = %f \n",name,value);
-   
-   snprintf(bufUrl,sizeof(bufUrl),"http://www.fluffyhome.com/sensor/fluffy/%s/value/",name);
-   snprintf(bufData,sizeof(bufData),"%f",value);
-   
+
    /* curl_easy_setopt(hnd, CURLOPT_WRITEDATA, 0x7fff5fbfee00); [REMARK] */
    /* curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, 0x1000026f2); [REMARK] */
    /* curl_easy_setopt(hnd, CURLOPT_READDATA, 0x7fff5fbfee80); [REMARK] */
@@ -95,6 +88,7 @@ postValue( char* name , float value )
    curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, (curl_off_t)-1);
    curl_easy_setopt(hnd, CURLOPT_URL, bufUrl );
    curl_easy_setopt(hnd, CURLOPT_PROXY, NULL);
+
    curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1);
    curl_easy_setopt(hnd, CURLOPT_HEADER, 0);
    curl_easy_setopt(hnd, CURLOPT_FAILONERROR, 0);
@@ -139,7 +133,7 @@ postValue( char* name , float value )
    curl_easy_setopt(hnd, CURLOPT_SSLVERSION, 0);
    curl_easy_setopt(hnd, CURLOPT_TIMECONDITION, 0);
    curl_easy_setopt(hnd, CURLOPT_TIMEVALUE, 0);
-   curl_easy_setopt(hnd, CURLOPT_CUSTOMREQUEST, "PUT");
+   curl_easy_setopt(hnd, CURLOPT_CUSTOMREQUEST, "POST");
    /* curl_easy_setopt(hnd, CURLOPT_STDERR, 0x7fff70c9e1f0); [REMARK] */
    curl_easy_setopt(hnd, CURLOPT_HTTPPROXYTUNNEL, 0);
    curl_easy_setopt(hnd, CURLOPT_INTERFACE, NULL);
@@ -171,61 +165,10 @@ postValue( char* name , float value )
 #endif
 
 
-void 
-processValues(  unsigned int seconds , unsigned int ch1wattSec,  unsigned int ch2wattSec, unsigned int voltsX10 )
-{
-   static unsigned int pseconds=0;
-   static unsigned int pch1wattSec=0;
-   static float pWatts = 0.0;
-   
-   int dSeconds = seconds - pseconds;
-   int dCh1wattSec = ch1wattSec - pch1wattSec;
-   
-   if ( dSeconds <= 0 ) goto end;
-   if ( dSeconds > 65 ) goto end;
-
-   if (dCh1wattSec <= 0 ) goto end;
-   if (dCh1wattSec > 100*240*dSeconds ) goto end;
-   
-   float watts = (float)(dCh1wattSec) / (float)(dSeconds);
-    
-   //fprintf(stderr,"Usage kW = %f \n", watts/1000.0 );
-   
-   float dWatts = watts - pWatts;
-   if ( dWatts < 0.0 ) 
-   {
-      dWatts = 0.0 - dWatts;
-   }
-   
-   if ( dSeconds < 2 )
-   {
-      return;
-   }
-   
-   if ( dWatts < 15.0 )
-   {
-      if ( dSeconds < 30 )
-      {
-         return;
-      }
-   }
-   
-   postValue( "totalElec" , floorf(watts) );
-
-   //postValue( "ch1KWH" , (float)(ch1wattSec) / 3600000.0 );
-   //postValue( "ch2KWH" , (float)(ch2wattSec) / 3600000.0 );
-   //postValue( "voltsError" , (float)(voltsX10) / 10.0 - 120.0 );
-   
-   pWatts = watts;
-   
-  end:
-   pseconds=seconds;
-   pch1wattSec=ch1wattSec;
-}
-
 
 void
-processValue( char* sensorName, float value, float* pValue, float minChange,
+processValueOLD( char* sensorName,  unsigned int serial,
+              float value, float* pValue, float minChange,
               int time, int* pTime, int minTimeDelta, int maxTimeDelta )
 {
    assert( pValue );
@@ -251,7 +194,10 @@ processValue( char* sensorName, float value, float* pValue, float minChange,
    if ( (dTime >= maxTimeDelta) || (dValue >= minChange) )
    {
       /* report the reading */
-      postValue( sensorName, value );
+
+      char buf[1024];
+      snprintf( buf , sizeof(buf), "ECM1240-%d-%s", serial, sensorName );
+      //postValue( buf, value );
       
       *pValue = value;
       *pTime = time;
@@ -260,8 +206,9 @@ processValue( char* sensorName, float value, float* pValue, float minChange,
 
 
 void  
-processPowerValue( char* sensorName, 
-                   int time, unsigned int wattSec, unsigned int* pWattSec, 
+processPowerValueOLD( char* sensorName, 
+                   int time,  unsigned int serial,
+                   unsigned int wattSec, unsigned int* pWattSec, 
                    float* pWatt, int* pTime, int* pPostTime )
 {
    int dTime = time - *pTime;
@@ -278,7 +225,8 @@ processPowerValue( char* sensorName,
    
    // fprintf(stderr,"%s watts = %f, dTime=%d wSec=%d pwSec=%d dWSec=%d\n",sensorName,watt,dTime,(int)wattSec,(int)*pWattSec,dWattSec );
    
-   processValue( sensorName, watt, pWatt, 20.0, 
+   processValueOLD( sensorName, serial, 
+                 watt, pWatt, 20.0, 
                  time, pPostTime, 5 , 60 * 10 /* randomize this a bit */ );
 
    *pWattSec = wattSec;
@@ -286,8 +234,95 @@ processPowerValue( char* sensorName,
 }
 
 
-void
-processMsg( int len,  unsigned char msg[] )
+typedef struct
+{
+      int serial;
+      int time; // seconds
+
+      int voltageX10; // volts times 10 
+      int dcVoltageX100; // voltes times 100 
+
+      int currentX100[2]; // amps times 100
+      long energy[2]; // Joules
+      long energyPolar[2]; // Joules
+
+      int auxEnergy[5]; // Joules
+} Value;
+
+
+
+int abs( int x )
+{
+   if (x<0 )
+   {
+      return -x;
+   }
+   else
+   {
+      return x;
+      
+   }
+}
+
+   
+void postMsg( char* url, Value* prev, Value* next )
+{
+   int i;
+   
+   if ( prev->time + 1 >= next->time ) return;
+   
+   int doPost = 0;
+   
+   if ( next->time > prev->time+30 ) doPost=1;
+   
+   if ( abs( prev->currentX100[0] - next->currentX100[0] ) >= 30 ) doPost=1;
+   if ( abs( prev->currentX100[1] - next->currentX100[1] ) >= 30 ) doPost=1;
+   if ( abs( prev->voltageX10 - next->voltageX10 ) >= 2 ) doPost=1;
+
+   if (!doPost) return;
+   
+   char bufData[2*1024];
+   int len=0;
+   float value;
+   len += snprintf(bufData+len,sizeof(bufData)-len,"[\n");
+   
+   prev->serial = next->serial;
+
+   prev->time = next->time;
+   len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-time\", \"v\":%d },\n",next->serial,next->time);
+
+   for( i=0; i < 2 ; i++)
+   {
+      prev->currentX100[i] = next->currentX100[i];
+      value = (float)(next->currentX100[i]) / 100.0;
+      len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-current%d\", \"v\":%f },\n",next->serial,i+1,value);
+
+      prev->energy[i] = next->energy[i];
+      len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%d\", \"s\":%ld },\n",next->serial,i+1,next->energy[i]);
+
+      prev->energyPolar[i] = next->energyPolar[i];
+      len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%dPolar\", \"s\":%ld },\n",next->serial,i+1,next->energyPolar[i]);
+   }
+   for( i=0; i < 5 ; i++)
+   {
+      prev->auxEnergy[i] = next->auxEnergy[i];
+      len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-aux%d\", \"s\":%d },\n",next->serial,i+1,next->auxEnergy[i]);
+   }
+
+   prev->voltageX10 = next->voltageX10;
+   value = (float)(next->voltageX10) / 10.0;
+   len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-voltage\", \"v\":%f }\n",next->serial,value);
+
+   len += snprintf(bufData+len,sizeof(bufData)-len,"]");
+
+   fprintf(stderr,"Post Message len=%d to %s:\n%s\n",len,url,bufData);
+
+   postValue( url, bufData );
+   
+}
+
+   
+void parseMsg( int len,  unsigned char msg[] , Value* prev, Value* next )
 {
    if (0)
    {
@@ -302,77 +337,64 @@ processMsg( int len,  unsigned char msg[] )
    
    if ( msg[0] == 3 )
    {
+      int mOff;
       /* easiest way to sort these out is create a fake message with a bit set
       at the location in question and send it to the normal ECM software and see
       where it shows up in the output data */
 
-      unsigned int seconds = msg[35] + msg[36]*256 + msg[37]*256*256;
-      //fprintf( stderr, "seconds %d \n", seconds );
+      next->time = msg[35] + msg[36]*256 + msg[37]*256*256;
 
-
-      unsigned int ch1ampsX100 = msg[31] + msg[32]*256;
+      next->currentX100[0] = msg[31] + msg[32]*256;
       //fprintf( stderr, "ch1amps x100 = %d \n", ch1ampsX100 );
 
-      unsigned int ch2ampsX100 = msg[33] + msg[34]*256;
+      next->currentX100[1]  = msg[33] + msg[34]*256;
       //fprintf( stderr, "ch2amps x100 = %d \n", ch2ampsX100 );
 
-      unsigned int voltsX10 = msg[1]*256 + msg[2];
+      next->voltageX10 = msg[1]*256 + msg[2];
       //fprintf( stderr, "volts x10 = %d \n", voltsX10 );
-      float vErr = (float)(voltsX10) / 10.0 - 120.0;
-      static float pvErr = 0.0;
-      static int pvErrTime=0;
-      processValue(  "voltsError", vErr, &pvErr, 0.1 , seconds, &pvErrTime, 10, 60*5 );
+      //float vErr = (float)(voltsX10) / 10.0 - 120.0;
+      // static float pvErr = 0.0;
+      // static int pvErrTime=0;
       
-      unsigned int dcVoltsX100 = msg[58] + msg[59]*256;
+      next->dcVoltageX100 = msg[58] + msg[59]*256;
       //fprintf( stderr, "dcVolts x100 = %d \n", dcVoltsX100 );
 
-      unsigned int ch1wattSec = msg[3] + msg[4]*256 + msg[5]*256*256 + msg[6]*256*256*256;
+      // todo relace mult with shits 
+      // todo assert size long > 32 bits
+
+      next->energy[0] = msg[3] + msg[4]*256 + msg[5]*256*256 + msg[6]*256*256*256 ; //+ msg[7]*256*256*256*256;
       //fprintf( stderr, "ch1wattSec %d \n", ch1wattSec );
-      static unsigned int pch1wattSec = 0; static float pch1watt=0.0; static int pch1time=0; static int pch1PostTime;
-      processPowerValue( "totalElec", seconds, ch1wattSec, &pch1wattSec, &pch1watt, &pch1time, &pch1PostTime);
-      
-      unsigned int ch2wattSec = msg[8] + msg[9]*256 + msg[10]*256*256 + msg[11]*256*256*256;
+      //static unsigned int pch1wattSec = 0; static float pch1watt=0.0; static int pch1time=0; static int pch1PostTime;
+       
+      next->energy[1] = msg[8] + msg[9]*256 + msg[10]*256*256 + msg[11]*256*256*256 ; //+ msg[12]*256*256*256*256;
       //fprintf( stderr, "ch2wattSec %d \n", ch2wattSec );
-      static unsigned int pch2wattSec = 0; static float pch2watt=0.0; static int pch2time=0; static int pch2PostTime;
-      processPowerValue( "ch2Watt", seconds, ch2wattSec, &pch2wattSec, &pch2watt, &pch2time, &pch2PostTime);
+      //static unsigned int pch2wattSec = 0; static float pch2watt=0.0; static int pch2time=0; static int pch2PostTime;
+     
+      next->energyPolar[0] = msg[13] + msg[14]*256 + msg[15]*256*256 + msg[16]*256*256*256 ; //+ msg[17]*256*256*256*256;
+      next->energyPolar[1] = msg[18] + msg[19]*256 + msg[20]*256*256 + msg[21]*256*256*256 ; //+ msg[22]*256*256*256*256;
+       
+      mOff = 27;
+      next->serial = msg[mOff] + msg[mOff+1]*256 ;
+      //fprintf( stderr, "serialNumber %d \n", serial );
+ 
+      int i;
+      for ( i=0; i<5; i++ )
+      {
+         mOff = 38+4*i;
+         next->auxEnergy[i] = msg[mOff] + msg[mOff+1]*256 + msg[mOff+2]*256*256 + msg[mOff+3]*256*256*256;
+      }
       
-
-      int mOff = 38;
-      unsigned int aux1wattSec = msg[mOff] + msg[mOff+1]*256 + msg[mOff+2]*256*256 + msg[mOff+3]*256*256*256;
-      //fprintf( stderr, "aux1wattSec %d \n", aux1wattSec );
-      static unsigned int paux1wattSec = 0; static float paux1watt=0.0; static int paux1time=0; static int paux1PostTime;
-      processPowerValue( "aux1Watt", seconds, aux1wattSec, &paux1wattSec, &paux1watt, &paux1time, &paux1PostTime);
-
-      mOff = 42;
-      unsigned int aux2wattSec = msg[mOff] + msg[mOff+1]*256 + msg[mOff+2]*256*256 + msg[mOff+3]*256*256*256;
-      //fprintf( stderr, "aux2wattSec %d \n", aux2wattSec );
-      static unsigned int paux2wattSec = 0; static float paux2watt=0.0; static int paux2time=0; static int paux2PostTime;
-      processPowerValue( "aux2Watt", seconds, aux2wattSec, &paux2wattSec, &paux2watt, &paux2time, &paux2PostTime);
-
-      mOff = 46;
-      unsigned int aux3wattSec = msg[mOff] + msg[mOff+1]*256 + msg[mOff+2]*256*256 + msg[mOff+3]*256*256*256;
-      //fprintf( stderr, "aux3wattSec %d \n", aux3wattSec );
-      static unsigned int paux3wattSec = 0; static float paux3watt=0.0; static int paux3time=0; static int paux3PostTime;
-      processPowerValue( "aux3Watt", seconds, aux3wattSec, &paux3wattSec, &paux3watt, &paux3time, &paux3PostTime);
-
-      mOff = 50;
-      unsigned int aux4wattSec = msg[mOff] + msg[mOff+1]*256 + msg[mOff+2]*256*256 + msg[mOff+3]*256*256*256;
-      //fprintf( stderr, "aux4wattSec %d \n", aux4wattSec );
-      static unsigned int paux4wattSec = 0; static float paux4watt=0.0; static int paux4time=0; static int paux4PostTime;
-      processPowerValue( "aux4Watt", seconds, aux4wattSec, &paux4wattSec, &paux4watt, &paux4time, &paux4PostTime);
-
-      mOff = 54;
-      unsigned int aux5wattSec = msg[mOff] + msg[mOff+1]*256 + msg[mOff+2]*256*256 + msg[mOff+3]*256*256*256;
-      //fprintf( stderr, "aux5wattSec %d \n", aux5wattSec );
-      static unsigned int paux5wattSec = 0; static float paux5watt=0.0; static int paux5time=0; static int paux5PostTime;
-      processPowerValue( "aux5Watt", seconds, aux5wattSec, &paux5wattSec, &paux5watt, &paux5time, &paux5PostTime);
+   
       
+      //processValue(  "voltsError",  serial, vErr, &pvErr, 0.1 , seconds, &pvErrTime, 10, 60*5 );
 
-      unsigned int ch1wattSecPolar = msg[13] + msg[14]*256 + msg[15]*256*256 + msg[16]*256*256*256;
-      //fprintf( stderr, "ch1wattSec %d \n", ch1wattSecPolar );
-      unsigned int ch2wattSecPolar = msg[18] + msg[19]*256 + msg[20]*256*256 + msg[21]*256*256*256;
-      //fprintf( stderr, "ch1wattSec %d \n", ch2wattSecPolar );
-
+      //processPowerValue( "ch1",  seconds, serial, ch1wattSec, &pch1wattSec, &pch1watt, &pch1time, &pch1PostTime);
+      //processPowerValue( "ch2",  seconds, serial, ch2wattSec, &pch2wattSec, &pch2watt, &pch2time, &pch2PostTime);
+      //processPowerValue( "aux1", seconds, serial, aux1wattSec, &paux1wattSec, &paux1watt, &paux1time, &paux1PostTime);
+      //processPowerValue( "aux2", seconds, serial, aux2wattSec, &paux2wattSec, &paux2watt, &paux2time, &paux2PostTime);
+      //processPowerValue( "aux3", seconds, serial, aux3wattSec, &paux3wattSec, &paux3watt, &paux3time, &paux3PostTime);
+      //processPowerValue( "aux4", seconds, serial, aux4wattSec, &paux4wattSec, &paux4watt, &paux4time, &paux4PostTime);
+      //processPowerValue( "aux5", seconds, serial, aux5wattSec, &paux5wattSec, &paux5watt, &paux5time, &paux5PostTime);
 
       //processValues( seconds, ch1wattSec, ch2wattSec, voltsX10 );
    }
@@ -380,9 +402,18 @@ processMsg( int len,  unsigned char msg[] )
 
 
 void
-processData( int sock )
+processData( int sock , char* url )
 {
    int c;
+   
+   assert( sizeof(int) >= 4 );
+   assert( sizeof(long) > 4 );
+   
+   Value prev,next;
+   prev.time = 0;
+   next.time = 0;
+   
+   int i=0;
    
    while (1)
    {
@@ -418,7 +449,8 @@ processData( int sock )
 
       if ( check == sum )
       {
-         processMsg( msgPos-2 , msgBuf );
+         parseMsg( msgPos-2 , msgBuf , &prev, &next );
+         postMsg( url, &prev, &next );
       }
       else
       {
@@ -429,15 +461,10 @@ processData( int sock )
 }
 
 
-int 
-main(int argc, char* argv[] )
+void runSerial( char* device, char* url )
 {
-   syslog(LOG_INFO,"Starting ECM 1240 Monitor");
-   
-#if 1
    struct termios p;
 
-   char* device = "/dev/cu.KeySerial1";
    int fd = open(device, O_RDONLY|O_SYMLINK|O_NOCTTY  );
    if (fd == -1 )
    {
@@ -477,22 +504,24 @@ main(int argc, char* argv[] )
    }
    
   
-   processData( fd );
-#endif
+   processData( fd , url );
+}
 
-#if 0
+
+void runIP( int port, char* url  )
+{
    int listenPort = 8083;
    int lSock = 0;
    int dataSock = 0;
    struct    sockaddr_in saddr;
-
-    if ( (lSock = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) 
-    {
-       fprintf(stderr, "Listen failed\n");
-       exit(EXIT_FAILURE);
-    }
-    
-    memset(&saddr, 0, sizeof(saddr));
+   
+   if ( (lSock = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) 
+   {
+      fprintf(stderr, "Listen failed\n");
+      exit(EXIT_FAILURE);
+   }
+   
+   memset(&saddr, 0, sizeof(saddr));
     saddr.sin_port        = htons(listenPort);
     saddr.sin_family      = AF_INET;
     saddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -517,7 +546,7 @@ main(int argc, char* argv[] )
           exit(EXIT_FAILURE);
        }
     
-       processData( dataSock );
+       processData( dataSock, url  );
        
        if ( close(dataSock) < 0 )
        {
@@ -525,8 +554,32 @@ main(int argc, char* argv[] )
           exit(EXIT_FAILURE);
        }
     }
-    
-#endif
+}
+
+
+int 
+main(int argc, char* argv[] )
+{
+   syslog(LOG_INFO,"Starting ECM 1240 Monitor");
+   
+   int port = 0;
+   char* dev = "/dev/cu.KeySerial1";
+   char* url = "http://localhost:8081/sensorValues/";
+  
+   if ( argc == 2 )
+   {
+      dev = argv[1];
+      port = strtol( argv[1], NULL, 10 );
+   }
+   
+   if ( port )
+   {
+      runIP( port , url );
+   }
+   else
+   {
+      runSerial( dev, url  );
+   }
 
    return 0;
 }
