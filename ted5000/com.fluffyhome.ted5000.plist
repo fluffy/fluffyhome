@@ -16,7 +16,6 @@
 	        <string>/usr/bin/ted5000.py</string>
 	        <string>-t</string>
 	        <string>5</string>
-		<string>http://www.fluffyhome.com/sensor/fluffy/ted5000mtu1/value/</string>
 	</array>
 </dict>
 </plist>

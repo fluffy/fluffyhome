@@ -39,7 +39,6 @@ from xml.etree.ElementTree import ElementTree
 from urlparse import urlparse
 
 
-
 class TedClient:
     port = 30303
     num = 1000
