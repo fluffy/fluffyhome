@@ -194,7 +194,7 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
    float value;
    len += snprintf(bufData+len,sizeof(bufData)-len,"[\n");
    
-   len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-time\", \"v\":1.0 \"s\":%d },\n",
+   len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-time\", \"v\":1.0, \"s\":%d },\n",
                    current->serial,current->time);
 
    int deltaTime = current->time - delta->time;
@@ -207,21 +207,38 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
 
       len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%d\", ",
                       current->serial,i+1);
-      if ( deltaTime > 0 )
+      if ( ( deltaTime > 0 ) && ( current->energy[i] >= delta->energy[i] ) )
       {
          len += snprintf(bufData+len,sizeof(bufData)-len,"\"v\":%f, ",
                          (float)(current->energy[i] - delta->energy[i])/(float)deltaTime );
       }
       len += snprintf(bufData+len,sizeof(bufData)-len,"\"s\":%ld },\n",
                       current->energy[i]);
-
-      len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%dPolar\", \"s\":%ld },\n",
-                      current->serial,i+1,current->energyPolar[i]);
    }
+
+   for( i=0; i < 2 ; i++)
+   {
+      len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%dPolar\", ",
+                      current->serial,i+1);
+      if ( ( deltaTime > 0 ) && ( current->energyPolar[i] >= delta->energyPolar[i] ) )
+      {
+         len += snprintf(bufData+len,sizeof(bufData)-len,"\"v\":%f, ",
+                         (float)(current->energyPolar[i] - delta->energyPolar[i])/(float)deltaTime );
+      }
+      len += snprintf(bufData+len,sizeof(bufData)-len,"\"s\":%ld },\n",
+                      current->energyPolar[i]);
+   }
+
    for( i=0; i < 5 ; i++)
    {
-      len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-aux%d\", \"s\":%d },\n",
-                      current->serial,i+1,current->auxEnergy[i]);
+      len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-aux%d\", ",
+                      current->serial,i+1);
+      if ( ( deltaTime > 0 ) && ( current->auxEnergy[i] >= delta->auxEnergy[i] ) )
+      {
+         len += snprintf(bufData+len,sizeof(bufData)-len," \"v\":%f, ",
+                        (float)(current->auxEnergy[i] - delta->auxEnergy[i])/(float)deltaTime );
+      }
+      len += snprintf(bufData+len,sizeof(bufData)-len," \"s\":%d },\n",current->auxEnergy[i]);
    }
 
    value = (float)(current->voltageX10) / 10.0;
@@ -438,12 +455,17 @@ main(int argc, char* argv[] )
    
    int port = 0;
    char* dev = "/dev/cu.KeySerial1";
-   char* url = "http://localhost:8081/sensorValues/";
+   char* url = "http://www.fluffyhome.com/sensorValues/";
   
-   if ( argc == 2 )
+   if ( argc > 1 )
    {
       dev = argv[1];
       port = strtol( argv[1], NULL, 10 );
+   }
+   
+   if ( argc > 2  )
+   {
+      url = argv[2];
    }
    
    if ( port )
