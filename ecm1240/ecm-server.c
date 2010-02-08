@@ -1,7 +1,6 @@
 /* 
-   Copyright Cullen Jennings 2009,2010 
-
-*/
+ * Copyright Cullen Jennings 2009, 2010. All rights reserved.
+ */
 
 #include <sys/types.h>   
 #include <sys/socket.h>  
