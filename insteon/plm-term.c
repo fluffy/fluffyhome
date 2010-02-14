@@ -259,6 +259,17 @@ int parseMsg( int received, unsigned char msg[], int len )
                   printf( "(light off) " );
                }
                break;
+               case 0x17:
+               case 0x18:
+               {
+                  printf( "(light change brightness) " );
+               }
+               break;
+               case 0x27:
+               {
+                  printf( "(light set LED level) " );
+               }
+               break;
             }
             
             printf("\n"); pos++; return 0x50;
