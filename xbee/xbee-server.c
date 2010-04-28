@@ -26,7 +26,7 @@
 
 typedef float Value;
 
-int verbose = 0;
+int verbose = 1;
 
 
 
@@ -34,13 +34,16 @@ unsigned char
 getChar( int sock )
 {
    unsigned char buf[1];
+
    size_t numRead = read(sock, buf, sizeof(buf) );
    
-   if (numRead != 1 )
+   if (numRead != sizeof(buf) )
    {
-      fprintf(stderr, "error in read\n");
+      int e = errno;
+      fprintf(stderr, "error in read. Errno=%d \n",e);
       exit(EXIT_FAILURE);
    }
+   //fprintf(stderr,"\nGot %d input\n",buf[0] );
    
    return buf[0];
 }
@@ -157,30 +160,42 @@ void postMsg( char* url, Value value )
 void 
 parseMsg( int len,  unsigned char msg[] , Value* value )
 {
-   if (0)
+   assert( len > 1 );
+   int i;
+   char addr[100];
+   
+   if ( msg[0] = 0x90 )
    {
-      fprintf(stderr,"Msg: ");
-      int i;
-      for ( i=0; i<len; i++ )
+      snprintf( addr, sizeof(addr), "ZB:%02X%02X%02X%02X%02X%02X",msg[1],msg[2],msg[3],msg[4],msg[5],msg[6] );
+       
+      if (0)
       {
-         fprintf(stderr," %d:%02x",i,msg[i]);
+         fprintf(stderr,"Msg: \n");
+         int i;
+         for ( i=0; i<len; i++ )
+         {
+            fprintf(stderr," %d:%02x \n",i+3,msg[i]);
+         }
+         fprintf(stderr,"\n");
       }
-      fprintf(stderr,"\n");
+      
+      assert( len > 12 );
+      
+      if ( verbose )
+      {
+         fprintf(stderr,"Msg from %s is: '%s' \n",addr,msg+12);
+      }
+      
+      char name[1000];
+      
+      float val = 0.0;
+      sscanf( msg+12, "%s %f", name , &val );
+      
+      val = val * 3.78541178; // convert from US Gallons to liters
+      
+      *value = val;
    }
    
-   if ( verbose )
-   {
-      fprintf(stderr,"Msg from xbee is: %s",msg);
-   }
-   
-   char name[1000];
-   
-   float val = 0.0;
-   sscanf( msg, "%s %f", name , &val );
-   
-   val = val * 3.78541178; // convert from US Gallons to liters
-   
-   *value = val;
 }
 
 
@@ -191,32 +206,54 @@ processData( int sock , char* url )
    {
       Value value;
       unsigned char msgBuf[128];
-      int msgPos =0;
+      int i;
+      unsigned char c;
       
+      // find the start sync 
       do
       {
-         unsigned char d = getChar( sock );
-         //fprintf(stderr," %02x",d);
-         msgBuf[msgPos++]=d;
-         if ( msgPos >= sizeof(msgBuf)-2 )
-         {
-            fprintf(stderr,"Message is too large\n");
-            continue; // go back to looking for sync, msg too large 
-         }
-         assert( msgPos > 0 );
+        c  = getChar( sock );
       }
-      while (  msgBuf[msgPos-1] != 0x0A  ); // find the end sync 
+      while (  c != 0x7E  ); 
+         
+      unsigned int msb = getChar( sock );
+      unsigned int lsb = getChar( sock );
+
+      unsigned int len = (msb << 8 ) + lsb;
+      fprintf(stderr,"len=%d \n", len );
+
+      if ( (len<4) || (len > sizeof(msgBuf)-2 ) )
+      {
+         fprintf(stderr,"Message size of %d is bogus\n",len);
+         continue; // go back to looking for sync, msg too large 
+      }
       
-      assert( msgPos < sizeof(msgBuf) );
-      msgBuf[msgPos] =0;
+      for ( i=0; i<len; i++ )
+      {
+         msgBuf[i] = getChar( sock );
+         //fprintf(stderr," %02x",d);
+      }
+      msgBuf[len] = 0; // null terminate input string 
       
-      parseMsg( msgPos , msgBuf , &value );
-      postMsg( url, value );
+      unsigned char ckSum = getChar( sock );
+      unsigned char cSum = 0xFF;
+      for ( i=0; i<len; i++ )
+      {
+         cSum -= msgBuf[i];
+      }
+      if ( cSum != ckSum )
+      {
+         fprintf(stderr,"Bad check sum on message ckSum=%d cSum=%d \n",ckSum, cSum );
+         continue;
+      }
+      
+      parseMsg( len , msgBuf , &value );
+      // TODO   postMsg( url, value );
    }
 }
 
 
-void runSerial( char* device, char* url )
+int setupSerial( char* device )
 {
    struct termios p;
 
@@ -257,8 +294,8 @@ void runSerial( char* device, char* url )
       fprintf(stderr, "Problem setting baud rate of device %s: errno=%d\n",device,e);
       exit(EXIT_FAILURE);
    }
-    
-   processData( fd , url );
+   
+   return fd;
 }
 
 
@@ -285,7 +322,13 @@ main(int argc, char* argv[] )
       url = argv[2];
    }
    
-   runSerial( dev, url  );
+   int sock = 0;
+   
+   sock = setupSerial( dev  );
+
+   fprintf(stderr,"Starting proceessin xbee data (sock=%d) \n",sock);
+   
+   processData( sock , url );
 
    return 0;
 }
