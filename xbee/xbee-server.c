@@ -248,7 +248,7 @@ processData( int sock , char* url )
       }
       
       parseMsg( len , msgBuf , &value );
-      // TODO   postMsg( url, value );
+      postMsg( url, value );
    }
 }
 
