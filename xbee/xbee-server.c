@@ -138,14 +138,14 @@ postValue( char* bufUrl , char* bufData )
 }
 
 
-void postMsg( char* url, Value value )
+void postMsg( char* url, char* addr, Value value1, Value value2 )
 {
    char bufData[2*1024];
    int len=0;
 
    len += snprintf(bufData+len,sizeof(bufData)-len,"[\n");
    
-   len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"FluffyMainWater\", \"v\":%f }\n", (float)value );
+   len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"%s\", \"s\":%f, \"v\":%f }\n", addr, (float)value1, (float)value2 );
 
    len += snprintf(bufData+len,sizeof(bufData)-len,"]");
 
@@ -157,16 +157,15 @@ void postMsg( char* url, Value value )
 }
 
    
-void 
-parseMsg( int len,  unsigned char msg[] , Value* value )
+int 
+parseMsg( int len,  unsigned char msg[] , char addr[100], Value* value1, Value* value2 )
 {
    assert( len > 1 );
    int i;
-   char addr[100];
    
-   if ( msg[0] = 0x90 )
+   if ( msg[0] == 0x90 )
    {
-      snprintf( addr, sizeof(addr), "ZB:%02X%02X%02X%02X%02X%02X",msg[1],msg[2],msg[3],msg[4],msg[5],msg[6] );
+      snprintf( addr, 100 /* size */ , "ZB-%02X%02X%02X%02X%02X%02X",msg[1],msg[2],msg[3],msg[4],msg[5],msg[6] );
        
       if (0)
       {
@@ -186,16 +185,23 @@ parseMsg( int len,  unsigned char msg[] , Value* value )
          fprintf(stderr,"Msg from %s is: '%s' \n",addr,msg+12);
       }
       
-      char name[1000];
+      if ( len < 20 )
+      {
+         return 0;
+      }
       
-      float val = 0.0;
-      sscanf( msg+12, "%s %f", name , &val );
+      char name[1000];    
+      float val1 = 0.0;
+      float val2 = 0.0;
+      sscanf( msg+12, "%s %f %f", name , &val1 , &val2 );
       
-      val = val * 3.78541178; // convert from US Gallons to liters
-      
-      *value = val;
+      *value1 = val1;
+      *value2 = val2;
+
+      return 1;
    }
    
+   return 0;
 }
 
 
@@ -204,7 +210,6 @@ processData( int sock , char* url )
 {
    while (1)
    {
-      Value value;
       unsigned char msgBuf[128];
       int i;
       unsigned char c;
@@ -220,7 +225,7 @@ processData( int sock , char* url )
       unsigned int lsb = getChar( sock );
 
       unsigned int len = (msb << 8 ) + lsb;
-      fprintf(stderr,"len=%d \n", len );
+      //fprintf(stderr,"len=%d \n", len );
 
       if ( (len<4) || (len > sizeof(msgBuf)-2 ) )
       {
@@ -247,8 +252,17 @@ processData( int sock , char* url )
          continue;
       }
       
-      parseMsg( len , msgBuf , &value );
-      postMsg( url, value );
+      char addr[100];
+      Value value1;
+      Value value2;
+      
+      int ok = parseMsg( len , msgBuf ,addr,  &value1, &value2 );
+
+      if ( ok )
+      {
+         postMsg( url, addr, value1, value2 );
+      }
+      
    }
 }
 
