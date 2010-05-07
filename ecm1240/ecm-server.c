@@ -45,7 +45,6 @@ typedef struct
 } Value;
 
 
-
 int abs( int x )
 {
    if (x<0 )
@@ -192,9 +191,11 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
    int len=0;
    float value;
    len += snprintf(bufData+len,sizeof(bufData)-len,"[\n");
-   
+
+# if 0  // send the time 
    len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-time\", \"v\":1.0, \"s\":%u },\n",
                    current->serial,current->time);
+#endif
 
    int deltaTime = current->time - delta->time;
    if ( deltaTime > 5 ) // don't use delta time if it is big or ngative
@@ -206,12 +207,13 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
       deltaTime = 0 ;
    }
    
-   
    for( i=0; i < 2 ; i++)
    {
+#if 0 // send the current 
       value = (float)(current->currentX100[i]) / 100.0;
       len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-current%d\", \"v\":%f },\n",
                       current->serial,i+1,value);
+#endif
 
       len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%d\", ",
                       current->serial,i+1);
@@ -224,6 +226,7 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
                       current->energy[i]);
    }
 
+#if 0 // do the polar values 
    for( i=0; i < 2 ; i++)
    {
       len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%dPolar\", ",
@@ -236,6 +239,7 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
       len += snprintf(bufData+len,sizeof(bufData)-len,"\"s\":%llu },\n",
                       current->energyPolar[i]);
    }
+#endif 
 
    for( i=0; i < 5 ; i++)
    {
@@ -255,7 +259,8 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
 
    len += snprintf(bufData+len,sizeof(bufData)-len,"]");
 
-   fprintf(stderr,"Post Message len=%d to %s:\n%s\n",len,url,bufData);
+   //fprintf(stderr,"Post Message len=%d to %s:\n%s\n",len,url,bufData);
+   //fprintf(stderr,"Post Message len=%d to %s \n",len,url);
    postValue( url, bufData );
 
    memcpy( prev, current, sizeof(Value) );
