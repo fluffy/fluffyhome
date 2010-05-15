@@ -25,6 +25,8 @@
 #include <assert.h>
 
 
+int verbose = 0;
+
 unsigned char cchar = 0;
 unsigned char pchar = 0;
 unsigned char checkSum = 0;
@@ -175,6 +177,11 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
    int doPost = 0;
    
    if ( current->time > prev->time+30 ) doPost=1;
+
+   if ( verbose ) 
+   {
+      if ( current->time > prev->time+3 ) doPost=1;
+   }
    if ( abs( prev->currentX100[0] - current->currentX100[0] ) >= 30 ) doPost=1;
    if ( abs( prev->currentX100[1] - current->currentX100[1] ) >= 30 ) doPost=1;
    if ( abs( prev->voltageX10 - current->voltageX10 ) >= 5 ) doPost=1;
@@ -209,11 +216,13 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
    
    for( i=0; i < 2 ; i++)
    {
-#if 0 // send the current 
-      value = (float)(current->currentX100[i]) / 100.0;
+      if ( verbose ) // send the current 
+      { 
+         value = (float)(current->currentX100[i]) / 100.0;
       len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-current%d\", \"v\":%f },\n",
                       current->serial,i+1,value);
-#endif
+      }
+      
 
       len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%d\", ",
                       current->serial,i+1);
@@ -259,7 +268,10 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
 
    len += snprintf(bufData+len,sizeof(bufData)-len,"]");
 
-   //fprintf(stderr,"Post Message len=%d to %s:\n%s\n",len,url,bufData);
+   if (verbose)
+   {
+      fprintf(stderr,"Post Message len=%d to %s:\n%s\n",len,url,bufData);
+   }
    //fprintf(stderr,"Post Message len=%d to %s \n",len,url);
    postValue( url, bufData );
 
@@ -469,7 +481,8 @@ main(int argc, char* argv[] )
    int port = 0;
    char* dev = "/dev/cu.KeySerial1";
    char* url = "http://www.fluffyhome.com/sensorValues/";
-  
+   verbose = 0;
+   
    if ( argc > 1 )
    {
       dev = argv[1];
@@ -479,6 +492,11 @@ main(int argc, char* argv[] )
    if ( argc > 2  )
    {
       url = argv[2];
+   }
+   
+   if ( argc > 3 )
+   {
+      verbose = 1;
    }
    
    if ( port )
