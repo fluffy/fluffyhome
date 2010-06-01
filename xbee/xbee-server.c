@@ -26,7 +26,7 @@
 
 typedef float Value;
 
-int verbose = 1;
+int verbose = 0;
 
 
 
@@ -138,16 +138,18 @@ postValue( char* bufUrl , char* bufData )
 }
 
 
-void postMsg( char* url, char* addr, Value value1, Value value2 )
+void postMsg( char* url, char* addr, Value value1, Value value2 ) // should
+                                                                  // depricate -
+                                                                  // water meter uses
 {
    char bufData[2*1024];
    int len=0;
 
-   len += snprintf(bufData+len,sizeof(bufData)-len,"[\n");
+   len += snprintf(bufData+len,sizeof(bufData)-len,"{\"m\":[\n");
    
    len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"%s\", \"s\":%f, \"v\":%f }\n", addr, (float)value1, (float)value2 );
 
-   len += snprintf(bufData+len,sizeof(bufData)-len,"]");
+   len += snprintf(bufData+len,sizeof(bufData)-len,"]}");
 
    if ( verbose )
    {
@@ -158,11 +160,14 @@ void postMsg( char* url, char* addr, Value value1, Value value2 )
 
    
 int 
-parseMsg( int len,  unsigned char msg[] , char addr[100], Value* value1, Value* value2 )
+parseMsg( int len,  unsigned char msg[], char* url )
 {
    assert( len > 1 );
    int i;
    
+   char addr[100];
+   
+
    if ( msg[0] == 0x90 )
    {
       snprintf( addr, 100 /* size */ , "ZB-%02X%02X%02X%02X%02X%02X",msg[1],msg[2],msg[3],msg[4],msg[5],msg[6] );
@@ -190,13 +195,29 @@ parseMsg( int len,  unsigned char msg[] , char addr[100], Value* value1, Value* 
          return 0;
       }
       
-      char name[1000];    
-      float val1 = 0.0;
-      float val2 = 0.0;
-      sscanf( msg+12, "%s %f %f", name , &val1 , &val2 );
+      if ( (msg[12] == 'l') && (msg[13] == ' ' ) ) // old format from old water sensor
+      {
+         char name[1000];    
+         float val1 = 0.0;
+         float val2 = 0.0;
+         sscanf( msg+12, "%s %f %f", name , &val1 , &val2 );
+         
+         postMsg( url, addr, val1, val2 );
+      }
+      else if ( (msg[12] == '{') && (msg[13] == '"' ) && (msg[14] == 'm') && (msg[15] == '"') && (msg[16] == ':' ) )
+      {
+         char* buf = msg+12;
+         if ( verbose )
+         {
+            fprintf(stderr,"Post Message len=%d to %s:\n%s\n",len-12,url,buf);
+         }
+         postValue( url, buf );
+      }
+      else
+      {
+         fprintf(stderr,"Bad message from %s is: '%s' \n",addr,msg+12);
+      }
       
-      *value1 = val1;
-      *value2 = val2;
 
       return 1;
    }
@@ -252,16 +273,12 @@ processData( int sock , char* url )
          continue;
       }
       
-      char addr[100];
-      Value value1;
-      Value value2;
-      
-      int ok = parseMsg( len , msgBuf ,addr,  &value1, &value2 );
+      int ok = parseMsg( len , msgBuf , url  );
 
-      if ( ok )
+      /*  if ( ok )
       {
          postMsg( url, addr, value1, value2 );
-      }
+         } */
       
    }
 }
@@ -316,7 +333,7 @@ int setupSerial( char* device )
 int 
 main(int argc, char* argv[] )
 {
-   syslog(LOG_INFO,"Starting ECM 1240 Monitor");
+   syslog(LOG_INFO,"Starting XBEE Monitor");
 
    assert( sizeof(int) >= 4 );
    assert( sizeof(long long) > 4 );
