@@ -176,17 +176,13 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
    int i;
    int doPost = 0;
    
-   if ( current->time > prev->time+30 ) doPost=1;
+   if ( current->time > prev->time+60 ) doPost=1;
 
-   if ( verbose ) 
-   {
-      if ( current->time > prev->time+3 ) doPost=1;
-   }
    if ( abs( prev->currentX100[0] - current->currentX100[0] ) >= 30 ) doPost=1;
    if ( abs( prev->currentX100[1] - current->currentX100[1] ) >= 30 ) doPost=1;
    if ( abs( prev->voltageX10 - current->voltageX10 ) >= 5 ) doPost=1;
 
-   if ( prev->time + 1 >= current->time ) doPost=0; // time too, short, overried
+   if ( prev->time + 10 >= current->time ) doPost=0; // time too, short, overried
                                                  // any previos post 
    if (!doPost) 
    {
@@ -197,7 +193,7 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
    char bufData[2*1024];
    int len=0;
    float value;
-   len += snprintf(bufData+len,sizeof(bufData)-len,"[\n");
+   len += snprintf(bufData+len,sizeof(bufData)-len,"{\"m\":[\n");
 
 # if 0  // send the time 
    len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-time\", \"v\":1.0, \"s\":%u },\n",
@@ -266,7 +262,7 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
    len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-voltage\", \"v\":%f }\n",
                    current->serial,value);
 
-   len += snprintf(bufData+len,sizeof(bufData)-len,"]");
+   len += snprintf(bufData+len,sizeof(bufData)-len,"]}");
 
    if (verbose)
    {
