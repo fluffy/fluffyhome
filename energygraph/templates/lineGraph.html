@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head %}
+<!--[if IE]><script type="text/javascript"src="/static/ext/excanvas.compiled.js.js"></script><![endif]-->
+<script type="text/javascript"
+  src="/static/ext/dygraph-combined.js"></script>
+</head>
+{% endblock %}
+
+{% block content %}
+<div class="section">
+  <h3 class="form-title" > {{label}} </h3>
+</div>
+<div id="visualization" style="height: 250px; width: 750px;"></div>
+<script type="text/javascript">
+  g = new Dygraph( document.getElementById("visualization"),
+                   "/sensor/{{ user }}/{{ sensorName }}/history/csv",
+                   { labels: [ "Date", "Series1"],
+                     xTicker: Dygraph.dateTicker}
+                 );
+</script>    
+{% endblock %}

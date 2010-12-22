@@ -1,0 +1,17 @@
+
+cron:
+- description: update the hourly values 
+  url: /tasks/update/*/*/*/
+  schedule: every 15 minutes synchronized
+- description: update the hourly graphs 
+  url: /user/fluffy/history/All/cost/0day/json/
+  schedule: every 60 minutes synchronized
+- description: update the hourly kwh graphs 
+  url: /user/fluffy/history/All/kWh/0day/json/
+  schedule: every 60 minutes synchronized
+- description: update the sensor cache 
+  url: /tasks/refresh/fluffy/
+  schedule: every 30 minutes 
+
+
+

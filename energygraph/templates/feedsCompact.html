@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head %}
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+{% for pipe in pipeList %}
+{% ifequal pipe.category "Tab" %}
+<div class="section">
+  <h3 class="form-title" >{{ pipe.label }}  </h3>
+</div>
+{% else %}
+<div class="section-item">
+  <div id="tools">
+      <!--
+      <a href="/sensor/{{ pipe.user }}/{{ pipe.name }}/edit/">
+      <img src="/static/icons-emre-ozcelik/edit.png" width="32" height="32" border="0" alt="edit" />
+      </a>
+      -->
+      {% ifnotequal pipe.category "Group" %}
+      <a href="/sensor/{{ pipe.user }}/{{ pipe.name }}/history/today/">
+      <img src="/static/icons-emre-ozcelik/graph.png" width="32" height="32" border="0" alt="graph" />
+      </a>
+      <a href="/sensor/{{ pipe.user }}/{{ pipe.name }}/history/">
+      <img src="/static/icons-emre-ozcelik/search.png" width="32" height="32" border="0" alt="search" />
+      </a>
+      {% endifnotequal %}
+      <a href="/sensor/{{ pipe.user }}/{{ pipe.name }}/meta/">
+      <img src="/static/icons-emre-ozcelik/prop.png" width="32" height="32" border="0" alt="properties" />
+      </a>
+  </div>
+  <div class="section-data"> <label>{{ pipe.label }}:</labeL>
+      {{ pipe.value }} {{ pipe.units }}
+      {% if pipe.secValue %} &nbsp Total: {{ pipe.secValue|floatformat:0 }} {{ pipe.secUnits }} {% endif %}
+      {% if pipe.watts %}({{ pipe.watts|floatformat:0 }} W){% endif %}
+  </div>
+    {% if pipe.time %}
+    <div class="section-subdata">
+      <label>&nbsp</label>
+      updated {{ pipe.time|timesince }} ago
+       {% if pipe.integral %}Integral={{ pipe.integral|floatformat:0 }}{% endif %} 
+       {% if pipe.joules %} {{ pipe.joules|floatformat:0 }} kWh{% endif %} 
+    </div>
+    {% endif %}
+</div>
+<div class="divider"></div>
+{% endifequal %}
+{% endfor %}
+{% endblock %}

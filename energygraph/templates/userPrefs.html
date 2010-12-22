@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head %}
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+<form method="post" action="">
+
+<div class="section">
+  <h3 class="form-title" > Costs </h3>
+</div>
+
+<div class="section-item">
+  {{ form.gasCost.errors }}
+  <label for="id_gasCost">{% trans "Gas $/KWh:" %}</label>
+  {{ form.gasCost }}
+</div>
+<div class="section-item">
+  {{ form.elecCost.errors }}
+  <label for="id_elecCost">{% trans "Elec $/KWh:" %}</label>
+  {{ form.elecCost }}
+</div>
+
+<div class="section-item">
+  {{ form.waterCost.errors }}
+  <label for="id_waterCost">{% trans "Water $/l:" %}</label>
+  {{ form.waterCost }}
+</div>
+
+
+<div class="section">
+  <h3 class="form-title" > Carbon </h3>
+</div>
+
+<div class="section-item">
+  {{ form.gasCO2.errors }}
+  <label for="id_gasCO2">{% trans "Gas kg/KWh:" %}</label>
+  {{ form.gasCO2 }}
+</div>
+<div class="section-item">
+  {{ form.elecCO2.errors }}
+  <label for="id_elecCO2">{% trans "Elec kg/KWh:" %}</label>
+  {{ form.elecCO2 }}
+</div>
+
+
+
+<div class="section">
+  <h3 class="form-title" > Time </h3>
+</div>
+
+<div class="section-item">
+  {{ form.timeZoneOffset.errors }}
+  <label for="id_timeZoneOffset">{% trans "Time Zone Offset (h):" %}</label>
+  {{ form.timeZoneOffset }}
+</div>
+
+<!--
+<div class="section-item">
+  {{ form.midnightIs4Am.errors }}
+  <label for="id_midnightIs4Am">{% trans "4AM is the new midnigt:" %}</label>
+  {{ form.midnightIs4Am }}
+</div>
+-->
+
+
+<!--
+<div class="section">
+  <h3 class="form-title" > Alarm Notificatioins </h3>
+</div>
+
+
+<div class="section-item">
+  {{ form.email.errors }}
+  <label for="id_email">{% trans "Email:" %}</label>
+  {{ form.email }}
+</div>
+<div class="section-item">
+  {{ form.twitter.errors }}
+  <label for="id_twitter">{% trans "Twitter:" %}</label>
+  {{ form.twitter }}
+</div>
+<div class="section-item">
+  {{ form.purlKey.errors }}
+  <label for="id_purlKey">{% trans "PURL API Key:" %}</label>
+  {{ form.purlKey }}
+</div>
+-->
+
+
+<div class="section">
+  <h3 class="form-title" > Password </h3>
+</div>
+
+
+<div class="section-item">
+  {{ form.newPwd.errors }}
+  <label for="id_newPwd">{% trans "New Password:" %}</label>
+  {{ form.newPwd }}
+</div>
+<div class="section-item">
+  {{ form.newPwdAgain.errors }}
+  <label for="id_newPwdAgain">{% trans "New Password Again:" %}</label>
+  {{ form.newPwdAgain }}
+</div>
+
+
+
+
+<div class="section">
+  <h3 class="form-title">{% trans "Update" %}</h3>
+</div>
+
+<div class="section-details">{{msg}}</div>
+
+<div class="section-item">
+  <label for="submit"></label>
+  <input type="submit" value="Update" />
+</div>
+    
+</form>
+{% endblock %}

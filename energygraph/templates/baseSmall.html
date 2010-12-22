@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<meta name = "format-detection" content = "telephone=no">
+<meta name = "viewport" content = "user-scalable=no, width=320,
+                                   initial-scale=1.0, maximum-scale=1.0">
+{% load i18n %}
+<html>
+<head>
+{% block head %}{% endblock %}
+<script type="application/x-javascript">
+    
+    addEventListener("load", function()
+    {
+        setTimeout(updateLayout, 0);
+    }, false);
+
+    var currentWidth = 0;
+    
+    function updateLayout()
+    {
+        if (window.innerWidth != currentWidth)
+        {
+            currentWidth = window.innerWidth;
+
+            var orient = currentWidth == 320 ? "profile" : "landscape";
+            document.body.setAttribute("orient", orient);
+            setTimeout(function()
+            {
+                window.scrollTo(0, 1);
+            }, 100);            
+        }
+    }
+
+    setInterval(updateLayout, 400);
+    
+</script>
+
+<style type="text/css" media="all">@import "/static/small.css";</style>
+
+<style type="text/css" media="screen">
+    body[orient="profile"] .container {
+        height: 416px;
+    }
+    
+    body[orient="landscape"] .container {
+        height: 268px;
+    }
+</style>
+
+</head>
+
+
+<title>{% trans "Fluffy Home" %}</title>
+</head>
+<body>
+<a name="home"></a>
+<div id="header" class="header-simple">
+<div class="side-header">
+{% if user %}
+  <a href="/user/{{user}}/status/">{% trans "Usage" %}</a>
+  <a href="/user/{{user}}/sensors/">{% trans "Sensors" %}</a>
+{% else %}
+  <a href="/login/">{% trans "Login" %}</a>
+{% endif %}
+  {% block nav %}{% endblock %}
+</div>
+</div>
+<div id="contents">
+<div class="main">
+  {% block content %}{% endblock %}
+</div>
+</div>
+<p>{% trans "DRAFT - TEST ONLY" %}</p>
+</body>
+</html>
+
+

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head %}
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+<div class="section">
+  <h3 class="form-title" >{% trans "Sensors to add" %}</h3>
+</div>
+{% for sensor in sensors %}
+ <div class="section-item">
+   <label>{{sensor}}:</labeL> 
+   <a href="/user/{{ user }}/enroll/add/{{ sensor }}/">{% trans "Add" %}</a>
+ </div>
+{% endfor %}
+<div class="section">
+  <h3 class="form-title" >{% trans "Create New Group" %}</h3>
+</div>
+<form method="post" action="">
+<div class="section-details">{{msg}}</div>
+
+<div class="section-item">
+  {{ form.name.errors }}
+  <label for="id_name">{% trans "Group Name:" %}</label>
+  {{ form.name }}
+  <input type="submit" value="Add" />
+</div>
+
+</div>
+
+</form>
+{% endblock %}

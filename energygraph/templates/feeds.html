@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head %}
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+{% for pipe in pipeList %}
+<div class="section">
+  <h3 class="form-title" >{{ pipe.label }}</h3>
+</div>
+<div>
+  <div class="section-graph" id="visX{{forloop.counter}}" style="height: 70px; width: 400px;"></div>           
+  <div class="section-item"> <label>Current Value:</labeL>{{ pipe.value }} {{ pipe.units }}</div>
+  <div class="section-item"> <label>Updated:</labeL>{{ pipe.time|timesince }} ago </div>
+  <div class="section-item">
+    <label></labeL>
+                <a href="/sensor/{{ pipe.user }}/{{ pipe.name }}/edit/">{% trans "Edit" %}</a>
+                <a href="/sensor/{{ pipe.user }}/{{ pipe.name }}/meta/">{% trans "Properties" %}</a>
+                <a href="/sensor/{{ pipe.user }}/{{ pipe.name }}/history/">{% trans "History" %}</a>
+                <a href="/sensor/{{ pipe.user }}/{{ pipe.name }}/history/today/">{% trans "Today" %}</a>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

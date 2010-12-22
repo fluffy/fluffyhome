@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head %}
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+<div class="section">
+  <h3 class="form-title" > Stats </h3>
+</div>
+<div class="section-item">
+
+<div class="section-data"> <label>IP Address:</label>
+  <table border=1>
+    <tr>
+      <th>IP</th>  
+      <th>Updates Prev Min</th>
+      <th>Updates This Min</th> 
+    </tr>
+    {% for ip in ipAddrs %}
+    <tr>
+      <td>{{ip.ip}}</td> <td>{{ip.updates1}}</td> <td>{{ip.updates0}}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="section-data"> <label>For:</label>
+  <table border=1>
+    <tr>
+      <th>Name</th>  <th>Label</th>  <th>id</th>  <th>User</th>
+      <th>IP</th>  <th>Updates Today</th>  <th>Updates Last Minute</th> 
+    </tr>
+    {% for sensor in sensors %}
+    <tr>
+      <td>{{ sensor.name }}</td> <td>{{ sensor.label }}</td>
+      <td>{{sensor.id }}</td> <td>{{sensor.userName }}</td>
+      <td>{{ sensor.ip }}</td>  <td>{{ sensor.updatesDay }}</td>  <td>{{ sensor.updatesMin }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+{% endblock %}

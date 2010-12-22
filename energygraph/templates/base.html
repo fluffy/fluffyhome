@@ -1,0 +1,47 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+{% load i18n %}
+<html>
+<head>
+<title>{% trans "FluffyHome" %}</title>
+{% block head %}{% endblock %}
+<style type="text/css" media="all">@import "/static/style.css";</style>
+<script  type="text/javascript"
+src="https://www.google.com/jsapi?key=ABQIAAAAJOYg8HUe5iieEnK7SXaQthSXVygrEV7Jpa5lHpo-1VUVNADl6RTUc07SkY9AX6hj0saOZq5j4IA0JQ"
+></script>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try{
+var pageTracker = _gat._getTracker("UA-4106492-2");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+</head>
+<body>
+<div id="banner">
+  <h1>{% trans "Fluffy Home" %}</h1>
+</div>
+<div id="nav">
+{% if user %}
+  <a href="/user/{{user}}/status/">{% trans "Usage" %}</a>
+  <a href="/user/{{user}}/graphs/">{% trans "Graphs" %}</a>
+  <a href="/user/{{user}}/sensors/">{% trans "Sensors" %}</a>
+  <a href="/user/{{user}}/enroll/find/">{% trans "Add" %}</a>
+  <a href="/user/{{user}}/prefs/">{% trans "Info" %}</a>
+{% else %}
+  <a href="/login/">{% trans "Login" %}</a>
+{% endif %}
+  {% block nav %}{% endblock %}
+<!--  <a href="/about/">{% trans "About" %}</a> -->
+ <a href="http://wiki.fluffyhome.com">{% trans "WIKI" %}</a>
+</div>
+<div id="contents">
+  {% block content %}{% endblock %}
+</div>
+<div id="footer">
+  <p>{% trans "TEST ONLY - DO NOT USE THIS WEB SITE" %}</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+
+queue:
+- name: default
+  rate: 15/s
+  bucket_size: 20
+- name: fastUpdateHourlyData
+  rate: 1/s
+  bucket_size: 10

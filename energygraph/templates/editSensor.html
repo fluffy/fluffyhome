@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head %}
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
+<script type="text/javascript" src="/static/editSensor.js"></script>
+
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+<form method="post" action="">
+
+<div class="section">
+  <h3 class="form-title" >{{ sensor.streamName }}</h3>
+</div>
+
+<div class="section-item" id="category" >
+{{ form.category.errors }}
+<label for="id_category">{% trans "Category:" %}</label>
+{{ form.category }}
+</div>
+
+<div class="section-item">
+{{ form.inGroup2.errors }}
+<label for="id_inGroup2">{% trans "In Group:" %}</label>
+{{ form.inGroup2 }}
+</div>
+
+<div class="section-item">
+  {{ form.label.errors }}
+  <label for="id_label">{% trans "Label:" %}</label>
+  {{ form.label }}
+</div>
+
+<div class="section-item">
+ {{ form.hidden.errors }}
+ <label for="id_hidden">{% trans "Hidden:" %}</label>
+ {{ form.hidden }}
+</div>
+
+
+<div id="calcGroup">
+<div class="section">
+ <h3 class="form-title">{% trans "Calculation" %}</h3>
+</div>
+
+<div class="section-item">
+ {{ form.ignore.errors }}
+ <label for="id_ignore">{% trans "Ignore:" %}</label>
+ {{ form.ignore }}
+</div>
+
+<div class="section-item" id="units" >
+  {{ form.units.errors }}
+  <label for="id_units">{% trans "Units:" %}</label>
+  {{ form.units }}
+</div>
+
+<div class="section-item" id="type" >
+ {{ form.type.errors }}
+ <label for="id_type">{% trans "Type:" %}</label>
+ {{ form.type }}
+</div>
+
+<div class="section-item" id="groupTotal" >
+  {{ form.groupTotal.errors }}
+  <label for="id_groupTotal">{% trans "Group Total:" %}</label>
+  {{ form.groupTotal }}
+</div>
+</div> <!-- calculation Group -->
+
+
+<div id="indicatorGroup">
+<div class="section">
+ <h3 class="form-title">{% trans "Indicator" %}</h3>
+</div>
+<div class="section-details">Use for a sensor that indicates something
+ else is using power.</div>
+
+<div class="section-item">
+ {{ form.threshold.errors }}
+ <label for="id_threshold">{% trans "On Threshold:" %}</label>
+ {{ form.threshold }}
+</div>
+
+<div class="section-item">
+  {{ form.unitsWhenOn.errors }}
+  <label for="id_unitsWhenOn">{% trans "Units when on:" %}</label>
+  {{ form.unitsWhenOn }}
+</div>
+
+<div class="section-item">
+  {{ form.valueWhenOn.errors }}
+  <label for="id_valueWhenOn">{% trans "Value when on:" %}</label>
+  {{ form.valueWhenOn }}
+</div>
+</div> <!-- end of indicator group -->
+
+<div class="section">
+ <h3 class="form-title">{% trans "Update" %}</h3>
+</div>
+<div class="section-details">{{msg}}</div>
+<div class="section-item">
+  <label for="submit"> &nbsp; </label>
+  <input type="submit" value="Update" />
+</div>
+    
+</form>
+{% endblock %}
