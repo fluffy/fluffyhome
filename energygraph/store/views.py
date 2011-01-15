@@ -35,6 +35,35 @@ from django.utils import simplejson as json  # fix when we can use Python 2.6 to
 from djangohttpdigest.decorators import digestProtect,digestLogin
 
 
+import oauth2 as oauth
+from oauthtwitter import OAuthApi
+
+
+@digestProtect(realm='fluffyhome.com') 
+def test1User(request,userName):
+
+    form = []
+    msg = "my message"
+    
+    consumer_key = ""
+    consumer_secret = ""
+
+    access_tok = ""
+    access_tok_secret = ""
+
+    twitter = OAuthApi(consumer_key, consumer_secret, access_tok, access_tok_secret)
+    res = twitter.VerifyCredentials()
+
+    msg = res['status']['text']
+    
+    return render_to_response('userPrefs.html', { 'msg':msg, 
+                                                  'form':form,
+                                                  'user':userName, 
+                                                  'host' : request.META["HTTP_HOST"] } )
+
+
+    
+    
 def editUser( request, userName ):
     record = findUserByName( userName )
     

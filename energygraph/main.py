@@ -28,6 +28,9 @@ use_library('django', '1.1')
 # 'project' is the name of the project created with django-admin.py
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
+import sys
+sys.path.insert(0, './contrib' )
+
 # Google App Engine imports.
 from google.appengine.ext.webapp import util
 
