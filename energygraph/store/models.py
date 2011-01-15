@@ -524,7 +524,9 @@ def findSensorID( userName, sensorName, create=False , createGroup=False ):
 class SystemData(db.Model):
     nextSensorID = db.IntegerProperty()
     nextUserID = db.IntegerProperty()
-
+    twitterConsumerToken  = db.StringProperty()
+    twitterConsumerSecret = db.StringProperty()
+    
 
 def getSystemData():
     query = SystemData.all()
@@ -535,9 +537,18 @@ def getSystemData():
         sys = SystemData()
         sys.nextSensorID =1
         sys.nextUserID = 1
+        sys.twitterConsumerToken = ""
+        sys.twitterConsumerSecret = ""
         sys.put()
         logging.debug("# DB create for getSystemData" )
     assert sys != None
+
+    if sys.twitterConsumerToken == None:
+        sys.twitterConsumerToken = ""
+        sys.twitterConsumerSecret = ""
+        sys.put()
+        logging.debug("# DB update for getSystemData" )
+        
     return sys
 
 
@@ -579,6 +590,8 @@ class User(db.Model):
     waterCost = db.FloatProperty(indexed=False)
     gasCO2 = db.FloatProperty(indexed=False)
     elecCO2 = db.FloatProperty(indexed=False)
+    twitterAccessToken = db.StringProperty(indexed=False)
+    twitterAccessSecret = db.StringProperty(indexed=False)
 
 
 
@@ -648,6 +661,9 @@ def createUser( userName , password ):
     user.settingEpoch = 1
     user.passwd = password # will not be able to log on till password is set
 
+    twitterAccessToken = ""
+    twitterAccessSecret = ""
+    
     user.put()
     logging.debug("# DB put for createUser" )
 

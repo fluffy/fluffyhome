@@ -42,6 +42,21 @@ from oauthtwitter import OAuthApi
 @digestProtect(realm='fluffyhome.com') 
 def test1User(request,userName):
 
+    #query = SystemData.all()
+    #sys = query.get()
+    #if  sys.twitterConsumerToken== None:
+    #    sys.twitterConsumerToken = ""
+    #    sys.twitterConsumerSecret = ""
+    #    sys.put()
+    #
+    #query = User.all()
+    #query.filter( 'userName =', userName )
+    #user = query.get()
+    #if user.twitterAccessToken == None:
+    #    user.twitterAccessToken  = ""
+    #    user.twitterAccessSecret  = ""
+    #    user.put()
+    
     form = []
     msg = "my message"
     
@@ -51,10 +66,9 @@ def test1User(request,userName):
     access_tok = ""
     access_tok_secret = ""
 
-    twitter = OAuthApi(consumer_key, consumer_secret, access_tok, access_tok_secret)
-    res = twitter.VerifyCredentials()
-
-    msg = res['status']['text']
+    #twitter = OAuthApi(consumer_key, consumer_secret, access_tok, access_tok_secret)
+    #res = twitter.VerifyCredentials()
+    #msg = res['status']['text']
     
     return render_to_response('userPrefs.html', { 'msg':msg, 
                                                   'form':form,
