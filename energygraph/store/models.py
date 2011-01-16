@@ -592,6 +592,8 @@ class User(db.Model):
     elecCO2 = db.FloatProperty(indexed=False)
     twitterAccessToken = db.StringProperty(indexed=False)
     twitterAccessSecret = db.StringProperty(indexed=False)
+    twitterTempToken = db.StringProperty(indexed=True)
+    twitterTempSecret = db.StringProperty(indexed=False)
 
 
 

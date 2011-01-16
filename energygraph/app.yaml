@@ -5,6 +5,10 @@ api_version: 1
 
 default_expiration: "12h"
 
+builtins:
+- datastore_admin: on
+
+
 handlers:
 
 - url: /static

@@ -1,9 +1,10 @@
 # Copyright (c) 2010, Cullen Jennings. All rights reserved.
 
-# Create your views here.
 import logging
 import sys
 import os
+import copy
+import time
 
 from datetime import timedelta
 from datetime import datetime
@@ -14,34 +15,133 @@ from django.http import HttpResponseNotFound
 from django.http import HttpResponseForbidden
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
-
-from google.appengine.api.labs import taskqueue
-from google.appengine.ext import db
-
-from store.models import *
 from google.appengine.ext.db import djangoforms
 #from django import newforms as forms
 #from django.newforms import form_for_model,form_for_instance
 from django import forms
 from django import VERSION as DJANGO_VERSION
-
-from google.appengine.runtime import apiproxy_errors
-
-import copy
-import time
-
 from django.utils import simplejson as json  # fix when we can use Python 2.6 to just be import json 
+
+from google.appengine.api.labs import taskqueue
+from google.appengine.ext import db
+from google.appengine.runtime import apiproxy_errors
 
 from djangohttpdigest.decorators import digestProtect,digestLogin
 
+from store.models import *
 
 import oauth2 as oauth
 from oauthtwitter import OAuthApi
 
 
+def twitterCallback(request):
+    token = request.GET.get('oauth_token',None)
+    verifier = request.GET.get('oauth_verifier',None)
+
+    assert token, "Twitter callback URL did not contain a oauth token"
+    assert verifier,  "Twitter callback URL did not contain a oauth token"
+
+    logging.info( "Twitter temp token in callback param is " + token )
+ 
+    # find the user with that token
+    query = User.all()
+    query.filter( 'twitterTempToken =', token )
+    user = query.get()
+    assert( user )
+     
+    return HttpResponseRedirect( '/user/' + user.userName + '/twitterVerify?tok=' + token + '&verify=' + verifier )
+
+
+#@digestProtect(realm='fluffyhome.com') 
+def twitterVerify(request,userName):
+    token = request.GET.get('tok',None)
+    verifier = request.GET.get('verify',None)
+
+    assert token, "Twitter callback URL did not contain a oauth token"
+    assert verifier,  "Twitter callback URL did not contain a oauth token"
+  
+    # get the temp credential
+    query = User.all()
+    query.filter( 'userName =', userName )
+    user = query.get()
+    assert( user )
+
+    assert user.twitterTempToken == token
+    
+    tempToken = {}
+    tempToken['oauth_token'] = user.twitterTempToken
+    tempToken['oauth_token_secret'] = user.twitterTempSecret
+
+    logging.info( "Twitter temp token in verify is " + user.twitterTempToken )
+ 
+    query = SystemData.all()
+    sys = query.get()
+    assert( sys )
+    assert( sys.twitterConsumerToken )
+    
+    twitter = OAuthApi( sys.twitterConsumerToken, sys.twitterConsumerSecret )
+
+    accessToken = twitter.getAccessToken( tempToken, verifier )
+
+    try:
+        user.twitterAccessToken  = accessToken['oauth_token']
+        user.twitterAccessSecret = accessToken['oauth_token_secret']
+        user.put()
+    except:
+        # don't have a valid access token
+        logging.info( "Did not get twitter access token"  )
+
+    return HttpResponseRedirect( '/user/' + userName + '/prefs/' )
+    
+
+@digestProtect(realm='fluffyhome.com') 
+def twitterLogout(request,userName):
+    # remove the twitter credentials
+    query = User.all()
+    query.filter( 'userName =', userName )
+    user = query.get()
+    assert( user )
+    user.twitterTempToken = ''
+    user.twitterTempSecret = ''
+    user.twitterAccessToken = ''
+    user.twitterAccessSecret = ''
+    user.put()
+    return HttpResponseRedirect( '/user/' + userName + '/prefs/' )
+
+
+@digestProtect(realm='fluffyhome.com')  
+def twitterLogin(request,userName):
+    query = SystemData.all()
+    sys = query.get()
+    assert( sys )
+    assert( sys.twitterConsumerToken )
+    
+    twitter = OAuthApi( sys.twitterConsumerToken,  sys.twitterConsumerSecret )
+
+    tempToken = twitter.getRequestToken()
+    assert( tempToken)
+    
+    # save the temp credential
+    query = User.all()
+    query.filter( 'userName =', userName )
+    user = query.get()
+    assert( user )
+    user.twitterTempToken = tempToken['oauth_token']
+    user.twitterTempSecret = tempToken['oauth_token_secret']
+    user.twitterAccessToken = ''
+    user.twitterAccessSecret = ''
+    user.put()
+
+    logging.info( "Twitter temp token in login is " + user.twitterTempToken )
+    
+    authURL = twitter.getAuthorizationURL( tempToken )
+    assert( authURL )
+
+    return HttpResponseRedirect( authURL )
+   
+    
 @digestProtect(realm='fluffyhome.com') 
 def test1User(request,userName):
-
     #query = SystemData.all()
     #sys = query.get()
     #if  sys.twitterConsumerToken== None:
@@ -130,8 +230,6 @@ def userPrefs( request, userName ):
 
             record.put()
             updateUserSettingsEpoch(userName)
-
-
         else:
             logging.error( "Error in form data to edit sensor form=%s"%( str( form )) )
             msg = "Some problem processing form"
@@ -139,10 +237,16 @@ def userPrefs( request, userName ):
     else:
         form = EditUserForm( instance=record ,  auto_id=False  )
 
+    twitterEnabled = False
+    if record.twitterAccessToken:
+        if record.twitterAccessToken != '':
+            twitterEnabled = True
+        
     logging.info( "debug for form=%s"%form )
     return render_to_response('userPrefs.html', { 'msg':msg, 
                                                   'form':form,
-                                                  'user':userName, 
+                                                  'user':userName,
+                                                  'twitterEnabled':twitterEnabled,
                                                   'host' : request.META["HTTP_HOST"] } )
 
 

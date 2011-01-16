@@ -68,9 +68,9 @@
 -->
 
 
-<!--
+
 <div class="section">
-  <h3 class="form-title" > Alarm Notificatioins </h3>
+  <h3 class="form-title" > Notificatioins </h3>
 </div>
 
 
@@ -80,16 +80,18 @@
   {{ form.email }}
 </div>
 <div class="section-item">
-  {{ form.twitter.errors }}
-  <label for="id_twitter">{% trans "Twitter:" %}</label>
-  {{ form.twitter }}
+ <label for="id_email">{% trans "Twitter:" %}</label>
+  {% if twitterEnabled %}
+  <p> Enabled  <a href='/user/{{ user }}/twitterLogout/'>(Click to disable)</a></p>
+ {% else %}
+  <p> Not Enabled <a href='/user/{{ user }}/twitterLogin/'>(Click to enable)</a></p>
+ {% endif %}
 </div>
 <div class="section-item">
   {{ form.purlKey.errors }}
   <label for="id_purlKey">{% trans "PURL API Key:" %}</label>
   {{ form.purlKey }}
 </div>
--->
 
 
 <div class="section">

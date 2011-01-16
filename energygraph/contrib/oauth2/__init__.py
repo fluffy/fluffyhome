@@ -30,9 +30,13 @@ import hmac
 import binascii
 import httplib2
 
-#from urlparse import parse_qs, parse_qsl #use this for python2.6 
-from cgi import parse_qs, parse_qsl # use this for python2.5 
-
+try:
+    # works python 2.6 and later 
+    from urlparse import parse_qs, parse_qsl 
+except ImportError:
+    # for python 2.5 
+    from cgi import parse_qs, parse_qsl
+    
 try:
     from hashlib import sha1
     sha = sha1
@@ -537,7 +541,7 @@ class Client(httplib2.Http):
     """OAuthClient is a worker to attempt to execute a request."""
 
     def __init__(self, consumer, token=None, cache=None, timeout=None,
-        proxy_info=None):
+        proxy_info=None ):
 
         if consumer is not None and not isinstance(consumer, Consumer):
             raise ValueError("Invalid consumer.")
@@ -558,8 +562,7 @@ class Client(httplib2.Http):
         self.method = method
 
     def request(self, uri, method="GET", body=None, headers=None, 
-#        redirections=httplib2.DEFAULT_MAX_REDIRECTS, connection_type=None):
-        redirections=5, connection_type=None):
+        redirections=httplib2.DEFAULT_MAX_REDIRECTS, connection_type=None):
         DEFAULT_CONTENT_TYPE = 'application/x-www-form-urlencoded'
 
         if not isinstance(headers, dict):

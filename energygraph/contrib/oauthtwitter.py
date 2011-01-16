@@ -24,9 +24,12 @@ import time
 # Use "import cgi as urlparse" for Python2.5 and earlier, use "import urlparse" for Python2.6
 # Swapping these two lines is all that is required to make the code compatible with the other version
 
-#from urlparse import parse_qsl # user for pyont 2.6 
-from cgi import parse_qsl # user for python 2.5 
-
+try:
+    # works python 2.6 and later 
+    from urlparse import parse_qs, parse_qsl 
+except ImportError:
+    # for python 2.5 
+    from cgi import parse_qs, parse_qsl
 
 # Non library modules
 #import simplejson
@@ -158,7 +161,7 @@ class OAuthApi:
             auth_url += "&force_login=1"
         return auth_url
         
-    def getRequestToken(self, url=REQUEST_TOKEN_URL):
+    def getRequestToken(self, url=REQUEST_TOKEN_URL ):
         '''Get a Request Token from Twitter
         
         Returns:
