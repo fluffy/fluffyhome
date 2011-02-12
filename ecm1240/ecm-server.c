@@ -332,7 +332,7 @@ processData( int sock , char* url )
    
    while (1)
    {
-      unsigned char msgBuf[128];
+      unsigned char msgBuf[1024];
       int msgPos =0;
       
       do
