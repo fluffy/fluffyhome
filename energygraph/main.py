@@ -59,8 +59,8 @@ def log_exception(*args, **kwds):
 def main():
     logging.getLogger().setLevel(logging.WARNING)
     #logging.getLogger().setLevel(logging.DEBUG)
-    #if os.environ['SERVER_SOFTWARE'].startswith("Development"):
-    #    logging.getLogger().setLevel(logging.DEBUG)
+    if os.environ['SERVER_SOFTWARE'].startswith("Development"):
+        logging.getLogger().setLevel(logging.DEBUG)
     
     # Create a Django application for WSGI.
     application = django.core.handlers.wsgi.WSGIHandler()

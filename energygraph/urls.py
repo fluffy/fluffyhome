@@ -36,6 +36,7 @@ urlpatterns = patterns('',
     (r'^sensor/(?P<userName>[a-zA-Z]\w{0,64})/(?P<sensorName>[\w][\-\w]{0,64})/history/csv/$', showLineGraphCSV ), 
 
     (r'^sensorValues/$', postSensorValues ), 
+    (r'^alarmValues/$', postAlarmValues ), 
  
     (r'^tasks/update/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[0-9]{8}T[0-9]{6}Z)/$', updateValues ), 
     (r'^tasks/update/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[\*])/$', updateValues ), 
