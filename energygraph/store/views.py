@@ -934,7 +934,7 @@ class EditSensorForm(djangoforms.ModelForm):
     inGroup2 = forms.TypedChoiceField(  coerce=int )
     class Meta:
         model = Sensor
-        exclude = [ 'sensorID','userID','sensorName','inGroup','apiKey','tags','watts','public','killed','displayMin','displayMax','maxUpdateTime' ]
+        exclude = [ 'sensorID','userID','sensorName','inGroup','apiKey','tags','watts','public','killed','displayMin','displayMax' ]
     def __init__(self, *args, **kwargs):
         super(djangoforms.ModelForm, self).__init__(*args, **kwargs)
         self.fields['inGroup2'].choices = findAllGroupsIdNamePairs( kwargs['instance'].userID )
@@ -985,8 +985,9 @@ def editSensor(request,userName,sensorName):
                      'groupTotal':record.groupTotal,
                      'unitsWhenOn':record.unitsWhenOn,
                      'valueWhenOn':record.valueWhenOn,
-                     'threshold':record.threshold
-                     }
+                     'threshold':record.threshold,
+                     'maxUpdateTime':record.maxUpdateTime
+                      }
         form = EditSensorForm( initVals, instance=record, auto_id=False  )
 
     #logging.info( "debug for form=%s"%form )
@@ -1039,6 +1040,9 @@ def createSensor(request,userName,sensorName):
         if "threshold" in data:
             if data.get("threshold") != "None":
                 record.threshold = float( data.get("threshold") );
+        if "maxUpdateTime" in data:
+            if data.get("maxUpdateTime") != "None":
+                record.maxUpdateTime = int( data.get("maxUpdateTime") );
         if "unitsWhenOn" in data:
             if data.get("unitsWhenOn") != "None":
                 record.units = data.get("unitsWhenOn");

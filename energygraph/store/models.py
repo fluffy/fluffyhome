@@ -22,7 +22,7 @@ class Sensor(db.Model):
 
     public = db.BooleanProperty(indexed=False) # data is public 
     hidden = db.BooleanProperty(indexed=False) # don't show the sensor on main displays of data 
-    ignore = db.BooleanProperty(indexed=False) # don't include senssor in calculations  
+    ignore = db.BooleanProperty(indexed=False) # don't include sensor in calculations  
     groupTotal = db.BooleanProperty(indexed=False) # don't show the sesnsor on main displays of data 
     killed = db.BooleanProperty(indexed=False) # mark this true to effetively delete a sensor
 
@@ -87,6 +87,7 @@ def findSensorMetaByID(sensorID, callFrom=None):
             'valueWhenOn': sensor.valueWhenOn ,
             'unitsWhenOn': sensor.unitsWhenOn ,
             'threshold': sensor.threshold ,
+            'maxUpdateTime': sensor.maxUpdateTime,
             'label':  sensor.label ,
             'userID': sensor.userID,
             'sensorName': sensor.sensorName,

@@ -60,6 +60,12 @@
   {{ form.units }}
 </div>
 
+<div class="section-item" id="maxUpdateTime" >
+  {{ form.maxUpdateTime.errors }}
+  <label for="id_maxUpdateTime">{% trans "Max update time (s):" %}</label>
+  {{ form.maxUpdateTime }}
+</div>
+
 <div class="section-item" id="type" >
  {{ form.type.errors }}
  <label for="id_type">{% trans "Type:" %}</label>
