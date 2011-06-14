@@ -1559,6 +1559,150 @@ def storeNoAuth(request,userName,sensorName): #old - should depricate
     return HttpResponse() # return a 200 
 
 
+def postAlarmValues(request):
+    enableQuota = True 
+
+    ver = os.environ['SERVER_SOFTWARE']
+    devel = ver.startswith("Development")
+    if ( devel ): 
+        enableQuota = False # disable quotas for development environment
+
+    if request.method != 'POST':
+        return  HttpResponseNotFound( "<H1>Must use a POST to update values</H1>" )
+
+    data = request.raw_post_data
+
+    ip = request.META.get('REMOTE_ADDR') # works on google app engine 
+    ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
+    if ( ip2 != None ):
+        ip = ip2
+
+    now = long( time.time() )
+
+    minute = now - now % 60 # make window 1 minutes long 
+    cacheKey = "key0-ipTokenBucketMinute:%s/%s"%(ip,minute)
+    token = memcache.incr( cacheKey , initial_value=0 )
+
+    rateLimit = 25 # Max number of request per minute from each IP address
+    if enableQuota and token >= rateLimit:
+        if token == rateLimit:
+            # should we log this or not
+            logging.warning( "IP %s exceed per minute rate limit"%ip )
+        return HttpResponseForbidden( "<H1>User has exceed limit of %d requests per minute</H1>"%rateLimit )
+        
+    logging.debug("Got post of alarm values %s from %s count=%d"%(data,ip, token) )
+    addKnownIP( ip )
+    
+    try:
+        jData = json.loads( data )
+    except ValueError:
+        logging.debug( "JSON data had error in parse")
+        #return HttpResponse( content="<H1>JSON data had error in parse: %s </H1>"%e , mimetype=None,  status=400 )
+        return HttpResponseNotFound( "<H1>JSON data had error in parse</H1>" )
+    
+    try:
+        #TODO validate user input data here for security 
+        logging.debug("j=%s"%str(jData) )
+        logging.debug(" type is =%s"%str(type(jData)) )
+        
+        if ( type(jData) != dict ):
+            return HttpResponseNotFound( "<H1>JSON data was not an object</H1>" )
+
+        account = 0;
+        user = 0;
+        code = 0;
+        zone = 0;
+        eq = 0;
+        part = 0;
+        
+        if jData.has_key('a'):
+            account = long( jData['a'] )
+        if jData.has_key('u'):
+            user = long( jData['u'] )
+        if jData.has_key('c'):
+            code = long( jData['c'] )
+        if jData.has_key('z'):
+            zone = long( jData['z'] )
+        if jData.has_key('p'):
+            part = long( jData['p'] )
+        if jData.has_key('eq'):
+            eq = long( jData['eq'] )
+            
+        day = now - now % (24*3600) # make window 24 hours long  
+        cacheKey = "key0-alarmTokenBucketDay%s/%s"%(account,day)
+        token = memcache.incr( cacheKey , initial_value=0 )
+        win = now - now % (60) # make window 1 min long  
+        cacheKey = "key0-alarmTokenBucketWindow%s/%s"%(account,win)
+        token = memcache.incr( cacheKey , initial_value=0 )
+        
+        rateLimit = 10 # Max number of request per minute from each sensor
+        if enableQuota and token >= rateLimit:
+            if token == rateLimit:
+                # should we log this or not
+                logging.warning( "IP %s exceed per minute rate limit"%ip )
+                return HttpResponseForbidden( "<H1>User has exceed limit of %d updates per minute for a sensor</H1>"%rateLimit )
+                
+        logging.debug("Received alarm account=%d user=%d eq=%d code=%d zone=%d part=%d"
+                      %(account,user,eq,code,zone,part) )
+
+        #TODO evil hack to fix IT100 API problems
+        if ( part == 0 ):
+            if ( zone != 0 ):
+                part = 1
+                
+        name =  "alarm"+"-a"+str(account)
+        if ( part != 0 ):
+            name += "-p"+str(part)
+        if ( zone != 0 ):
+            name += "-z"+str(zone)
+
+        value = 0
+        if ( code > 0 ) and ( code < 300 ):
+            if eq == 3 :
+                value = 0
+            else:
+                value = 1
+        if ( code >= 300 ) and ( code < 400 ):
+            if eq == 3:
+                value = 0
+            else:
+                value = 0.75
+        if ( code >= 400 ) and ( code < 500 ):
+            if eq == 3:
+                value = user
+            else:
+                value = - user
+        if ( code >= 500 ):
+            if eq == 3:
+                value = 0
+            else:
+                value = 0.25
+
+        if code == 302:
+            name += "-battery"
+        if code == 301:
+            name += "-acPower"
+        if code == 321:
+            name += "-bell"
+        if code == 351:
+            name += "-phone"
+        if code == 602:
+            name += "-watchdog"
+
+        if sensorExistsByName( name ):
+            storeMeasurementByName( name,  value )
+            addKnownIP( ip, name )
+        else:
+            logging.debug("Sensor to enroll %s at IP %s "%(name,ip) ) 
+            info = findEnroll( name, ip )
+    
+    except apiproxy_errors.OverQuotaError, message:
+        logging.error( "Out of quota to store data in postSensorValues: %s"%message)
+        return HttpResponseNotFound( "<H1>Out of quota to store data in postSensorValues</H1>" )
+         
+    return HttpResponse() # return a 200 
+
+
 def postSensorValues(request):
     enableQuota = True 
 
@@ -1659,7 +1803,7 @@ def postSensorValues(request):
     
                 logging.debug("Received measurment %s time=%d value=%s sum=%s units=%s joules=%s updateCount=%d"
                               %(name,mTime,value,sum,units,joules,token) ) 
-                storeMeasurementByName( name, mTime, value, sum=sum, reset=False, joules=joules )
+                storeMeasurementByName( name, value, mTime=mTime, sum=sum, reset=False, joules=joules )
                 addKnownIP( ip , name )
             else:
                 logging.debug("Sensor to enroll %s at IP %s "%(name,ip) ) 

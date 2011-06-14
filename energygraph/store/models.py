@@ -1406,12 +1406,10 @@ def findRecentMeasurements( sensorID ):
     return p
 
 
-
-
-def storeMeasurementByName( sensorName, time, value, sum, reset=False ,joules=None ):
+def storeMeasurementByName( sensorName, value, mTime=0, sum=None, reset=False ,joules=None ):
     sensorID = getSensorIDByName( sensorName )
     assert sensorID > 0
-    storeMeasurement( sensorID, value, time, sum=sum, reset=reset, joules=joules )
+    storeMeasurement( sensorID, value, mTime=mTime, sum=sum, reset=reset, joules=joules )
 
 
 def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=None,  ):
