@@ -522,6 +522,38 @@ def findSensorID( userName, sensorName, create=False , createGroup=False ):
     return sensorID
 
 
+class AlarmData(db.Model):
+    time  = db.IntegerProperty() # time this messarement was made (seconds since unix epoch)
+    crit  = db.IntegerProperty() # 0=status, 1=info, 2=important, 3=alert 
+    alarmID = db.IntegerProperty(required=False)
+    eq = db.IntegerProperty(required=False,indexed=False)
+    code = db.IntegerProperty(required=False) # todo should be true , and next one too 
+    part = db.IntegerProperty(required=False)
+    zone = db.IntegerProperty(required=False)
+    user = db.IntegerProperty(required=False)
+    note = db.StringProperty(required=False,indexed=False)
+
+
+def addAlarmData( a, eq, c, p, crit, z=None, u=None, note=None ):
+    rec = AlarmData()
+
+    rec.time = long( time.time() )
+    rec.alarmID = a
+    rec.eq = eq
+    rec.code = c
+    rec.part = p
+    rec.crit = crit
+    rec.zone = z
+    rec.user = u
+    rec.note = note 
+
+    logging.debug("saving alarm data account=%d user=%d eq=%d code=%d zone=%d part=%d"
+                  %(rec.alarmID, rec.user, rec.eq, rec.code, rec.zone, rec.part) )
+
+    rec.put()
+    logging.debug("# DB put for addAlarmData" )
+
+
 class SystemData(db.Model):
     nextSensorID = db.IntegerProperty()
     nextUserID = db.IntegerProperty()

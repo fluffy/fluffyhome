@@ -30,8 +30,9 @@ from djangohttpdigest.decorators import digestProtect,digestLogin
 
 from store.models import *
 
-import oauth2 as oauth
-from oauthtwitter import OAuthApi
+# TODO - need to uncomment these and install on notebook comp 
+#import oauth2 as oauth
+#from oauthtwitter import OAuthApi
 
 
 def twitterCallback(request):
@@ -1444,6 +1445,15 @@ def updateValues(request,userName,sensorName,pTime):
     return HttpResponse('<h1>Queued tasks to updated Values</h1>'  )  
 
 
+def updateNotify(request,userName,sensorName):
+    logging.info("TASK: Running task updatreNotify %s %s"%(userName,sensorName,) )
+
+    # TODO 
+
+    logging.info("TASK: completed task updateNotify %s %s"%(userName,sensorName,) )
+    return HttpResponse('<h1>Completed tasks to updated Value</h1>'  )  
+
+
 def updateAllValues(request):
     users = findAllUserNames()
     for userName in users:
@@ -1612,13 +1622,14 @@ def postAlarmValues(request):
         if ( type(jData) != dict ):
             return HttpResponseNotFound( "<H1>JSON data was not an object</H1>" )
 
-        account = 0;
-        user = 0;
-        code = 0;
-        zone = 0;
-        eq = 0;
-        part = 0;
-        
+        account = 0
+        user = 0
+        code = 0
+        zone = 0
+        eq = 0
+        part = 0
+        note = None
+
         if jData.has_key('a'):
             account = long( jData['a'] )
         if jData.has_key('u'):
@@ -1631,6 +1642,8 @@ def postAlarmValues(request):
             part = long( jData['p'] )
         if jData.has_key('eq'):
             eq = long( jData['eq'] )
+        if jData.has_key('n'):
+            note = str( jData['n'] )
             
         day = now - now % (24*3600) # make window 24 hours long  
         cacheKey = "key0-alarmTokenBucketDay%s/%s"%(account,day)
@@ -1653,34 +1666,41 @@ def postAlarmValues(request):
         if ( part == 0 ):
             if ( zone != 0 ):
                 part = 1
-                
+             
         name =  "alarm"+"-a"+str(account)
         if ( part != 0 ):
             name += "-p"+str(part)
         if ( zone != 0 ):
             name += "-z"+str(zone)
 
+        crit = 5 
         value = 0
         if ( code > 0 ) and ( code < 300 ):
+            crit = 4
             if eq == 3 :
                 value = 0
             else:
                 value = 1
         if ( code >= 300 ) and ( code < 400 ):
+            crit =2
             if eq == 3:
                 value = 0
             else:
                 value = 0.75
         if ( code >= 400 ) and ( code < 500 ):
+            crit = 3
             if eq == 3:
                 value = user
             else:
                 value = - user
         if ( code >= 500 ):
+            crit = 5
             if eq == 3:
                 value = 0
             else:
                 value = 0.25
+
+        addAlarmData( crit = crit, a=account, eq=eq, c=code, p=part, z=zone, u=user, note=note )
 
         if code == 302:
             name += "-battery"
