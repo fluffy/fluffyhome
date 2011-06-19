@@ -1446,14 +1446,52 @@ def updateValues(request,userName,sensorName,pTime):
 
 
 def updateNotify(request,userName,sensorName):
-    logging.info("TASK: Running task updatreNotify %s %s"%(userName,sensorName,) )
+    logging.info("TASK: Running task updateNotify %s %s"%(userName,sensorName,) )
 
-    # TODO 
+    # TODO
+    if userName == "*" :
+        users = findAllUserNames()
+    else:
+        users = [ userName ]
+    for userName in users:
+        if sensorName == "*":
+            sensors = findAllSensorsByUserID( findUserIDByName( userName ) )
+        else:
+            sensors = [ findSensor( getSensorIDByName( sensorName ) ) ]
+        for sensor in sensors: # do ones that a NOT a group
+            if sensor.killed != True:
+                if sensor.category != "Group":
+                    checkNotify(userName, sensor.sensorName )
 
-    logging.info("TASK: completed task updateNotify %s %s"%(userName,sensorName,) )
+    logging.info("TASK: completed task updateNotify %s %s"%(userName,sensorName) )
     return HttpResponse('<h1>Completed tasks to updated Value</h1>'  )  
 
 
+def checkNotify(userName, sensorName):
+    logging.debug( "CheckNotify %s %s "%(  userName, sensorName  ) )
+
+    assert userName != "*"
+    assert sensorName != "*"
+    
+    sensorID = getSensorIDByName( sensorName )
+    assert sensorID > 0
+    
+    meta = findSensorMetaByID( sensorID, callFrom="checkNotify" )
+
+    if ( meta['maxUpdateTime'] != None ):
+        now = long(  time.time() )
+        lastTime = getSensorLastTime( sensorID )
+        if ( now-lastTime >=  meta['maxUpdateTime'] ):
+            # this sensor is frozen ...
+            lastValue = getSensorValue( sensorID )
+            if ( lastValue == lastValue ): # this checks if value is not NaN in python 2.5. Better to use isnan in python 2.6 and later 
+                # sensor just went to frozen
+                mTime = lastTime+1
+                storeMeasurement( sensorID, float('nan'), mTime )
+                logging.debug( "Sensor just went frozen %s %s "%(  userName, meta['sensorName']  ) )
+                # TODO - send notify
+
+                
 def updateAllValues(request):
     users = findAllUserNames()
     for userName in users:

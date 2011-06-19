@@ -1445,7 +1445,7 @@ def storeMeasurementByName( sensorName, value, mTime=0, sum=None, reset=False ,j
     storeMeasurement( sensorID, value, mTime=mTime, sum=sum, reset=reset, joules=joules )
 
 
-def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=None,  ):
+def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=None  ):
     #userID = findUserID( userName )
     #if userName == "fluffy": #  TODO - this is a hack to auto create fluffy on any store 
     #    userID = findUserID( userName, True )
@@ -1458,7 +1458,7 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=N
     
     #sensorID = findSensorID(userName,sensorName,True)
     if value is None:
-        v=0.0
+        v= float( 'nan' )
     else:
         v = float( value ) # TODO should catch excpetions
     
@@ -1534,7 +1534,7 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=N
     m.joules = newJoules
 
     if reset:
-        m.value = 0.0
+        m.value = float('nan')
         m.integral = 0.0
         m.joules = 0.0
 
