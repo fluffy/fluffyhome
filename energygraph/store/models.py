@@ -607,7 +607,10 @@ def getNextUserID():
 
 class User(db.Model):
     userName = db.StringProperty()
-    email = db.StringProperty(indexed=False)
+    email  = db.StringProperty(indexed=False)
+    email2 = db.StringProperty(indexed=False)
+    email3 = db.StringProperty(indexed=False)
+    sms1   = db.StringProperty(indexed=False)
     twitter = db.StringProperty(indexed=False)
     purlKey = db.StringProperty(indexed=False)
     passwd = db.StringProperty(indexed=False)
@@ -682,6 +685,9 @@ def createUser( userName , password ):
     user.userID = id
 
     user.email = None
+    user.email2 = None
+    user.email3 = None
+    user.sms1 = None
     user.twitter = None
     user.purlKey = None
 
@@ -711,8 +717,8 @@ def getUserMetaByUserID( userID ):
     epoch = getUserSettingEpochByUserID( userID )
     assert epoch > 0 
 
-    logging.debug( 'key0-getUserMetaByUserID:%d/%d'%(epoch,userID) ) 
-    id = memcache.get( 'key0-getUserMetaByUserID:%d/%d'%(epoch,userID) ) 
+    logging.debug( 'key1-getUserMetaByUserID:%d/%d'%(epoch,userID) ) 
+    id = memcache.get( 'key1-getUserMetaByUserID:%d/%d'%(epoch,userID) ) 
     if id != None:
         return id
 
@@ -725,9 +731,14 @@ def getUserMetaByUserID( userID ):
         "elecCost":user.elecCost,
         "waterCost":user.waterCost,
         "gasCO2":user.gasCO2,
-        "elecCO2":user.elecCO2 }
+        "elecCO2":user.elecCO2,
+        "email1":user.email,
+        "email2":user.email2,
+        "email3":user.email3,
+        "sms1":user.sms1
+        }
 
-    memcache.set( 'key0-getUserMetaByUserID:%d/%d'%(epoch,userID), ret , 24*3600 )
+    memcache.set( 'key1-getUserMetaByUserID:%d/%d'%(epoch,userID), ret , 24*3600 )
     return ret
 
 

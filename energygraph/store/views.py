@@ -26,6 +26,8 @@ from google.appengine.api.labs import taskqueue
 from google.appengine.ext import db
 from google.appengine.runtime import apiproxy_errors
 
+from google.appengine.api import mail
+
 from djangohttpdigest.decorators import digestProtect,digestLogin
 
 from store.models import *
@@ -849,6 +851,9 @@ def dumpUser(request,userName):
     user = findUserByName( userName ) 
     response.write( "<user userID='%d' userName='%s' \n"%( user.userID, user.userName, ) )
     response.write( "   email='%s' "%( user.email ) )
+    response.write( "   email2='%s' "%( user.email2 ) )
+    response.write( "   email3='%s' "%( user.email3 ) )
+    response.write( "   sms1='%s' "%( user.sms1 ) )
     response.write( "   timeZoneOffset='%f' "%( user.timeZoneOffset ) )
     response.write( "   midnightIs4Am='%d' "%( user.midnightIs4Am ) )
     response.write( "   gasCost='%f' "%( user.gasCost ) )
@@ -1489,7 +1494,29 @@ def checkNotify(userName, sensorName):
                 mTime = lastTime+1
                 storeMeasurement( sensorID, float('nan'), mTime )
                 logging.debug( "Sensor just went frozen %s %s "%(  userName, meta['sensorName']  ) )
-                # TODO - send notify
+                sendNotify(userName,  meta['sensorName'],
+                           "Sensor %s is frozen"%( meta['label'] ), 
+                           "Sensor %s stoped reporting %s minutes ago"%( meta['label'], (now-lastTime)/60.0 )
+                           )
+
+
+def sendNotify(userName, sensorName, summary, note ):
+    userID =  findUserIdByName( userName )
+    assert userID > 0 
+
+    #  get all costs from DB
+    userMeta = getUserMetaByUserID( userID )
+
+    # TODO - send notifies on ohter emails and sms 
+    if ( userMeta['email1'] ):
+        # send email
+        message = mail.EmailMessage(sender = "cullenfluffyjennings@gmail.com",
+                                    subject = summary,
+                                    to = userMeta['email1'],
+                                    body = note)
+        message.send()
+        logging.debug( "Sent email To:%s Subject:%s Body:%s"%(  userMeta['email1'], summary, note ) )
+
 
                 
 def updateAllValues(request):
