@@ -21,12 +21,12 @@
 import logging
 import os
 
-from google.appengine.dist import use_library
-use_library('django', '1.1')
-
 # Must set this env var before importing any part of Django
 # 'project' is the name of the project created with django-admin.py
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+
+from google.appengine.dist import use_library
+use_library('django', '1.1')
 
 import sys
 sys.path.insert(0, './contrib' )

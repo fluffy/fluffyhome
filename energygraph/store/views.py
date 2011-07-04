@@ -267,14 +267,14 @@ def showStats( request ):
 
     sensors = findAllNonGroupSensors( )
     for s in sensors:
-        cacheKey = "key0-sensorTokenBucketDay%s/%s"%( s['name'], day )
+        cacheKey = "key2-sensorTokenBucketDay%s/%s"%( s['name'], day )
         updates = memcache.get( cacheKey )
         if updates != None:
             s['updatesDay'] = int(updates)
         else:
             s['updatesDay'] = int(0)
 
-        cacheKey = "key0-sensorTokenBucketWindow%s/%s"%(s['name'],minute1)
+        cacheKey = "key2-sensorTokenBucketWindow%s/%s"%(s['name'],minute1)
         updates = memcache.get( cacheKey )
         if updates != None:
             s['updatesMin'] = int(updates)
@@ -291,13 +291,13 @@ def showStats( request ):
     ipAddrs = findAllKnownIP()
     ips = []
     for ip in ipAddrs:
-        cacheKey = "key0-ipTokenBucketMinute:%s/%s"%(ip,minute0)
+        cacheKey = "key2-ipTokenBucketMinute:%s/%s"%(ip,minute0)
         updates0 = memcache.get( cacheKey )
         if updates0 == None:
             updates0 = 0
         updates0 = int( updates0 )
 
-        cacheKey = "key0-ipTokenBucketMinute:%s/%s"%(ip,minute1)
+        cacheKey = "key2-ipTokenBucketMinute:%s/%s"%(ip,minute1)
         updates1 = memcache.get( cacheKey )
         if updates1 == None:
             updates1 = 0
@@ -523,7 +523,7 @@ def usageJson(request,userName,sensorName,type,period):
     head += "status:'ok', \n"
     head += "reqId:'%s', \n"%reqId
 
-    cacheKey = "key0-usageJson:%d/%s/%s/%s/%s/%d"%(epoch,userName,sensorName,type,period,now)
+    cacheKey = "key2-usageJson:%d/%s/%s/%s/%s/%d"%(epoch,userName,sensorName,type,period,now)
     id = memcache.get( cacheKey )
     #id = None # TODO - remove
     if id != None:
@@ -1659,10 +1659,10 @@ def postAlarmValues(request):
     now = long( time.time() )
 
     minute = now - now % 60 # make window 1 minutes long 
-    cacheKey = "key0-ipTokenBucketMinute:%s/%s"%(ip,minute)
+    cacheKey = "key2-ipTokenBucketMinute:%s/%s"%(ip,minute)
     token = memcache.incr( cacheKey , initial_value=0 )
 
-    rateLimit = 25 # Max number of request per minute from each IP address
+    rateLimit = 100 # Max number of request per minute from each IP address
     if enableQuota and token >= rateLimit:
         if token == rateLimit:
             # should we log this or not
@@ -1711,10 +1711,10 @@ def postAlarmValues(request):
             note = str( jData['n'] )
             
         day = now - now % (24*3600) # make window 24 hours long  
-        cacheKey = "key0-alarmTokenBucketDay%s/%s"%(account,day)
+        cacheKey = "key2-alarmTokenBucketDay%s/%s"%(account,day)
         token = memcache.incr( cacheKey , initial_value=0 )
         win = now - now % (60) # make window 1 min long  
-        cacheKey = "key0-alarmTokenBucketWindow%s/%s"%(account,win)
+        cacheKey = "key2-alarmTokenBucketWindow%s/%s"%(account,win)
         token = memcache.incr( cacheKey , initial_value=0 )
         
         rateLimit = 10 # Max number of request per minute from each sensor
@@ -1813,7 +1813,7 @@ def postSensorValues(request):
     now = long( time.time() )
 
     minute = now - now % 60 # make window 1 minutes long 
-    cacheKey = "key0-ipTokenBucketMinute:%s/%s"%(ip,minute)
+    cacheKey = "key2-ipTokenBucketMinute:%s/%s"%(ip,minute)
     token = memcache.incr( cacheKey , initial_value=0 )
 
     rateLimit = 25 # Max number of request per minute from each IP address
@@ -1877,10 +1877,10 @@ def postSensorValues(request):
 
             if sensorExistsByName( name ):
                 day = now - now % (24*3600) # make window 24 hours long  
-                cacheKey = "key0-sensorTokenBucketDay%s/%s"%(name,day)
+                cacheKey = "key2-sensorTokenBucketDay%s/%s"%(name,day)
                 token = memcache.incr( cacheKey , initial_value=0 )
                 win = now - now % (60) # make window 1 min long  
-                cacheKey = "key0-sensorTokenBucketWindow%s/%s"%(name,win)
+                cacheKey = "key2-sensorTokenBucketWindow%s/%s"%(name,win)
                 token = memcache.incr( cacheKey , initial_value=0 )
 
                 rateLimit = 10 # Max number of request per minute from each sensor
