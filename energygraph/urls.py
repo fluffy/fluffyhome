@@ -43,6 +43,8 @@ urlpatterns = patterns('',
     (r'^tasks/notify/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/$', updateNotify ), 
     (r'^tasks/refresh/(?P<userName>[a-zA-Z]\w{0,64})/$', loadAllSensors ), 
 
+    (r'^tasks/pollWindAB/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB ), 
+
     (r'^admin/updateAll/$', updateAllValues ), 
     (r'^admin/stats/$', showStats ), 
     (r'^admin/updateAllNow/$', updateAllValuesNow ), 

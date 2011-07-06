@@ -5,6 +5,7 @@ import sys
 import os
 import copy
 import time
+import re
 
 from datetime import timedelta
 from datetime import datetime
@@ -27,6 +28,8 @@ from google.appengine.ext import db
 from google.appengine.runtime import apiproxy_errors
 
 from google.appengine.api import mail
+
+from google.appengine.api import urlfetch
 
 from djangohttpdigest.decorators import digestProtect,digestLogin
 
@@ -1991,4 +1994,53 @@ def login(request,user=None):
 @digestLogin(realm='fluffyhome.com')
 def enrollSensor2(request,sensorName,secret,user=None):
     return HttpResponseRedirect( "/user/%s/enroll/add/%s/"%(user,sensorName) )
+
+
+
+#@digestLogin(realm='fluffyhome.com')
+def pollWindAB(request,loc,user=None):
+    ip = request.META.get('REMOTE_ADDR') # works on google app engine 
+    ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
+    if ( ip2 != None ):
+        ip = ip2
+   
+    url = "http://www.ama.ab.ca/road_reports/cameras/%s"%loc
+    result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
+
+    html = "" 
+    if result.status_code == 200:
+        m = re.search('Air Temperature:\D*(?P<data>[\d.]*)',result.content)
+        if m == None:
+            logging.warning("Problem parsing out air temp from %s"%url )
+        else:
+            temp = m.group('data')
+            html += "<p> temp = %s </p>"%temp
+
+            name = 'alberta-%s-temp'%loc
+            if sensorExistsByName( name ):
+                storeMeasurementByName( name, temp )
+            else:
+                findEnroll( name, ip )
+
+        m = re.search('Wind Speed:\D*(?P<data>[\d.]*)',result.content)
+        if m == None:
+            logging.warning("Problem parsing out wind speed from %s"%url )
+        else:
+            speed = m.group('data')
+            html += "<p> speed = %s </p>"%speed
+
+            name = 'alberta-%s-speed'%loc
+            if sensorExistsByName( name ):
+                storeMeasurementByName( name, speed )
+            else:
+                findEnroll( name, ip )
+
+    else:
+        html += "<p> Problem in fetch </p>"
+        logging.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
+        
+    response = HttpResponse()
+    response.write( html );
+    return response 
+
 

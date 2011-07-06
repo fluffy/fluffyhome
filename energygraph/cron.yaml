@@ -6,6 +6,21 @@ cron:
 - description: update the notifications 
   url: /tasks/notify/*/*/
   schedule: every 5 minutes synchronized
+- description: update  wind red dear
+  url: /tasks/pollWindAB/red-deer/
+  schedule: every 10 minutes 
+- description: update  wind monarch
+  url: /tasks/pollWindAB/monarch/
+  schedule: every 10 minutes 
+- description: update  wind chestermere
+  url: /tasks/pollWindAB/chestermere/
+  schedule: every 10 minutes 
+- description: update  wind gleichen
+  url: /tasks/pollWindAB/gleichen/
+  schedule: every 10 minutes 
+- description: update  wind canmore
+  url: /tasks/pollWindAB/canmore/
+  schedule: every 10 minutes 
 - description: update the hourly graphs 
   url: /user/fluffy/history/All/cost/0day/json/
   schedule: every 60 minutes synchronized
