@@ -11,7 +11,7 @@
 
     function drawVisualization() {
       var query = new google.visualization.Query(
-                  'http://{{host}}/sensor/{{user}}/{{sensorName}}/history/today/json/' );
+                  'http://{{host}}/sensor/{{graphUser}}/{{sensorName}}/history/today/json/' );
      
       // Send the query with a callback function.
       query.send(handleQueryResponse);

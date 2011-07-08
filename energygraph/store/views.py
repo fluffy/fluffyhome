@@ -6,6 +6,7 @@ import os
 import copy
 import time
 import re
+import string
 
 from datetime import timedelta
 from datetime import datetime
@@ -830,14 +831,24 @@ def todayJson(request,userName,sensorName):
     return response 
 
 
+def graphWindToday(request,sensorName):
+    userName='wind'
+    return graphTodayFunc(request,userName,sensorName,realUserName=None)
+
+
 @digestProtect(realm='fluffyhome.com') 
 def graphToday(request,userName,sensorName):
+    return graphTodayFunc(request,userName,sensorName,realUserName=userName)
+
+  
+def graphTodayFunc(request,userName,sensorName,realUserName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == 0 :
         return HttpResponseNotFound('<h1>userName=%s sensor name=%s not found</h1>'%(userName,sensorName) )
 
     data = { 'sensorName': sensorName ,
-             'user':userName,
+             'user': realUserName,
+             'graphUser':userName,
              'label': getSensorLabelByID(sensorID),
              'host' : request.META["HTTP_HOST"] }
     return render_to_response('graphToday.html', data )
@@ -1086,10 +1097,130 @@ def loadAllSensors(request,userName):
 
     return HttpResponse('<h1>Updated sensor cache for user %s</h1>'%(userName) )  
 
+
+def showAllWindSensors(request):
+    # check user exists
+    userName = 'wind'
+    if findUserIdByName(userName) == 0 :
+        return HttpResponseNotFound('<h1>Error: No user with name %s</h1>'%(userName) )  
+
+    sensorDataList = []
+
+    allGroupSensorID = findSensorID(userName,"All",create=True)
+    assert allGroupSensorID > 0, "There is no group named 'All' for user %s"%userName
+
+    sensorsIDs = findAllSensorsIDsByUserID( findUserIdByName( userName ) )
     
+    # find all the groups in sorted order 
+    groupList = []
+    for s in sensorsIDs:
+        assert s > 0
+        meta = findSensorMetaByID( s ,"showAllWindSensors" );
+
+        if meta['category'] == "Group":
+                groupList.append( (meta['label'],s) )
+    groupList = sorted( groupList )
+
+    # if any sensor is not in any group, put it in the All group
+    for s in sensorsIDs:
+        meta = findSensorMetaByID( s ,"showAllWindSensors 1" );
+        if meta['sensorName'] == "All": # don't put the All group in itself 
+            meta['inGroup'] = 0
+            continue
+        found = False
+        for group in groupList:
+            if group[1] == meta['inGroup']:
+                found = True
+                break
+        if not found:
+            # this sensor is not in a valid group, move to all 
+            meta['inGroup'] = allGroupSensorID
+            logging.warning( "Moved sensor %s to All group"%meta['sensorName'] )
+
+    # for each group, output it's tab then all the sensors/groups in it in sorted order 
+    outList = []
+    for group in groupList:
+        grpID = group[1]
+
+        # add this group as a tab 
+        outList.append( (grpID,1) )
+
+        # find and sort the sensors in this group 
+        sList = []
+        for s in sensorsIDs:
+            meta = findSensorMetaByID( s ,"showAllWindSensors 2" )
+            if meta['inGroup'] == grpID:
+                if meta['units'] == 'km/h':
+                    sList.append( (meta['label'],s) )
+
+        slist = sorted( sList )
+        for pair in sList:
+            outList.append( (pair[1],0) )
+
+    sensorData = {}
+    sensorData['user'] = userName
+    sensorData['label'] = 'Wind'
+    sensorData['category'] = "Tab"
+    sensorDataList.append( sensorData )
+    
+    # output all the stuff in the outlist paying attention to tags 
+    for sensorPair in outList:
+        sensorID = sensorPair[0]
+        meta = findSensorMetaByID( sensorID ,"showAllWindSensors 3" )
+
+        if meta['killed']:
+            continue
+
+        sensorData = {}
+        sensorData['user'] = userName
+        sensorData['name'] = meta['sensorName']
+        sensorData['label'] = meta['label']
+        sensorData['type'] = meta['type']
+        sensorData['units'] = meta['units']
+        sensorData['category'] = meta['category']
+       
+        if sensorPair[1] == 1:
+            sensorData['category'] = "Tab"
+        else:
+            if sensorData['category'] != "Group":
+                v = None
+                v = getSensorValue( sensorID ) 
+                if v is not None:
+                    sensorData['value'] = int( round( v , 0 ) )
+                else:
+                    sensorData['value'] = "N/A"
+                    sensorData['units'] = ""
+
+                # get the time sensor
+                name = string.replace( meta['sensorName'], "-speed" , "-time" )
+                sensorID = findSensorID( 'wind' , name );
+                v1 = None
+                v1 = getSensorValue( sensorID ) 
+                if v1 is not None:
+                    sensorData['timeMin'] = int( round( v1 , 0 ) )%100
+                    sensorData['timeHour'] = int( round( v1 , 0 ) )/100
+
+                # get the temp sensor
+                name2 = string.replace( meta['sensorName'], "-speed" , "-temp" )
+                sensorID2 = findSensorID( 'wind' , name2 );
+                v2 = None
+                v2 = getSensorValue( sensorID2 ) 
+                if v2 is not None:
+                    sensorData['temp'] = int( round( v2 , 0 ) )
+
+                sensorDataList.append( sensorData )
+
+    template = "feedsWindCompact.html"
+    return render_to_response( template , { 'user':None,
+                                            'pipeList': sensorDataList ,
+                                            'host':request.META["HTTP_HOST"] }) 
 
 @digestProtect(realm='fluffyhome.com') 
 def showAllSensors(request,userName):
+    return showAllSensorsFunc(request,userName=userName)
+
+
+def showAllSensorsFunc(request,userName):
     # check user exists 
     if findUserIdByName(userName) == 0 :
         return HttpResponseNotFound('<h1>Error: No user with name %s</h1>'%(userName) )  
@@ -1998,7 +2129,66 @@ def enrollSensor2(request,sensorName,secret,user=None):
 
 
 #@digestLogin(realm='fluffyhome.com')
-def pollWindAB(request,loc,user=None):
+def pollWindAB1(request,loc,user=None):
+    ip = request.META.get('REMOTE_ADDR') # works on google app engine 
+    ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
+    if ( ip2 != None ):
+        ip = ip2
+   
+    url = "http://www.ama.ab.ca/road_report/camera/%s.htm"%loc
+    result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
+
+    html = "" 
+    if result.status_code == 200:
+        m = re.search('Air Temperature:\D*(?P<data>[\d.]*)',result.content)
+        if m == None:
+            logging.warning("Problem parsing out air temp from %s"%url )
+        else:
+            temp = m.group('data')
+            html += "<p> temp = %s </p>"%temp
+
+            name = 'alberta-%s-temp'%loc
+            if sensorExistsByName( name ):
+                storeMeasurementByName( name, temp )
+            else:
+                findEnroll( name, ip )
+
+        m = re.search('Wind Speed:\D*(?P<data>[\d.]*)',result.content)
+        if m == None:
+            logging.warning("Problem parsing out wind speed from %s"%url )
+        else:
+            speed = m.group('data')
+            html += "<p> speed = %s </p>"%speed
+
+            name = 'alberta-%s-speed'%loc
+            if sensorExistsByName( name ):
+                storeMeasurementByName( name, speed )
+            else:
+                findEnroll( name, ip )
+
+        m = re.search('at (?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
+        if m == None:
+            logging.warning("Problem parsing out update from %s"%url )
+        else:
+            time = int( m.group('hour') )%12  * 100 +  int( m.group('min') )
+            html += "<p> time = %s </p>"%time
+
+            name = 'alberta-%s-time'%loc
+            if sensorExistsByName( name ):
+                storeMeasurementByName( name, time )
+            else:
+                findEnroll( name, ip )
+
+    else:
+        html += "<p> Problem in fetch </p>"
+        logging.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
+        
+    response = HttpResponse()
+    response.write( html );
+    return response 
+
+
+def pollWindAB2(request,loc,user=None):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
     if ( ip2 != None ):
@@ -2035,6 +2225,19 @@ def pollWindAB(request,loc,user=None):
             else:
                 findEnroll( name, ip )
 
+        m = re.search('at (?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
+        if m == None:
+            logging.warning("Problem parsing out update from %s"%url )
+        else:
+            time = int( m.group('hour') )%12  * 100 +  int( m.group('min') )
+            html += "<p> speed = %s </p>"%time
+
+            name = 'alberta-%s-time'%loc
+            if sensorExistsByName( name ):
+                storeMeasurementByName( name, time )
+            else:
+                findEnroll( name, ip )
+
     else:
         html += "<p> Problem in fetch </p>"
         logging.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
@@ -2044,3 +2247,121 @@ def pollWindAB(request,loc,user=None):
     return response 
 
 
+def pollWindAB3(request,loc,user=None):
+    ip = request.META.get('REMOTE_ADDR') # works on google app engine 
+    ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
+    if ( ip2 != None ):
+        ip = ip2
+   
+    url = "http://www.weatherlink.com/user/%s/index.php?view=summary&headers=0"%loc
+    result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
+
+    html = "" 
+    if result.status_code == 200:
+        m = re.search('Outside Temp</td>\s*.*>(?P<data>[\d.]{3,7}) C',result.content)
+        if m == None:
+            logging.warning("Problem parsing out air temp from %s"%url )
+        else:
+            temp = m.group('data')
+            html += "<p> temp = %s </p>"%temp
+
+            name = 'alberta-%s-temp'%loc
+            if sensorExistsByName( name ):
+                storeMeasurementByName( name, temp )
+            else:
+                findEnroll( name, ip )
+
+        m = re.search('Wind Speed</td>\s*.*>(?P<data>[\d.]{1,3}) km/h',result.content)
+        if m == None:
+            logging.warning("Problem parsing out wind speed from %s"%url )
+        else:
+            speed = m.group('data')
+            html += "<p> speed = %s </p>"%speed
+
+            name = 'alberta-%s-speed'%loc
+            if sensorExistsByName( name ):
+                storeMeasurementByName( name, speed )
+            else:
+                findEnroll( name, ip )
+
+
+        m = re.search('as of (?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
+        if m == None:
+            logging.warning("Problem parsing out update from %s"%url )
+        else:
+            time = int( m.group('hour') )%12  * 100 +  int( m.group('min') )
+            html += "<p> time = %s </p>"%time
+
+            name = 'alberta-%s-time'%loc
+            if sensorExistsByName( name ):
+                storeMeasurementByName( name, time )
+            else:
+                findEnroll( name, ip )
+
+    else:
+        html += "<p> Problem in fetch </p>"
+        logging.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
+        
+    response = HttpResponse()
+    response.write( html );
+    return response 
+
+
+def pollWindAB4(request,loc,user=None):
+    ip = request.META.get('REMOTE_ADDR') # works on google app engine 
+    ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
+    if ( ip2 != None ):
+        ip = ip2
+   
+    url = "http://text.www.weatheroffice.gc.ca/forecast/city_e.html?%s&unit=m"%loc
+    result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
+
+    html = "" 
+    if result.status_code == 200:
+        m = re.search('Temperature:</dt><dd>(?P<data>[\d.]{1,5})&deg;C',result.content)
+        if m == None:
+            logging.warning("Problem parsing out air temp from %s"%url )
+        else:
+            temp = m.group('data')
+            html += "<p> temp = %s </p>"%temp
+
+            name = 'alberta-%s-temp'%loc
+            if sensorExistsByName( name ):
+                storeMeasurementByName( name, temp )
+            else:
+                findEnroll( name, ip )
+
+        m = re.search('Wind Speed:</dt><dd>[NSWE]* (?P<data>[\d.]{1,5}) km/h',result.content)
+        if m == None:
+            logging.warning("Problem parsing out wind speed from %s"%url )
+        else:
+            speed = m.group('data')
+            html += "<p> speed = %s </p>"%speed
+
+            name = 'alberta-%s-speed'%loc
+            if sensorExistsByName( name ):
+                storeMeasurementByName( name, speed )
+            else:
+                findEnroll( name, ip )
+
+
+        m = re.search('Observed at:[a-zA-Z'+"'"+' ]*(?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
+        if m == None:
+            logging.warning("Problem parsing out update from %s"%url )
+        else:
+            time = int( m.group('hour') )%12  * 100 +  int( m.group('min') )
+            html += "<p> time = %s </p>"%time
+
+            name = 'alberta-%s-time'%loc
+            if sensorExistsByName( name ):
+                storeMeasurementByName( name, time )
+            else:
+                findEnroll( name, ip )
+
+    else:
+        html += "<p> Problem in fetch </p>"
+        logging.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
+        
+    response = HttpResponse()
+    response.write( html );
+    return response 

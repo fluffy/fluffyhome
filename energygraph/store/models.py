@@ -29,7 +29,7 @@ class Sensor(db.Model):
     category = db.StringProperty(indexed=True,required=False,choices=set(["Group", "Sensor"])) # dep , "Computed"
     type = db.StringProperty(indexed=False,required=False,choices=set([ "None","Electricity","Gas","Water"   ] )) # rename resource
                                                     #   , "Elecricity","Temp","Switch","Humidity", "Any" ])) #depricate lower ones
-    units = db.StringProperty(indexed=False,choices=set(["None","V","W","C","F","lps","A","%","RH%","Pa"])) #,'k' 'Ws' #TODO fix, degC and degF
+    units = db.StringProperty(indexed=False,choices=set(["None","V","W","C","F","lps","A","%","RH%","Pa","km/h"])) #,'k' 'Ws' #TODO fix, degC and degF
     unitsWhenOn = db.StringProperty(indexed=False,choices=set(["W","lps"])) 
 
     displayMin = db.FloatProperty(indexed=False) 

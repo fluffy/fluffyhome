@@ -2,6 +2,7 @@
 
 
 from django.conf.urls.defaults import *
+from django.views.generic.simple import redirect_to
 
 #from pachube.views import *
 from store.views import *
@@ -13,6 +14,10 @@ urlpatterns = patterns('',
    # (r'^pachube/(?P<feed>\d{1,8})/(?P<stream>\d{1,3})/chart/$', view4 ), 
 
     (r'^twitterCallback/$', twitterCallback ), 
+
+    (r'^wind/$', redirect_to, { 'url':'/wind/ab-south/'} ), 
+    (r'^wind/ab-south/$', showAllWindSensors ), 
+    (r'^wind/sensor/(?P<sensorName>[\w][\-\w]{0,64})/history/today/$', graphWindToday ), 
 
     (r'^user/(?P<userName>[a-zA-Z]\w{0,64})/sensors/$', showAllSensors ), 
     (r'^user/(?P<userName>[a-zA-Z]\w{0,64})/graphs/$', showGraphs ), 
@@ -43,7 +48,10 @@ urlpatterns = patterns('',
     (r'^tasks/notify/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/$', updateNotify ), 
     (r'^tasks/refresh/(?P<userName>[a-zA-Z]\w{0,64})/$', loadAllSensors ), 
 
-    (r'^tasks/pollWindAB/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB ), 
+    (r'^tasks/pollWindAB1/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB1 ), 
+    (r'^tasks/pollWindAB2/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB2 ), 
+    (r'^tasks/pollWindAB3/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB3 ), 
+    (r'^tasks/pollWindAB4/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB4 ), 
 
     (r'^admin/updateAll/$', updateAllValues ), 
     (r'^admin/stats/$', showStats ), 
