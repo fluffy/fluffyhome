@@ -16,6 +16,11 @@ cron:
   url: /tasks/refresh/fluffy/
   schedule: every 30 minutes 
 
+- description: keep cache fresh  
+  url: /wind/ab-south/
+  schedule: every 30 minutes 
+
+
 - description: update  wind red deer
   url: /tasks/pollWindAB2/red-deer/
   schedule: every 10 minutes 

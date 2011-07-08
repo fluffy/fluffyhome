@@ -833,26 +833,30 @@ def todayJson(request,userName,sensorName):
 
 def graphWindToday(request,sensorName):
     userName='wind'
-    return graphTodayFunc(request,userName,sensorName,realUserName=None)
-
-
-@digestProtect(realm='fluffyhome.com') 
-def graphToday(request,userName,sensorName):
-    return graphTodayFunc(request,userName,sensorName,realUserName=userName)
-
-  
-def graphTodayFunc(request,userName,sensorName,realUserName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == 0 :
         return HttpResponseNotFound('<h1>userName=%s sensor name=%s not found</h1>'%(userName,sensorName) )
 
     data = { 'sensorName': sensorName ,
-             'user': realUserName,
+             'user': None,
+             'graphUser':userName,
+             'label': getSensorLabelByID(sensorID),
+             'host' : request.META["HTTP_HOST"] }
+    return render_to_response('graphTodaySmall.html', data )
+
+
+@digestProtect(realm='fluffyhome.com') 
+def graphToday(request,userName,sensorName):
+    sensorID = findSensorID( userName, sensorName )
+    if sensorID == 0 :
+        return HttpResponseNotFound('<h1>userName=%s sensor name=%s not found</h1>'%(userName,sensorName) )
+
+    data = { 'sensorName': sensorName ,
+             'user': userName,
              'graphUser':userName,
              'label': getSensorLabelByID(sensorID),
              'host' : request.META["HTTP_HOST"] }
     return render_to_response('graphToday.html', data )
-
 
 
 @digestProtect(realm='fluffyhome.com') 
@@ -1197,8 +1201,8 @@ def showAllWindSensors(request):
                 v1 = None
                 v1 = getSensorValue( sensorID ) 
                 if v1 is not None:
-                    sensorData['timeMin'] = int( round( v1 , 0 ) )%100
-                    sensorData['timeHour'] = int( round( v1 , 0 ) )/100
+                    sensorData['timeMin'] = '%02d'%( int( round( v1 , 0 ) )%100  )
+                    sensorData['timeHour'] = '%d'%( int( round( v1 , 0 ) )/100  )
 
                 # get the temp sensor
                 name2 = string.replace( meta['sensorName'], "-speed" , "-temp" )
