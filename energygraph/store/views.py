@@ -957,7 +957,7 @@ def dumpUser(request,userName):
         alarms = findRecentAlarmData( 3261 ) # TODO , don't hard code alarm ID for user 
         for a in alarms:
             ad="<alarm time='%d' id='%d' eq='%d' code='%d' part='%d' crit='%d't zone='%d' user='%d' note='%s' />\n"%(
-                a.time,a.alarmID, a.eq, a.code, a.part, a.crit, a.zone, a.users, a.note )
+                a.time,a.alarmID, a.eq, a.code, a.part, a.crit, a.zone, a.user, a.note )
             response.write( md )
         
     response.write( "</dump>\n" )

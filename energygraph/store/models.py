@@ -563,16 +563,16 @@ def addAlarmData( a, eq, c, p, crit, z=None, u=None, note=None ):
 def findRecentAlarmData( alarmID ):
     now = long( time.time() )
     t = now
-    t = t - 36*60*60
+    t = t - 2*24*60*60
 
     query = AlarmData.all() 
     logging.debug("# DB search for findRecentAlarmData" )
     query.filter( 'alarmID =', alarmID )
     #query.filter( 'code !=', 602 ) # can't do this in GAE 
-    query.filter( 'notCrit =', 0 ) # filter out stuff where crit = 5 
+    #query.filter( 'notCrit =', 0 ) # filter out stuff where crit = 5 
     query.filter( 'time >', t )
     query.order("-time") 
-    p = query.fetch(500)
+    p = query.fetch(100)
 
     return p
     
