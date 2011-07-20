@@ -670,6 +670,11 @@ def usageJson(request,userName,sensorName,type,period):
             if ( vI < 0 ) : # integral can go negative when a reset of a counter happens - this ignores that
                 vI = 0
 
+            if not ( v == v ): # nan
+                v = 0.0
+            if not ( vI == vI ): # nan
+                vI = 0.0
+                
             kWh = 0
             water = 0
             cost = 0
@@ -929,7 +934,7 @@ def dumpUser(request,userName):
             attr += " threshold='%f'"%sensor.threshold 
 
         if sensor.maxUpdateTime is not None:
-            attr += " maxUpdateTime='%f'"%sensor.maxUpdateTime 
+            attr += " maxUpdateTime='%d'"%sensor.maxUpdateTime 
 
         response.write( "<sensor %s >\n"%attr )
         d = sensor.to_xml()
@@ -948,6 +953,13 @@ def dumpUser(request,userName):
                 m.integral, m.joules )
             response.write( md )
 
+    if ( userName == 'fluffy' ):
+        alarms = findRecentAlarmData( 3261 ) # TODO , don't hard code alarm ID for user 
+        for a in alarms:
+            ad="<alarm time='%d' id='%d' eq='%d' code='%d' part='%d' crit='%d't zone='%d' user='%d' note='%s' />\n"%(
+                a.time,a.alarmID, a.eq, a.code, a.part, a.crit, a.zone, a.users, a.note )
+            response.write( md )
+        
     response.write( "</dump>\n" )
 
     return response
@@ -1054,9 +1066,6 @@ def createSensor(request,userName,sensorName):
         if "displayMax" in data:
             if data.get("displayMax") != "None":
                 record.displayMax = float( data.get("displayMax") );
-        if "maxUpdateTime" in data:
-            if data.get("maxUpdateTime") != "None":
-                record.displayMax = int( data.get("maxUpdateTime") );
                 
         if "watts" in data:
             if data.get("watts") != "None":
@@ -1064,9 +1073,11 @@ def createSensor(request,userName,sensorName):
         if "threshold" in data:
             if data.get("threshold") != "None":
                 record.threshold = float( data.get("threshold") );
+                
         if "maxUpdateTime" in data:
             if data.get("maxUpdateTime") != "None":
                 record.maxUpdateTime = int( data.get("maxUpdateTime") );
+                
         if "unitsWhenOn" in data:
             if data.get("unitsWhenOn") != "None":
                 record.units = data.get("unitsWhenOn");

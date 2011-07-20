@@ -527,6 +527,7 @@ def findSensorID( userName, sensorName, create=False , createGroup=False ):
 class AlarmData(db.Model):
     time  = db.IntegerProperty() # time this messarement was made (seconds since unix epoch)
     crit  = db.IntegerProperty() # 0=status, 1=info, 2=important, 3=alert 
+    notCrit  = db.IntegerProperty(required=False) # set to 1 if crit is 5, 0 otherwise
     alarmID = db.IntegerProperty(required=False)
     eq = db.IntegerProperty(required=False,indexed=False)
     code = db.IntegerProperty(required=False) # todo should be true , and next one too 
@@ -545,6 +546,9 @@ def addAlarmData( a, eq, c, p, crit, z=None, u=None, note=None ):
     rec.code = c
     rec.part = p
     rec.crit = crit
+    rec.notCrit = 0
+    if crit == 5:
+        rec.notCrit = 1
     rec.zone = z
     rec.user = u
     rec.note = note 
@@ -555,6 +559,23 @@ def addAlarmData( a, eq, c, p, crit, z=None, u=None, note=None ):
     rec.put()
     logging.debug("# DB put for addAlarmData" )
 
+
+def findRecentAlarmData( alarmID ):
+    now = long( time.time() )
+    t = now
+    t = t - 36*60*60
+
+    query = AlarmData.all() 
+    logging.debug("# DB search for findRecentAlarmData" )
+    query.filter( 'alarmID =', alarmID )
+    #query.filter( 'code !=', 602 ) # can't do this in GAE 
+    query.filter( 'notCrit =', 0 ) # filter out stuff where crit = 5 
+    query.filter( 'time >', t )
+    query.order("-time") 
+    p = query.fetch(500)
+
+    return p
+    
 
 class SystemData(db.Model):
     nextSensorID = db.IntegerProperty()
