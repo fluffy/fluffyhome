@@ -1602,17 +1602,18 @@ def updateValues(request,userName,sensorName,pTime):
 def updateNotify(request,userName,sensorName):
     logging.info("TASK: Running task updateNotify %s %s"%(userName,sensorName,) )
 
-    # TODO
     if userName == "*" :
         users = findAllUserNames()
     else:
         users = [ userName ]
+
     for userName in users:
         if sensorName == "*":
             sensors = findAllSensorsByUserID( findUserIDByName( userName ) )
         else:
             sensors = [ findSensor( getSensorIDByName( sensorName ) ) ]
-        for sensor in sensors: # do ones that a NOT a group
+
+        for sensor in sensors: # do ones that are NOT a group
             if sensor.killed != True:
                 if sensor.category != "Group":
                     checkNotify(userName, sensor.sensorName )

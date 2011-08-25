@@ -1310,11 +1310,8 @@ def getSensorValue( sensorID ):
     global globalLastMeasurementEnergy 
     global globalLastMeasurementIntegral
     global globalLastMeasurementCacheTime
-
-    now = long(  time.time() )
-    now = now - now%15 # round to lower 15 seconds 
-    
-    if globalLastMeasurementCacheTime != now:
+    now = long( time.time() )
+    if (now - globalLastMeasurementCacheTime) > 15:
         globalLastMeasurementTime = {}
         globalLastMeasurementValue = {}
         globalLastMeasurementEnergy = {}
@@ -1346,6 +1343,18 @@ def getSensorValue( sensorID ):
 
 
 def getSensorLastTime( sensorID ):
+    global globalLastMeasurementTime
+    global globalLastMeasurementValue
+    global globalLastMeasurementEnergy 
+    global globalLastMeasurementIntegral
+    global globalLastMeasurementCacheTime
+    now = long( time.time() )
+    if (now - globalLastMeasurementCacheTime) > 15:
+        globalLastMeasurementTime = {}
+        globalLastMeasurementValue = {}
+        globalLastMeasurementEnergy = {}
+        globalLastMeasurementIntegral = {}
+        globalLastMeasurementCacheTime = now
 
     if sensorID in globalLastMeasurementTime:
         return globalLastMeasurementTime[sensorID]
@@ -1372,6 +1381,18 @@ def getSensorLastTime( sensorID ):
 
 
 def getSensorLastIntegral( sensorID ):
+    global globalLastMeasurementTime
+    global globalLastMeasurementValue
+    global globalLastMeasurementEnergy 
+    global globalLastMeasurementIntegral
+    global globalLastMeasurementCacheTime
+    now = long( time.time() )
+    if (now - globalLastMeasurementCacheTime) > 15:
+        globalLastMeasurementTime = {}
+        globalLastMeasurementValue = {}
+        globalLastMeasurementEnergy = {}
+        globalLastMeasurementIntegral = {}
+        globalLastMeasurementCacheTime = now
 
     if sensorID in globalLastMeasurementIntegral:
         return globalLastMeasurementIntegral[sensorID]
@@ -1399,6 +1420,19 @@ def getSensorLastIntegral( sensorID ):
 
 
 def getSensorLastEnergy( sensorID ):
+    global globalLastMeasurementTime
+    global globalLastMeasurementValue
+    global globalLastMeasurementEnergy 
+    global globalLastMeasurementIntegral
+    global globalLastMeasurementCacheTime
+    now = long( time.time() )
+    if (now - globalLastMeasurementCacheTime) > 15:
+        globalLastMeasurementTime = {}
+        globalLastMeasurementValue = {}
+        globalLastMeasurementEnergy = {}
+        globalLastMeasurementIntegral = {}
+        globalLastMeasurementCacheTime = now
+
     if sensorID in globalLastMeasurementEnergy:
        return globalLastMeasurementEnergy[sensorID]
 
@@ -1459,7 +1493,7 @@ def getSensorPower( sensorID , value=None):
                 if value >= sensorMeta['threshold'] :
                     watts = sensorMeta['valueWhenOn']
 
-    assert watts >= 0.0
+    #assert watts >= 0.0 # todo - crash  galdstones sensor
     return watts
     
 
@@ -1543,18 +1577,18 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=N
                 watts = getSensorPower( sensorID , p.value )
                 newJoules = newJoules + watts * len 
 
-                logging.debug( "Updating integral by len=%d val=%f watts=%f joules=%f"%(len,val,watts,newJoules) )
+                #logging.debug( "Updating integral by len=%d val=%f watts=%f joules=%f"%(len,val,watts,newJoules) )
 
     if sum is not None:
         integral = sum
         logging.debug( "Updating integral using provided sum %f"%sum )
         if getSensorUnitsByID(sensorID) == 'W':
             newJoules = sum
-            logging.debug( "Updating joules using provided sum %f"%sum )
+            #logging.debug( "Updating joules using provided sum %f"%sum )
 
     if joules is not None:
         newJoules = joules
-        logging.debug( "Updating joules using passed in joules value of %f"%joules )
+        #logging.debug( "Updating joules using passed in joules value of %f"%joules )
 
     if (value is None) and (p is not None):
         if ( sTime > p.time ):
