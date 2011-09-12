@@ -1835,12 +1835,20 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
     # if no after, extrapolate based on current rate. can cache this 
     if ( prev is not None ) and ( next is None ):
         watts = getSensorPower( sensorID , prev.value )
-        logging.debug("*** value=%d watts=%d "%(prev.value,watts) )
-        len = utime - prev.time
-        assert  len >= 0
-        ret = prev.joules + watts*len
-        logging.debug("extrapolate for %d seconds, watts=%f prev=%f ",len, watts,prev.joules)
-        #return ret
+        if watts != watts : # test for NaN
+            assert prev.joules == prev.joules # check for NaN
+            assert prev.joules >= 0
+            ret = prev.joules 
+            logging.debug("extrapolate for with no sensor reading from prev=%f ",prev.joules)
+        else:
+            len = utime - prev.time
+            assert  len >= 0
+            assert watts == watts # check for NaN
+            assert watts >= 0.0
+            assert prev.joules == prev.joules # check for NaN
+            assert prev.joules >= 0
+            ret = prev.joules + watts*len
+            logging.debug("extrapolate for %d seconds, watts=%f prev=%f ",len, watts,prev.joules)
 
     # if no before, just use after zero. Can cache this 
     if ( prev is None) and ( next is not None ):
@@ -1850,6 +1858,10 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
     # if have before and after, interpolate between the two. Cache in DB and memory 
     if ( prev is not None ) and ( next is not None ):
         if  prev.time == next.time :
+            assert next.joules == next.joules # check for NaN
+            assert prev.joules == prev.joules # check for NaN
+            assert prev.joules >= 0.0
+            assert next.joules >= 0.0
             ret = (prev.joules+next.joules) / 2
         else:
             len = next.time - prev.time
@@ -1857,6 +1869,10 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
             assert len > 0
             assert tim >= 0
             assert tim <= len
+            assert next.joules == next.joules # check for NaN
+            assert prev.joules == prev.joules # check for NaN
+            assert next.joules >= 0.0
+            assert prev.joules >= 0.0
             delta = next.joules - prev.joules
             ret =  prev.joules + delta*tim/len
         logging.debug("interpolated sec before=%d sec after=%d "%( utime-prev.time , next.time-utime ) )

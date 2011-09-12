@@ -98,9 +98,6 @@ def main():
     for measurement in measurements:
         sensorName = str( measurement.attrib.get("sensor") )
         time = int( measurement.attrib.get("time") )
-        value = float( measurement.attrib.get("value") )
-        integral = float( measurement.attrib.get("integral") )
-        joules = float( measurement.attrib.get("joules") )
 
         #print sensorName,time,value,integral
         
@@ -109,7 +106,22 @@ def main():
         else:
             data += ", \n"
 
-        data += '  { "n":"%s", "t":%d, "v":%f, "s":%f, "j":%f }'%(sensorName,time,value,integral,joules)
+        data += '  { "n":"%s", "t":%d'%( sensorName, time )
+
+        value = measurement.attrib.get("value")
+        if value:
+            data += ', "v":%f'%float( value )
+            
+        integral = measurement.attrib.get("integral")
+        if integral:
+            data += ', "s":%f'%float( integral )
+            
+        joules = measurement.attrib.get("joules")
+        if joules:
+            data += ', "j":%f'%float( joules )
+
+        data += ' }'
+        
         count = count+1
 
         if count > 20 :

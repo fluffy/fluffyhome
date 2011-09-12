@@ -419,9 +419,9 @@ def showLineGraphCSV(request,userName,sensorName):
         except ValueError:
             logging.debug( "Non numberic value in measurement value=%s"%( str(value) ) )
 
-    #response = HttpResponse("text/plain")
     response = HttpResponse()
-    #response['Content-Disposition'] = 'attachment; filename=somefilename.csv'
+    #response = HttpResponse("text/plain")
+    response['Content-Disposition'] = 'attachment; filename=%s-%s.csv'%(userName,sensorName)
     response.write( html );
     return response 
 
@@ -613,6 +613,25 @@ def usageJson(request,userName,sensorName,type,period):
         step = 3600 * 24 
         hour = (start/3600) % 24
 
+    if period == "6week":
+        mid = now - ( (now  + timeOffsetSeconds ) % (7*24*3600) ) # todo deal with  and 4 am is new midnight
+        start = mid - 6 * 7 *24*3600
+        end = mid
+        step = 3600 * 24 * 7
+        hour = (start/3600) % 24
+
+
+    if period == "Aug": # august this year - TODO - should be last AUG  
+        mid = now - ( (now  + timeOffsetSeconds ) % (24*3600) ) # todo deal with  and 4 am is new midnight
+        mid   = time.mktime( ( time.localtime(mid)[0] , 9,1,1,0,0,0,0,0 ) )
+        start = time.mktime( ( time.localtime(mid)[0] , 8,1,1,0,0,0,0,0 ) ) 
+        end   = mid
+        step = 3600 * 24 * 7
+        hour = (start/3600) % 24
+
+    logging.info( "start=%f end=%f"%(start,end) )
+
+
     userID =  findUserIdByName( userName )
     assert userID > 0 
 
@@ -626,10 +645,12 @@ def usageJson(request,userName,sensorName,type,period):
         ret += "   {c:[  \n"
 
         localTime = datetime.fromtimestamp( t ) + timedelta( hours=timeOffset ) 
-        if ( step == 3600 ):
+        if ( step == 3600 ): # hour
             ret += "        {v:'%02d:00'}, \n"%( localTime.hour ) 
-        elif ( step == 24*3600 ):
+        elif ( step == 24*3600 ): # day 
             ret += "        {v:'%s'}, \n"%(  localTime.strftime("%a") )
+        elif ( step == 7*24*3600 ): # week 
+            ret += "        {v:'W-%s'}, \n"%(  localTime.strftime("%U") )
         else:
             assert 0
 
@@ -805,6 +826,7 @@ def todayJson(request,userName,sensorName):
     utime = utime - utime % 3600 # get prev hour time 
     vals = []
     for i in range(-24,0):
+    #for i in range(-34*24,-33*24):
         #ptime = datetime.utcnow() + timedelta( hours=i )
         #startTime = datetime( ptime.year, ptime.month, ptime.day, ptime.hour )
         #timeTuple = startTime.timetuple()
@@ -812,14 +834,25 @@ def todayJson(request,userName,sensorName):
         #utime = long( floatTime )
 
         t = utime + i*3600 # is is negative so add it 
+        #t = utime + 24*i*3600 # is is negative so add it 
         dTime = datetime.fromtimestamp( t )
 
-        v = 0
+        v = 7000
         start = getHourlyIntegralBySensorID( sensorID, t)
         end   = getHourlyIntegralBySensorID( sensorID ,t+3600)
+        #end   = getHourlyIntegralBySensorID( sensorID ,t+24*3600)
         if ( start is not None ) and ( end is not None ):
             if ( end >= start ) and ( start >= 0 ):
-                v = (end-start)/3600.0
+                v = (end-start) / 3600.0
+                #v = (end-start) / (24 * 3600.0)
+#        if (  end < start ) :
+#            v = 3000 # todo ver bad
+#        if (  start < 0 ) :
+#            v = 5000 # todo ver bad
+#        if ( v > 5000 ):
+#            v = 10000 # TODO VERY BAD 
+#        if ( v < 0 ):
+#            v = 15000 # TODO VERY BAD 
         logging.debug("sensor=%s hour=%d start=%s end=%s i=%s v=%s"%( getSensorLabelByID(sensorID),
                                                                       (t/3600) % 24 ,
                                                                       start,end,i,v ) )
@@ -943,14 +976,18 @@ def dumpUser(request,userName):
              
         measurements = findRecentMeasurements( sensor.sensorID )
         for m in measurements:
-            if m.integral == None:
-                m.integral = 0.0
-            if m.joules == None:
-                m.joules = 0.0
-            md="<measurement user='%s' sensor='%s' time='%d' value='%f' integral='%f' joules='%f' />\n"%(
-                userName, sensor.sensorName, 
-                m.time, m.value,
-                m.integral, m.joules )
+            md="<measurement user='%s' sensor='%s' time='%d' "%(
+                userName, sensor.sensorName, m.time, )
+            if m.value != None:
+                if m.value == m.value: # test NaN
+                    md += "value='%f' "%m.value
+            if m.integral != None:
+                if m.integral == m.integral: # test NaN
+                    md += "integral='%f' "%m.integral
+            if m.joules != None:
+                if m.joules == m.joules: # test NaN
+                    md += "joules='%f' "%m.joules
+            md += "/>\n"
             response.write( md )
 
     if ( userName == 'fluffy' ):
@@ -1827,7 +1864,7 @@ def postAlarmValues(request):
     except ValueError:
         logging.debug( "JSON data had error in parse")
         #return HttpResponse( content="<H1>JSON data had error in parse: %s </H1>"%e , mimetype=None,  status=400 )
-        return HttpResponseNotFound( "<H1>JSON data had error in parse</H1>" )
+        return HttpResponseNotFound( "<H1>JSON data had error in parse</H1><br /><pre>%s</pre>"%data )
     
     try:
         #TODO validate user input data here for security 
@@ -1981,7 +2018,7 @@ def postSensorValues(request):
     except ValueError:
         logging.debug( "JSON data had error in parse")
         #return HttpResponse( content="<H1>JSON data had error in parse: %s </H1>"%e , mimetype=None,  status=400 )
-        return HttpResponseNotFound( "<H1>JSON data had error in parse</H1>" )
+        return HttpResponseNotFound( "<H1>JSON data had error in parse</H1><br /><pre>%s</pre>"%data )
     
     try:
         #TODO validate user input data here for security 
