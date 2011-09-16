@@ -575,7 +575,28 @@ def findRecentAlarmData( alarmID ):
     p = query.fetch(100)
 
     return p
+
+
+def findAlarmsBetween( alarmID, start, end ):
+    query = AlarmData.all() 
+    logging.debug("# DB search for findAlarmBetween" )
+    query.filter( 'alarmID =', alarmID )
+    query.filter( 'time >=', start )
+    query.filter( 'time <', end )
+    query.order("-time")
+
+    maxLimit = 10000
+    p = query.fetch(maxLimit)
+
+    if len(p) == maxLimit:
+        logging.error("findAlarmBetween hit max entires of %d "%( len(p) ) )
+        c = query.count(100000)
+        logging.error("count is %d which is bigger than %d"%( c, maxLimit ) )
+        assert c <= maxLimit , "Too many alarms for this day %d > max of %d"%(c,maxLimit)
+        return None
     
+    return p
+
 
 class SystemData(db.Model):
     nextSensorID = db.IntegerProperty()
@@ -1496,6 +1517,28 @@ def getSensorPower( sensorID , value=None):
     #assert watts >= 0.0 # todo - crash  galdstones sensor
     return watts
     
+
+def findMeasurementsBetween( sensorID, start, end ):
+    query = Measurement2.all() 
+    logging.debug("# DB search for findMeasurementsBetween" )
+    query.filter( 'sensorID =', sensorID )
+    query.filter( 'time >=', start )
+    query.filter( 'time <', end )
+    query.order("-time")
+
+    maxLimit = 13000
+    p = query.fetch(maxLimit)
+
+    # TODO - turn this back on 
+    #if len(p) == maxLimit:
+    #    logging.error("findMeasurementsBetween hit max entires of %d "%( len(p) ) )
+    #    c = query.count(100000)
+    #    logging.error("count is %d which is bigger than %d"%( c, maxLimit ) )
+    #    assert c <= maxLimit , "Too many meassurments for this day %d > max of %d"%(c,maxLimit)
+    #    return None
+    
+    return p
+
 
 def findRecentMeasurements( sensorID ):
     now = long( time.time() )

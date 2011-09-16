@@ -40,6 +40,10 @@ urlpatterns = patterns('',
     (r'^sensor/(?P<userName>[a-zA-Z]\w{0,64})/(?P<sensorName>[\w][\-\w]{0,64})/history/$', showLineGraph ), 
     (r'^sensor/(?P<userName>[a-zA-Z]\w{0,64})/(?P<sensorName>[\w][\-\w]{0,64})/history/csv/$', showLineGraphCSV ), 
 
+    (r'^sensor/(?P<userName>[a-zA-Z]\w{0,64})/alarm/dump/(?P<year>[\d]{4,4})/(?P<day>[\d]{1,3})/$', dumpAlarm ), 
+
+    (r'^sensor/(?P<userName>[a-zA-Z]\w{0,64})/(?P<sensorName>[\w][\-\w]{0,64})/dump/(?P<year>[\d]{4,4})/(?P<day>[\d]{1,3})/$', dumpSensor ), 
+
     (r'^sensorValues/$', postSensorValues ), 
     (r'^alarmValues/$', postAlarmValues ), 
  
@@ -55,6 +59,7 @@ urlpatterns = patterns('',
 
     (r'^admin/updateAll/$', updateAllValues ), 
     (r'^admin/stats/$', showStats ), 
+    (r'^admin/dump/meta/$', dumpMeta ), 
     (r'^admin/updateAllNow/$', updateAllValuesNow ), 
     (r'^admin/updateHourly/$', upgradeHourly ), 
     (r'^admin/user/(?P<userName>[a-zA-Z]\w{0,64})/$', editUser ), 

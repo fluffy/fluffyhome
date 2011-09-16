@@ -898,12 +898,144 @@ def graphToday(request,userName,sensorName):
 
 
 @digestProtect(realm='fluffyhome.com') 
+def dumpAlarm(request,userName,year,day):
+    logging.info( "dumping alarm for %s %s %s"%(userName,year,day ) )
+
+    year = int( year )
+    day = int( day )
+    
+    response = HttpResponse(mimetype='application/xml')
+    response['Content-Disposition'] = 'attachment; filename=dump-%s-%s-%0d-%03d.xml'%(userName,'alarm',year,day)
+    
+    response.write( "<dump-alarm>\n" )
+
+    t = int( time.mktime( ( year , 1,1,0,0,0,0,0,0 ) ) ) - time.timezone
+    t = t + day * 24 * 3600
+    start = t
+    end = t + 24*3600 
+
+    if ( userName == 'fluffy' ):
+        alarms = findAlarmsBetween( 3261 , start, end ) # TODO , don't hard code alarm ID for user 
+        for a in alarms:
+            if a.notCrit is None:
+                if a.crit == 5:
+                    a.notCrit = 1
+                else:
+                    a.notCrit = 0 
+            ad="<alarm time='%d' id='%d' eq='%d' code='%d' part='%d' crit='%d' zone='%d' user='%d' note='%s' notCrit='%d' />\n"%(
+                a.time,a.alarmID, a.eq, a.code, a.part, a.crit, a.zone, a.user, a.note, a.notCrit )
+            response.write( ad )
+            
+    response.write( "</dump-alarm>\n" )
+    return response
+
+            
+@digestProtect(realm='fluffyhome.com') 
+def dumpSensor(request,userName,sensorName,year,day):
+    logging.info( "dumping sensor for %s %s %s %s"%(userName,sensorName,year,day ) )
+
+    year = int( year )
+    day = int( day )
+    
+    response = HttpResponse(mimetype='application/xml')
+    response['Content-Disposition'] = 'attachment; filename=dump-%s-%s-%0d-%03d.xml'%(userName,sensorName,year,day)
+    
+    response.write( "<dump-sensor>\n" )
+
+    sensorID = findSensorID( userName , sensorName )
+    assert sensorID is not None
+    assert sensorID != 0
+
+    t = int( time.mktime( ( year , 1,1,0,0,0,0,0,0 ) ) ) - time.timezone
+    t = t + day * 24 * 3600
+    start = t
+    end = t + 24*3600 
+    
+    measurements = findMeasurementsBetween( sensorID, start, end  )
+    for m in measurements:
+        md="<measurement user='%s' sensor='%s' time='%d' "%(
+            userName, sensorName, m.time, )
+        if m.value != None:
+            if m.value == m.value: # test NaN
+                md += "value='%f' "%m.value
+        if m.integral != None:
+            if m.integral == m.integral: # test NaN
+                md += "integral='%f' "%m.integral
+        if m.joules != None:
+            if m.joules == m.joules: # test NaN
+                md += "joules='%f' "%m.joules
+        md += "/>\n"
+        response.write( md )
+
+    response.write( "</dump-sensor>\n" )
+    return response           
+
+
+def dumpMeta(request):
+    response = HttpResponse(mimetype='application/xml')
+    response['Content-Disposition'] = 'attachment; filename=all-dump.xml'
+    response.write( "<dump-meta>\n" )
+
+    usersNames = findAllUserNames()
+    for userName in usersNames:
+        dumpUserData( userName, response )
+
+        sensors = findAllSensorsByUserID( findUserIdByName( userName ) )
+        for sensor in sensors:
+            dumpSensorData( sensor, response )
+
+    response.write( "</dump-meta>\n" )
+    return response
+
+
+@digestProtect(realm='fluffyhome.com') 
 def dumpUser(request,userName):
     response = HttpResponse(mimetype='application/xml')
     response['Content-Disposition'] = 'attachment; filename=%s-dump.xml'%userName
 
     response.write( "<dump>\n" )
 
+    user = findUserByName( userName )
+    dumpUserData( userName, response )
+
+    sensors = findAllSensorsByUserID( findUserIdByName( userName ) )
+    for sensor in sensors:
+        dumpSensorData( sensor, response )
+             
+        measurements = findRecentMeasurements( sensor.sensorID )
+        for m in measurements:
+            md="<measurement user='%s' sensor='%s' time='%d' "%(
+                userName, sensor.sensorName, m.time, )
+            if m.value != None:
+                if m.value == m.value: # test NaN
+                    md += "value='%f' "%m.value
+            if m.integral != None:
+                if m.integral == m.integral: # test NaN
+                    md += "integral='%f' "%m.integral
+            if m.joules != None:
+                if m.joules == m.joules: # test NaN
+                    md += "joules='%f' "%m.joules
+            md += "/>\n"
+            response.write( md )
+
+    if ( userName == 'fluffy' ):
+        alarms = findRecentAlarmData( 3261 ) # TODO , don't hard code alarm ID for user 
+        for a in alarms:
+            if a.notCrit is None:
+                if a.crit == 5:
+                    a.notCrit = 1
+                else:
+                    a.notCrit = 0 
+            ad="<alarm time='%d' id='%d' eq='%d' code='%d' part='%d' crit='%d' zone='%d' user='%d' note='%s' notCrit='%d' />\n"%(
+                a.time,a.alarmID, a.eq, a.code, a.part, a.crit, a.zone, a.user, a.note, a.notCrit )
+            response.write( ad )
+        
+    response.write( "</dump>\n" )
+
+    return response
+
+
+def dumpUserData( userName, response ):
     user = findUserByName( userName ) 
     response.write( "<user userID='%d' userName='%s' \n"%( user.userID, user.userName, ) )
     response.write( "   email='%s' "%( user.email ) )
@@ -922,8 +1054,8 @@ def dumpUser(request,userName):
     #response.write( d )
     response.write( "</user>\n" )
 
-    sensors = findAllSensorsByUserID( findUserIdByName( userName ) )
-    for sensor in sensors:
+
+def dumpSensorData( sensor, response ):
         if sensor.groupTotal is None: 
             sensor.groupTotal=False
         if sensor.ignore is None: 
@@ -933,7 +1065,11 @@ def dumpUser(request,userName):
         attr += " sensorID='%d'"%sensor.sensorID 
         attr += " sensorName='%s'"%sensor.sensorName 
         attr += " label='%s'"%sensor.label 
-        attr += " userID='%d'"%sensor.userID 
+
+        attr += " userID='%d'"%sensor.userID
+        if sensor.userID is not None:
+            attr += " userName='%s'"%findUserNameBySensorID( sensor.sensorID )
+            
         attr += " apiKey='%s'"%sensor.apiKey 
 
         attr += " public='%d'"%sensor.public 
@@ -973,34 +1109,8 @@ def dumpUser(request,userName):
         d = sensor.to_xml()
         response.write( d )
         response.write( "</sensor>\n" )
-             
-        measurements = findRecentMeasurements( sensor.sensorID )
-        for m in measurements:
-            md="<measurement user='%s' sensor='%s' time='%d' "%(
-                userName, sensor.sensorName, m.time, )
-            if m.value != None:
-                if m.value == m.value: # test NaN
-                    md += "value='%f' "%m.value
-            if m.integral != None:
-                if m.integral == m.integral: # test NaN
-                    md += "integral='%f' "%m.integral
-            if m.joules != None:
-                if m.joules == m.joules: # test NaN
-                    md += "joules='%f' "%m.joules
-            md += "/>\n"
-            response.write( md )
 
-    if ( userName == 'fluffy' ):
-        alarms = findRecentAlarmData( 3261 ) # TODO , don't hard code alarm ID for user 
-        for a in alarms:
-            ad="<alarm time='%d' id='%d' eq='%d' code='%d' part='%d' crit='%d't zone='%d' user='%d' note='%s' />\n"%(
-                a.time,a.alarmID, a.eq, a.code, a.part, a.crit, a.zone, a.user, a.note )
-            response.write( md )
         
-    response.write( "</dump>\n" )
-
-    return response
-
 
 class EditSensorForm(djangoforms.ModelForm):
     #inGroup = forms.TypedChoiceField(  coerce=int )
