@@ -987,7 +987,7 @@ class Hourly2(db.Model):
 def hourlyPatchCount(): 
     level = getPatchLevel()
 
-    sensorID = getSensorIDByName( 'ECM1240-42340-ch1' )
+    sensorID = getSensorIDByName( 'ECM1240-42340-ch2' )
     assert sensorID is not None
 
     logging.debug("hourlyPatch sensorID = %d"%sensorID )
@@ -997,46 +997,44 @@ def hourlyPatchCount():
     query.filter( 'sensorID =', sensorID )
     
     logging.debug("# DB search for hourlyPatchCount" )     
-    c = query.count(25000)
+    c = query.count(100000)
     
     logging.info("hourlyPatchCount got %d"%(c) )   
     return c
 
         
-def hourlyPatchOld(): #  used to make sure everything had a patchLevel of zero 
-    level = 0
+def hourlyPatchFast(): 
+    level = getPatchLevel()
     maxUpgrade = 1000
     
     query = Hourly2.all()
-    #query.filter("patchLevel != ", level) 
+    query.filter("patchLevel < ", level) 
     logging.debug("# DB search for hourlyPatch" )
 
-    cursor = memcache.get('key4-hourly_path_cursor_%d_a'%level)
-    if ( cursor ):
-        query.with_cursor( cursor )
+    #cursor = memcache.get('key4-hourly_path_cursor_%d_a'%level)
+    #if ( cursor ):
+    #    query.with_cursor( cursor )
         
     results = query.fetch( maxUpgrade ) 
 
-    cursor = query.cursor()
-    memcache.set('key4-hourly_path_cursor_%d_a'%level,cursor, 5*60 )
+    #cursor = query.cursor()
+    #memcache.set('key4-hourly_path_cursor_%d_a'%level,cursor, 2*24*3600 )
 
-    i=0
     c=0
     patched = Set()
     for result in results:
-        i = i+1
-        if result.patchLevel is None:
-            result.patchLevel = 0
-            #result.put()
-            #db.put_async( result )
+        if result.patchLevel < 3:
+            result.patchLevel = level
+            result.hourOfDay  = (result.time / 3600) % 24 
+            result.hourOfWeek = (result.time / 3600) % (24*7) #added before patchLevel 2 
+
             patched.add( result )
-            
             logging.debug("Updated result # %d"%i )
             c = c+1
             
     db.put_async( patched )
     
-    logging.info("hourlyPatch processed %d records and patched %d"%(i,c) )   
+    logging.info("hourlyPatchFast processed patched %d records"%(c) )   
     return c
 
 
@@ -1044,7 +1042,7 @@ def hourlyPatch():
     maxUpgrade = 50
 
     level = getPatchLevel()
-    sensorID = getSensorIDByName( 'ECM1240-42340-ch1' )
+    sensorID = getSensorIDByName( 'ECM1240-42340-ch2' )
 
     assert sensorID is not None
 
