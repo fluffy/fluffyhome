@@ -1,7 +1,7 @@
 
 blacklist:
 - subnet: 173.181.12.124
-  description: Suspect this is arunas box 
+  description: This is corin's box  
 
 
 

@@ -271,14 +271,14 @@ def showStats( request ):
 
     sensors = findAllNonGroupSensors( )
     for s in sensors:
-        cacheKey = "key2-sensorTokenBucketDay%s/%s"%( s['name'], day )
+        cacheKey = "key4-sensorTokenBucketDay%s/%s"%( s['name'], day )
         updates = memcache.get( cacheKey )
         if updates != None:
             s['updatesDay'] = int(updates)
         else:
             s['updatesDay'] = int(0)
 
-        cacheKey = "key2-sensorTokenBucketWindow%s/%s"%(s['name'],minute1)
+        cacheKey = "key4-sensorTokenBucketWindow%s/%s"%(s['name'],minute1)
         updates = memcache.get( cacheKey )
         if updates != None:
             s['updatesMin'] = int(updates)
@@ -295,13 +295,13 @@ def showStats( request ):
     ipAddrs = findAllKnownIP()
     ips = []
     for ip in ipAddrs:
-        cacheKey = "key2-ipTokenBucketMinute:%s/%s"%(ip,minute0)
+        cacheKey = "key4-ipTokenBucketMinute:%s/%s"%(ip,minute0)
         updates0 = memcache.get( cacheKey )
         if updates0 == None:
             updates0 = 0
         updates0 = int( updates0 )
 
-        cacheKey = "key2-ipTokenBucketMinute:%s/%s"%(ip,minute1)
+        cacheKey = "key4-ipTokenBucketMinute:%s/%s"%(ip,minute1)
         updates1 = memcache.get( cacheKey )
         if updates1 == None:
             updates1 = 0
@@ -327,9 +327,14 @@ def showGraphs( request, userName ):
                                             'host':request.META["HTTP_HOST"] }) 
 
 
-def upgradeHourly(request):
-    val = hourlyUpgrade()
-    return HttpResponse("<h1>Upgraded all Hourly = %s</h1>"%val)
+def patchHourly(request):
+    val = hourlyPatch()
+    return HttpResponse("<h1>Patched %d Hourly </h1>"%val)
+
+
+def patchHourlyCount(request):
+    val = hourlyPatchCount()
+    return HttpResponse("<h1>Counted %d hourly to patch</h1>"%val)
 
 
 @digestProtect(realm='fluffyhome.com') 
@@ -527,7 +532,7 @@ def usageJson(request,userName,sensorName,type,period):
     head += "status:'ok', \n"
     head += "reqId:'%s', \n"%reqId
 
-    cacheKey = "key2-usageJson:%d/%s/%s/%s/%s/%d"%(epoch,userName,sensorName,type,period,now)
+    cacheKey = "key4-usageJson:%d/%s/%s/%s/%s/%d"%(epoch,userName,sensorName,type,period,now)
     id = memcache.get( cacheKey )
     #id = None # TODO - remove
     if id != None:
@@ -964,6 +969,8 @@ def dumpSensor(request,userName,sensorName,year,day):
         if m.joules != None:
             if m.joules == m.joules: # test NaN
                 md += "joules='%f' "%m.joules
+        if m.patchLevel != None:
+            md += "patchLevel='%d' "%m.patchLevel
         md += "/>\n"
         response.write( md )
 
@@ -1015,6 +1022,8 @@ def dumpUser(request,userName):
             if m.joules != None:
                 if m.joules == m.joules: # test NaN
                     md += "joules='%f' "%m.joules
+            if m.patchLevel != None:
+                md += "patchLevel='%d' "%m.patchLevel
             md += "/>\n"
             response.write( md )
 
@@ -1839,7 +1848,7 @@ def updateAllValues(request):
     return HttpResponse('<h1>Completed update all hourly values</h1>'  )  
 
 
-def updateAllValuesNow(request):
+def updateAllValuesNow(request): # this is just like updateAllValues but it queses the tasks instead of doing them
     users = findAllUserNames()
     for userName in users:
         now = long( time.time() )
@@ -1956,7 +1965,7 @@ def postAlarmValues(request):
     now = long( time.time() )
 
     minute = now - now % 60 # make window 1 minutes long 
-    cacheKey = "key2-ipTokenBucketMinute:%s/%s"%(ip,minute)
+    cacheKey = "key4-ipTokenBucketMinute:%s/%s"%(ip,minute)
     token = memcache.incr( cacheKey , initial_value=0 )
 
     rateLimit = 100 # Max number of request per minute from each IP address
@@ -2008,13 +2017,13 @@ def postAlarmValues(request):
             note = str( jData['n'] )
             
         day = now - now % (24*3600) # make window 24 hours long  
-        cacheKey = "key2-alarmTokenBucketDay%s/%s"%(account,day)
+        cacheKey = "key4-alarmTokenBucketDay%s/%s"%(account,day)
         token = memcache.incr( cacheKey , initial_value=0 )
         win = now - now % (60) # make window 1 min long  
-        cacheKey = "key2-alarmTokenBucketWindow%s/%s"%(account,win)
+        cacheKey = "key4-alarmTokenBucketWindow%s/%s"%(account,win)
         token = memcache.incr( cacheKey , initial_value=0 )
         
-        rateLimit = 10 # Max number of request per minute from each sensor
+        rateLimit = 10 # Max number of request perg minute from each sensor
         if enableQuota and token >= rateLimit:
             if token == rateLimit:
                 # should we log this or not
@@ -2090,6 +2099,7 @@ def postAlarmValues(request):
 
 
 def postSensorValues(request):
+    enableQuota = False
     enableQuota = True 
 
     ver = os.environ['SERVER_SOFTWARE']
@@ -2110,11 +2120,13 @@ def postSensorValues(request):
     now = long( time.time() )
 
     minute = now - now % 60 # make window 1 minutes long 
-    cacheKey = "key2-ipTokenBucketMinute:%s/%s"%(ip,minute)
+    cacheKey = "key4-ipTokenBucketMinute:%s/%s"%(ip,minute)
     token = memcache.incr( cacheKey , initial_value=0 )
 
     rateLimit = 25 # Max number of request per minute from each IP address
     if enableQuota and token >= rateLimit:
+        logging.debug( "IP %s exceed per minute rate limit"%ip )
+        logging.debug( "data in post is %s "%data )
         if token == rateLimit:
             # should we log this or not
             logging.warning( "IP %s exceed per minute rate limit"%ip )
@@ -2168,20 +2180,26 @@ def postSensorValues(request):
             if m.has_key('s'):
                 sum = float( m['s'] )
 
+            patchLevel = None
+            if m.has_key('pl'):
+                patchLevel = int( m['pl'] )
+
             joules = None  
             if m.has_key('j'):  # depricate 
                 joules = float( m['j'] )
 
             if sensorExistsByName( name ):
                 day = now - now % (24*3600) # make window 24 hours long  
-                cacheKey = "key2-sensorTokenBucketDay%s/%s"%(name,day)
+                cacheKey = "key4-sensorTokenBucketDay%s/%s"%(name,day)
                 token = memcache.incr( cacheKey , initial_value=0 )
                 win = now - now % (60) # make window 1 min long  
-                cacheKey = "key2-sensorTokenBucketWindow%s/%s"%(name,win)
+                cacheKey = "key4-sensorTokenBucketWindow%s/%s"%(name,win)
                 token = memcache.incr( cacheKey , initial_value=0 )
 
                 rateLimit = 10 # Max number of request per minute from each sensor
                 if enableQuota and token >= rateLimit:
+                    logging.debug( "IP %s exceed per minute rate limit for sensors %s"%(ip,name) )
+                    logging.debug( "post data is %s"%(data) )
                     if token == rateLimit:
                         # should we log this or not
                         logging.warning( "IP %s exceed per minute rate limit"%ip )
@@ -2189,7 +2207,7 @@ def postSensorValues(request):
     
                 logging.debug("Received measurment %s time=%d value=%s sum=%s units=%s joules=%s updateCount=%d"
                               %(name,mTime,value,sum,units,joules,token) ) 
-                storeMeasurementByName( name, value, mTime=mTime, sum=sum, reset=False, joules=joules )
+                storeMeasurementByName( name, value, mTime=mTime, sum=sum, reset=False, joules=joules, patchLevel=patchLevel )
                 addKnownIP( ip , name )
             else:
                 logging.debug("Sensor to enroll %s at IP %s "%(name,ip) ) 

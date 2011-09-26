@@ -22,8 +22,11 @@ handlers:
   static_files: static/robots.txt
   upload: static/robots.txt 
 
-- url: /stats.*
-  script: $PYTHON_LIB/google/appengine/ext/appstats/ui.py
+#- url: /stats.*
+#  script: $PYTHON_LIB/google/appengine/ext/appstats/ui.py
+
+- url: /admin/patchHourly/
+  script: main.py
 
 - url: /admin/.*
   script: main.py

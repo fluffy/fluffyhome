@@ -13,6 +13,10 @@ from google.appengine.ext import db
 from google.appengine.ext.db import Key
 
 
+def getPatchLevel():
+    return 2
+
+
 class Sensor(db.Model):
     sensorID = db.IntegerProperty(required=True) # unique interger ID for this sensor 
     sensorName = db.StringProperty(required=True) # For a given user, this is a unique name used in URIs
@@ -65,8 +69,8 @@ def findSensorMetaByID(sensorID, callFrom=None):
     #logging.debug( "In findSensorMetaByID sensorID=%s"%sensorID )
     assert  long( sensorID ) > 0 , "Problem with sensorID=%s"%sensorID
 
-    logging.debug( 'key2-findSensorMetaByID:%d/%d'%(epoch,sensorID) ) 
-    id = memcache.get( 'key2-findSensorMetaByID:%d/%d'%(epoch,sensorID) ) 
+    logging.debug( 'key4-findSensorMetaByID:%d/%d'%(epoch,sensorID) ) 
+    id = memcache.get( 'key4-findSensorMetaByID:%d/%d'%(epoch,sensorID) ) 
     if id != None:
         globalSensorMetaStore[sensorID] = id
         return id
@@ -98,7 +102,7 @@ def findSensorMetaByID(sensorID, callFrom=None):
             'inGroup' : sensor.inGroup }
 
     globalSensorMetaStore[sensorID] = ret
-    memcache.set( 'key2-findSensorMetaByID:%d/%d'%(epoch,sensorID), ret , 24*3600 )
+    memcache.set( 'key4-findSensorMetaByID:%d/%d'%(epoch,sensorID), ret , 24*3600 )
     return ret
 
 
@@ -187,8 +191,8 @@ def findGroupTotalSensorID( groupID , ignoreList ):
     returns 0 if none exist 
     """
     epoch = getUserSettingEpochBySensorID( groupID )
-    logging.debug( 'key2-findGroupTotalSensorID:%d/%d'%(groupID,epoch) ) 
-    id = memcache.get( 'key2-findGroupTotalSensorID:%d/%d'%(groupID,epoch) ) 
+    logging.debug( 'key4-findGroupTotalSensorID:%d/%d'%(groupID,epoch) ) 
+    id = memcache.get( 'key4-findGroupTotalSensorID:%d/%d'%(groupID,epoch) ) 
     if id != None:
         id = long(id)
         return id
@@ -206,7 +210,7 @@ def findGroupTotalSensorID( groupID , ignoreList ):
                     ret = sensorID
                     break
 
-    memcache.set( 'key2-findGroupTotalSensorID:%d/%d'%(groupID,epoch), ret , 24*3600 )
+    memcache.set( 'key4-findGroupTotalSensorID:%d/%d'%(groupID,epoch), ret , 24*3600 )
     return ret
 
 
@@ -346,8 +350,8 @@ def findAllSensorsInGroup( groupID , calledBy="" ):
 def findAllSensorIDsInGroup( groupID , calledBy="" ):
     epoch = getUserSettingEpochBySensorID( groupID )
 
-    logging.debug( 'key2-findAllSensorIDsInGroup:%d/%d'%(epoch,groupID) )
-    id = memcache.get( 'key2-findAllSensorIDsInGroup:%d/%d'%(epoch,groupID) )
+    logging.debug( 'key4-findAllSensorIDsInGroup:%d/%d'%(epoch,groupID) )
+    id = memcache.get( 'key4-findAllSensorIDsInGroup:%d/%d'%(epoch,groupID) )
     if id != None:
         return id
 
@@ -361,7 +365,7 @@ def findAllSensorIDsInGroup( groupID , calledBy="" ):
         if sensor.killed != True:
             ret.append( sensor.sensorID )
 
-    memcache.set( 'key2-findAllSensorIDsInGroup:%d/%d'%(epoch,groupID), ret, 24*3600 )
+    memcache.set( 'key4-findAllSensorIDsInGroup:%d/%d'%(epoch,groupID), ret, 24*3600 )
 
     logging.debug("findAllSensorIDsInGroup returned for group %s "%( groupID ) )
 
@@ -385,8 +389,8 @@ def findAllSensorsByUserID( userID ):
 def findAllSensorsIDsByUserID( userID ):
     epoch = getUserSettingEpochByUserID( userID )
 
-    logging.debug( 'key2-findAllSensorsIDsByUserID:%d/%d'%(epoch,userID) )
-    id = memcache.get( 'key2-findAllSensorsIDsByUserID:%d/%d'%(epoch,userID) )
+    logging.debug( 'key4-findAllSensorsIDsByUserID:%d/%d'%(epoch,userID) )
+    id = memcache.get( 'key4-findAllSensorsIDsByUserID:%d/%d'%(epoch,userID) )
     if id != None:
         return id
 
@@ -400,7 +404,7 @@ def findAllSensorsIDsByUserID( userID ):
         if sensor.killed != True:
             ret.append( sensor.sensorID )
 
-    memcache.set( 'key2-findAllSensorsIDsByUserID:%d/%d'%(epoch,userID), ret, 24*3600 )
+    memcache.set( 'key4-findAllSensorsIDsByUserID:%d/%d'%(epoch,userID), ret, 24*3600 )
     return ret
 
 
@@ -447,8 +451,8 @@ def sensorExistsByName( sensorName ):
 
 
 def getSensorIDByName( sensorName ):
-    logging.debug( 'key2-getSensorIDByName:%s'%(sensorName) )
-    id = memcache.get( 'key2-getSensorIDByName:%s'%(sensorName) )
+    logging.debug( 'key4-getSensorIDByName:%s'%(sensorName) )
+    id = memcache.get( 'key4-getSensorIDByName:%s'%(sensorName) )
     if id != None:
         return id
 
@@ -460,9 +464,9 @@ def getSensorIDByName( sensorName ):
     ret = 0
     if sensor != None:
         ret = sensor.sensorID
-        memcache.set( 'key2-getSensorIDByName:%s'%(sensorName) , ret, 24*3600 )
+        memcache.set( 'key4-getSensorIDByName:%s'%(sensorName) , ret, 24*3600 )
     else:
-        memcache.set( 'key2-getSensorIDByName:%s'%(sensorName) , ret, 5 ) # keep bad sensor from hammering DB
+        memcache.set( 'key4-getSensorIDByName:%s'%(sensorName) , ret, 5 ) # keep bad sensor from hammering DB
     return ret 
 
 
@@ -470,8 +474,8 @@ def findSensorID( userName, sensorName, create=False , createGroup=False ):
     assert userName is not None, "Must pass valid userName" 
     assert sensorName is not None, "Must pass valid sensorName"
 
-    logging.debug( 'key2-sensorID:%s/%s'%(userName,sensorName) )
-    id = memcache.get( 'key2-sensorID:%s/%s'%(userName,sensorName) )
+    logging.debug( 'key4-sensorID:%s/%s'%(userName,sensorName) )
+    id = memcache.get( 'key4-sensorID:%s/%s'%(userName,sensorName) )
     if id != None:
         return long(id )
 
@@ -487,7 +491,7 @@ def findSensorID( userName, sensorName, create=False , createGroup=False ):
 
     if sensor is not None:
         # put in memcache 
-        memcache.set(  'key2-sensorID:%s/%s'%(userName,sensorName), str(sensor.sensorID) , 3600 )
+        memcache.set(  'key4-sensorID:%s/%s'%(userName,sensorName), str(sensor.sensorID) , 3600 )
         return sensor.sensorID
 
     if not create:
@@ -686,8 +690,8 @@ def getUserPasswordHash( userName ):
          return None
 
     assert epoch > 0 
-    logging.debug( 'key2-getUserPasswordHash:%d/%s'%(epoch,userName)  )
-    id = memcache.get( 'key2-getUserPasswordHash:%d/%s'%(epoch,userName)  )
+    logging.debug( 'key4-getUserPasswordHash:%d/%s'%(epoch,userName)  )
+    id = memcache.get( 'key4-getUserPasswordHash:%d/%s'%(epoch,userName)  )
     if id != None:
         return id
 
@@ -705,7 +709,7 @@ def getUserPasswordHash( userName ):
     if user.passwd is "": # don't allow empty passwords 
         return None
 
-    memcache.set( 'key2-getUserPasswordHash:%d/%s'%(epoch,userName) ,ret , 24*3600 )
+    memcache.set( 'key4-getUserPasswordHash:%d/%s'%(epoch,userName) ,ret , 24*3600 )
     return ret
 
 
@@ -761,8 +765,8 @@ def getUserMetaByUserID( userID ):
     epoch = getUserSettingEpochByUserID( userID )
     assert epoch > 0 
 
-    logging.debug( 'key2-getUserMetaByUserID:%d/%d'%(epoch,userID) ) 
-    id = memcache.get( 'key2-getUserMetaByUserID:%d/%d'%(epoch,userID) ) 
+    logging.debug( 'key4-getUserMetaByUserID:%d/%d'%(epoch,userID) ) 
+    id = memcache.get( 'key4-getUserMetaByUserID:%d/%d'%(epoch,userID) ) 
     if id != None:
         return id
 
@@ -782,7 +786,7 @@ def getUserMetaByUserID( userID ):
         "sms1":user.sms1
         }
 
-    memcache.set( 'key2-getUserMetaByUserID:%d/%d'%(epoch,userID), ret , 24*3600 )
+    memcache.set( 'key4-getUserMetaByUserID:%d/%d'%(epoch,userID), ret , 24*3600 )
     return ret
 
 
@@ -795,8 +799,8 @@ def updateUserSettingsEpoch(userName):
     user.settingEpoch =  user.settingEpoch + 1 
     user.put()
     logging.debug("# DB put for updateUserSettingsEpoch" )
-    memcache.set( 'key2-UserSettingEpoch:%s'%(user.userName) , user.settingEpoch , 24*3600 )
-    memcache.set( 'key2-getUserSettingEpochByUserID:%s'%(user.userID) , user.settingEpoch , 24*3600 )
+    memcache.set( 'key4-UserSettingEpoch:%s'%(user.userName) , user.settingEpoch , 24*3600 )
+    memcache.set( 'key4-getUserSettingEpochByUserID:%s'%(user.userID) , user.settingEpoch , 24*3600 )
 
 
 globalUserName=""
@@ -816,8 +820,8 @@ def getUserSettingEpoch(userName):
             if globalEpochTime == now:
                 return globalEpoch
             
-    logging.debug( 'key2-UserSettingEpoch:%s'%(userName)  )
-    id = memcache.get( 'key2-UserSettingEpoch:%s'%(userName)  )
+    logging.debug( 'key4-UserSettingEpoch:%s'%(userName)  )
+    id = memcache.get( 'key4-UserSettingEpoch:%s'%(userName)  )
     if id != None:
         ret = long(id)
         globalUserName = userName
@@ -834,13 +838,13 @@ def getUserSettingEpoch(userName):
         ret = user.settingEpoch
 
     logging.debug("Doing cache set in getUserSettingEpoch userName=%s ret=%d"%(userName,ret) )
-    memcache.set( 'key2-UserSettingEpoch:%s'%(userName) , ret , 24*3600 )
+    memcache.set( 'key4-UserSettingEpoch:%s'%(userName) , ret , 24*3600 )
     return ret
 
 
 def getUserSettingEpochByUserID(userID):
-    logging.debug( 'key2-getUserSettingEpochByUserID:%s'%(userID)  )
-    id = memcache.get( 'key2-getUserSettingEpochByUserID:%s'%(userID)  )
+    logging.debug( 'key4-getUserSettingEpochByUserID:%s'%(userID)  )
+    id = memcache.get( 'key4-getUserSettingEpochByUserID:%s'%(userID)  )
     if id != None:
         return long(id)
 
@@ -851,7 +855,7 @@ def getUserSettingEpochByUserID(userID):
         ret = 1
     else:
         ret = user.settingEpoch
-    memcache.set( 'key2-getUserSettingEpochByUserID:%s'%(userID) , ret , 24*3600 )
+    memcache.set( 'key4-getUserSettingEpochByUserID:%s'%(userID) , ret , 24*3600 )
     return ret
 
 
@@ -868,8 +872,8 @@ def findUserNameBySensorID(sensorID):
     if sensorID in globalUserNameBySensorID:
         return globalUserNameBySensorID[sensorID]
 
-    logging.debug( 'key2-findUserNameBySensorID:%d'%(sensorID)  )
-    id = memcache.get( 'key2-findUserNameBySensorID:%d'%(sensorID)  )
+    logging.debug( 'key4-findUserNameBySensorID:%d'%(sensorID)  )
+    id = memcache.get( 'key4-findUserNameBySensorID:%d'%(sensorID)  )
     if id != None:
         ret = id
         globalUserNameBySensorID[sensorID] = ret
@@ -886,7 +890,7 @@ def findUserNameBySensorID(sensorID):
     ret = user.userName
 
     globalUserNameBySensorID[sensorID] = ret
-    memcache.set( 'key2-findUserNameBySensorID:%d'%(sensorID) , ret , 24*3600 )
+    memcache.set( 'key4-findUserNameBySensorID:%d'%(sensorID) , ret , 24*3600 )
     return ret
 
 
@@ -896,8 +900,8 @@ def findUserIDByName( userName ):
     # returns 0 if none found 
 
     id = None
-    logging.debug( 'key2-userID:%s'%(userName) )
-    id = memcache.get( 'key2-userID:%s'%(userName) )
+    logging.debug( 'key4-userID:%s'%(userName) )
+    id = memcache.get( 'key4-userID:%s'%(userName) )
     if id != None:
         return long(id)
 
@@ -909,7 +913,7 @@ def findUserIDByName( userName ):
         id = user.userID
         logging.debug( "found user ID %d "%id )
         # put in memcache 
-        memcache.set( 'key2-userID:%s'%(userName) , str(id) , 24*3600 )
+        memcache.set( 'key4-userID:%s'%(userName) , str(id) , 24*3600 )
         return id
 
     return 0
@@ -933,8 +937,8 @@ def findUserByID( userID ):
 
 
 def findUserNameByID( userID ):
-    logging.debug( 'key2-findUserNameByID:%d'%userID )
-    val = memcache.get( 'key2-findUserNameByID:%d'%userID )
+    logging.debug( 'key4-findUserNameByID:%d'%userID )
+    val = memcache.get( 'key4-findUserNameByID:%d'%userID )
     if val != None:
         return val
 
@@ -943,13 +947,13 @@ def findUserNameByID( userID ):
     ret = user.userName
     assert ret is not None
 
-    memcache.set( 'key2-findUserNameByID:%d'%userID, ret, 24*3600 )
+    memcache.set( 'key4-findUserNameByID:%d'%userID, ret, 24*3600 )
     return ret
 
 
 def findUserIdByName( userName ):
-    logging.debug( 'key2-findUserIdByName:%s'%userName )
-    val = memcache.get( 'key2-findUserIdByName:%s'%userName )
+    logging.debug( 'key4-findUserIdByName:%s'%userName )
+    val = memcache.get( 'key4-findUserIdByName:%s'%userName )
     if val != None:
         return val
 
@@ -960,7 +964,7 @@ def findUserIdByName( userName ):
     ret = user.userID
     assert ret is not None
 
-    memcache.set( 'key2-findUserIdByName:%s'%userName, ret, 24*3600 )
+    memcache.set( 'key4-findUserIdByName:%s'%userName, ret, 24*3600 )
     return ret
 
 
@@ -968,36 +972,99 @@ def findUserIdByName( userName ):
 class Hourly2(db.Model):
     sensorID   = db.IntegerProperty() # system wide unique identifer for sensor 
     userID     = db.IntegerProperty() # user that owns the sensor
+    patchLevel  = db.IntegerProperty() # version that data has been upgraded too 
     time       = db.IntegerProperty() # time this messarement was made (seconds since unix epoch)
     integral   = db.FloatProperty() # integral of value over time up to this meassurment (units * seconds)
     value      = db.FloatProperty() # value of sensor at time of meassurment (units)
     joules     = db.FloatProperty() # cumulative energy used in watt seconds (Joules) #TODO rename energy
-    hourOfDay  = db.IntegerProperty() # time this messarement was made (seconds since unix epoch)
+    hourOfDay  = db.IntegerProperty() # 0 to (24-1), hour of day messarement was made 
+    hourOfWeek  = db.IntegerProperty() # 0 to (24*7-1), hour of week messarement was made (Available in patchlevel >= 2)
     groupOtherValue = db.FloatProperty() # for groups, value of groupTotal - sum of group values (units)
     groupOtherEnergy = db.FloatProperty() # for groups, value of groupTotal - sum of group energy (units)
 
 
-def hourlyUpgrade(): # does anything use this TODO 
-    assert False
-    query = Hourly2.all() 
-    logging.debug("# DB search for hourlyUpgrade" )
-    query.order("-time") 
-    results = query.fetch( 1500) 
+
+def hourlyPatchCount(): 
+    level = getPatchLevel()
+
+    sensorID = getSensorIDByName( 'ECM1240-42340-ch1' )
+    assert sensorID is not None
+
+    logging.debug("hourlyPatch sensorID = %d"%sensorID )
+    
+    query = Hourly2.all()
+    query.filter("patchLevel <", level) 
+    query.filter( 'sensorID =', sensorID )
+    
+    logging.debug("# DB search for hourlyPatchCount" )     
+    c = query.count(25000)
+    
+    logging.info("hourlyPatchCount got %d"%(c) )   
+    return c
+
+        
+def hourlyPatchOld(): #  used to make sure everything had a patchLevel of zero 
+    level = 0
+    maxUpgrade = 1000
+    
+    query = Hourly2.all()
+    #query.filter("patchLevel != ", level) 
+    logging.debug("# DB search for hourlyPatch" )
+
+    cursor = memcache.get('key4-hourly_path_cursor_%d_a'%level)
+    if ( cursor ):
+        query.with_cursor( cursor )
+        
+    results = query.fetch( maxUpgrade ) 
+
+    cursor = query.cursor()
+    memcache.set('key4-hourly_path_cursor_%d_a'%level,cursor, 5*60 )
 
     i=0
     c=0
+    patched = Set()
     for result in results:
         i = i+1
-        if result.hourOfDay is None:
-            result.hourOfDay =  (result.time / 3600) % 24 
-            result.put()
-            c = c + 1
+        if result.patchLevel is None:
+            result.patchLevel = 0
+            #result.put()
+            #db.put_async( result )
+            patched.add( result )
+            
             logging.debug("Updated result # %d"%i )
-            if c > 200 :
-                return False
+            c = c+1
+            
+    db.put_async( patched )
+    
+    logging.info("hourlyPatch processed %d records and patched %d"%(i,c) )   
+    return c
 
-    logging.debug("Done with hourlyUpgrade of %d items"%i )   
-    return True
+
+def hourlyPatch(): 
+    maxUpgrade = 50
+
+    level = getPatchLevel()
+    sensorID = getSensorIDByName( 'ECM1240-42340-ch1' )
+
+    assert sensorID is not None
+
+    logging.debug("hourlyPatch sensorID = %d"%sensorID )
+    
+    query = Hourly2.all()
+    query.filter("patchLevel <", level) 
+    query.filter( 'sensorID =', sensorID )
+    #query.order("time")  # can't do this and do comparison to patchLevel
+    logging.debug("# DB search for hourlyPatch" )
+    records = query.fetch( maxUpgrade ) 
+
+    c=0
+    for record in records:
+        computeHourlyBySensorID( record.sensorID, record.time )
+        c = c+1
+        logging.debug("Updated result # %d"%c )
+            
+    logging.info("hourlyPatch patched %d"%(c) )   
+    return c
 
 
 def getHourlyByUserIDTime( userID, start=None, end=None , hour=None ):
@@ -1029,8 +1096,8 @@ def getHourlyEnergyTotalByGroupID( groupID, utime ):
     assert groupID > 0
     assert utime > 0 
     
-    logging.debug( 'key2-getHourlyEnergyTotalByGroupID:%d/%d'%(groupID,utime) )
-    val = memcache.get( 'key2-getHourlyEnergyTotalByGroupID:%d/%d'%(groupID,utime) )
+    logging.debug( 'key4-getHourlyEnergyTotalByGroupID:%d/%d'%(groupID,utime) )
+    val = memcache.get( 'key4-getHourlyEnergyTotalByGroupID:%d/%d'%(groupID,utime) )
     if val != None:
         return val
 
@@ -1055,7 +1122,7 @@ def getHourlyEnergyTotalByGroupID( groupID, utime ):
         ret = sum
 
     assert ret >= 0.0
-    memcache.set(  'key2-getHourlyEnergyTotalByGroupID:%d/%d'%(groupID,utime), ret, 5*60 )
+    memcache.set(  'key4-getHourlyEnergyTotalByGroupID:%d/%d'%(groupID,utime), ret, 5*60 )
     return ret
 
 
@@ -1063,8 +1130,8 @@ def getHourlyEnergyOtherByGroupID( groupID, utime ):
     assert groupID > 0
     assert utime > 0 
     
-    logging.debug( 'key2-getHourlyEnergyOtherByGroupID:%d/%d'%(groupID,utime) )
-    val = memcache.get( 'key2-getHourlyEnergyOtherByGroupID:%d/%d'%(groupID,utime) )
+    logging.debug( 'key4-getHourlyEnergyOtherByGroupID:%d/%d'%(groupID,utime) )
+    val = memcache.get( 'key4-getHourlyEnergyOtherByGroupID:%d/%d'%(groupID,utime) )
     if val != None:
         return val
 
@@ -1087,25 +1154,35 @@ def getHourlyEnergyOtherByGroupID( groupID, utime ):
                 if v == v : # nan
                     if v >= 0.0 :
                         sum += v
+                        logging.debug("other added label=%s v=%f to sum=%f"%
+                                      (getSensorLabelByID(groupID),v, sum))
+
             if sensor.category == "Group" :
                 v = getHourlyEnergyTotalByGroupID( sensor.sensorID , utime )
                 #logging.debug("sum group in label=%s sum=%f"%( getSensorLabelByID(sensor.sensorID),sum))
                 if v == v : # nan
                     if v >= 0.0 :
                         sum += v
+                        logging.debug("other added group label=%s v=%f to sum=%f"%
+                                      (getSensorLabelByID(groupID),v, sum))
+
 
     assert total >= 0.0
     assert sum >= 0.0
     ret = total - sum 
-    #logging.debug("End getHourlyEnergyOtherByGroupID groupid=%d label=%s sum=%f total=%f ret=%f"%(groupID,
-    #                                                                                             getSensorLabelByID(groupID),
-    #                                                                                             sum,total,ret))
+    logging.debug("End getHourlyEnergyOtherByGroupID groupid=%d label=%s sum=%f total=%f ret=%f"%(groupID,
+                                                                                                 getSensorLabelByID(groupID),
+                                                                                                 sum,total,ret))
 
-    if ret < 0.0: # TODO - think about this 
+    if ret < 0.0: # TODO - think about this
+        logging.debug("Negative other energy in getHourlyEnergyOtherByGroupID groupid=%d label=%s sum=%f total=%f ret=%f"%
+                      (groupID,
+                        getSensorLabelByID(groupID),
+                        sum,total,ret))
         ret = 0.0 
 
     assert ret >= 0.0
-    memcache.set(  'key2-getHourlyEnergyOtherByGroupID:%d/%d'%(groupID,utime), ret, 5*60 )
+    memcache.set(  'key4-getHourlyEnergyOtherByGroupID:%d/%d'%(groupID,utime), ret, 5*60 )
     return ret
 
 
@@ -1117,8 +1194,8 @@ def getHourlyEnergyBySensorID( sensorID, utime ): # TODO - can we get rid of thi
     utime = long( utime )
     utime = utime - utime % 3600
 
-    logging.debug( 'key2-getHourlyEnergyBySensorID:%d/%d'%(sensorID,utime) )
-    val = memcache.get( 'key2-getHourlyEnergyBySensorID:%d/%d'%(sensorID,utime) )
+    logging.debug( 'key4-getHourlyEnergyBySensorID:%d/%d'%(sensorID,utime) )
+    val = memcache.get( 'key4-getHourlyEnergyBySensorID:%d/%d'%(sensorID,utime) )
     if val != None:
         return val
 
@@ -1137,7 +1214,7 @@ def getHourlyEnergyBySensorID( sensorID, utime ): # TODO - can we get rid of thi
     assert hourly is not None
 
     assert hourly.joules >= 0.0
-    memcache.set(  'key2-getHourlyEnergyBySensorID:%d/%d'%(sensorID,utime), hourly.joules, 24*3600 )
+    memcache.set(  'key4-getHourlyEnergyBySensorID:%d/%d'%(sensorID,utime), hourly.joules, 24*3600 )
     return hourly.joules
 
 
@@ -1147,8 +1224,8 @@ def getHourlyIntegralBySensorID( sensorID, utime ):
     assert utime > 0, "Problem with invalid utime of %d"%utime
     assert utime <= long( time.time() )
 
-    logging.debug( 'key2-getHourlyIntegralBySensorID:%d/%d'%(sensorID,utime) )
-    val = memcache.get( 'key2-getHourlyIntegralBySensorID:%d/%d'%(sensorID,utime) )
+    logging.debug( 'key4-getHourlyIntegralBySensorID:%d/%d'%(sensorID,utime) )
+    val = memcache.get( 'key4-getHourlyIntegralBySensorID:%d/%d'%(sensorID,utime) )
     if val != None:
         return val
 
@@ -1166,7 +1243,7 @@ def getHourlyIntegralBySensorID( sensorID, utime ):
 
     assert hourly is not None
 
-    memcache.set(  'key2-getHourlyIntegralBySensorID:%d/%d'%(sensorID,utime), hourly.integral, 24*3600 )
+    memcache.set(  'key4-getHourlyIntegralBySensorID:%d/%d'%(sensorID,utime), hourly.integral, 24*3600 )
     return hourly.integral
   
 
@@ -1183,7 +1260,7 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
     # find before and after points
     if prev is None:
         query = Measurement2.all() 
-        logging.debug("# DB search for prev getSensorIntegral" )
+        logging.debug("# DB search for prev computeHourlyBySensorID" )
         query.filter( 'sensorID =', sensorID )
         query.filter( 'time <=', utime )
         query.order("-time") 
@@ -1191,7 +1268,7 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
         
     if next is None:
         query = Measurement2.all() 
-        logging.debug("# DB search for next getSensorIntegral " )
+        logging.debug("# DB search for next computeHourlyBySensorID " )
         query.filter( 'sensorID =', sensorID )
         query.filter( 'time >=', utime )
         query.order("time") 
@@ -1201,24 +1278,42 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
     logging.debug("# DB search for computeHourlyBySensorID" )
     query.filter( 'sensorID =', sensorID )
     query.filter("time", utime) 
-    hourly = query.get()
+    #hourly = query.get()
+    records = query.fetch( 1000 )
+    hourly = None
+    if len( records ) > 0:
+        hourly = records.pop()
+    if len( records ) > 0:
+        logging.debug("# DB delete extra records for computeHourlyBySensorID" )
+        db.delete( records )
 
     if hourly is None:
         hourly = Hourly2()
         hourly.sensorID = sensorID
         hourly.time = utime 
-        hourly.hourOfDay = (hourly.time / 3600) % 24 
         meta = findSensorMetaByID( sensorID )
         assert meta is not None
         hourly.userID = meta['userID'] 
         assert hourly.userID > 0 
   
+    hourly.hourOfDay  = (hourly.time / 3600) % 24 
+    hourly.hourOfWeek = (hourly.time / 3600) % (24*7) #added before patchLevel 2 
+
     hourly.integral = 0.0
     hourly.value = 0.0
     hourly.joules = 0.0
     hourly.groupOtherValue = 0.0
     hourly.groupOtherEnergy = 0.0
-
+    hourly.patchLevel = 0
+    
+    if patchMeasurement( prev ):
+        prev.put()
+        
+    if patchMeasurement( next ):
+        next.put()
+        
+    hourly.patchLevel = getPatchLevel()
+    
     if prev is not None:
         hourly.integral = getSensorIntegral(sensorID,utime,prev,next)
         hourly.value = prev.value
@@ -1237,6 +1332,8 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
     logging.debug( "hourly integral = %f"%hourly.integral )
     logging.debug( "hourly value = %f"%hourly.value )
     logging.debug( "hourly joules = %f"%hourly.joules )
+    if getSensorCategoryByID( sensorID ) == "Group":
+        logging.debug( "hourly other = %f"%hourly.groupOtherEnergy )
 
     return hourly
 
@@ -1264,7 +1361,7 @@ def addKnownIP( ip, sensorName=None ):
 
 
 def checkKnownIP( ip, sensorID=0, calledBy=""):
-    cachekey = "key2-checkKnownIPfoo:%s/%d"%(ip,sensorID)
+    cachekey = "key4-checkKnownIPfoo:%s/%d"%(ip,sensorID)
     logging.debug( cachekey) 
     id = memcache.get( cachekey ) 
     if id != None:
@@ -1316,9 +1413,46 @@ class Measurement2(db.Model):
     integral   = db.FloatProperty() # integral of value over time up to this meassurment (units * seconds)
     value      = db.FloatProperty() # value of sensor at time of meassurment (units)
     joules     = db.FloatProperty() # cumulative energy used in watt seconds (Joules) # TODO rename energy
+    patchLevel = db.IntegerProperty() # version that data has been upgraded too 
 
 
 
+def patchMeasurement( m ):
+    if ( m is None ):
+        return False
+    
+    if ( m.patchLevel is not None ) and ( m.patchLevel == getPatchLevel() ):
+        return False
+
+    if m.patchLevel is None:
+        m.patchLevel = 0
+
+    level = getPatchLevel()
+    
+    if ( m.patchLevel < 1 ) and ( level >= 1 ): # This is a patch level 1 change 
+        if m.sensorID == getSensorIDByName( 'ZB-0013A2004052-ch1' ):
+            m.integral = m.integral * 6.389
+            m.value = m.value * 6.389
+
+    if ( m.patchLevel < 2 ) and ( level >= 2 ): # This is a patch level 2 change 
+        if (      ( m.sensorID == getSensorIDByName( 'ECM1240-42340-ch1' ) )
+               or ( m.sensorID == getSensorIDByName( 'ECM1240-42340-ch2' ) )
+               or ( m.sensorID == getSensorIDByName( 'ECM1240-42414-ch1' ) )
+               or ( m.sensorID == getSensorIDByName( 'ECM1240-42414-ch2' ) ) ):
+            raw = int( m.integral )
+            corr = raw
+            if ( (raw>>31)&1 ):
+                corr = raw + (1<<32)
+            m.integral = float( corr )
+            m.joules = m.integral
+            
+    m.patchLevel = getPatchLevel()
+    #m.put()
+    return True
+    
+
+
+    
 globalLastMeasurementTime = {}
 globalLastMeasurementValue = {}
 globalLastMeasurementEnergy = {}
@@ -1342,8 +1476,8 @@ def getSensorValue( sensorID ):
     if sensorID in globalLastMeasurementValue:
         return globalLastMeasurementValue[sensorID]
 
-    logging.debug( 'key2-lastMeasurementValue:%d'%sensorID )
-    val = memcache.get( 'key2-lastMeasurementValue:%d'%sensorID )
+    logging.debug( 'key4-lastMeasurementValue:%d'%sensorID )
+    val = memcache.get( 'key4-lastMeasurementValue:%d'%sensorID )
     if val != None:
         ret = float(val)
         globalLastMeasurementValue[sensorID] = ret
@@ -1359,7 +1493,7 @@ def getSensorValue( sensorID ):
     if p is not None:
         ret = float( p.value )
 
-    memcache.set(  'key2-lastMeasurementValue:%d'%sensorID, ret , 24*3600 )
+    memcache.set(  'key4-lastMeasurementValue:%d'%sensorID, ret , 24*3600 )
     return ret
 
 
@@ -1380,8 +1514,8 @@ def getSensorLastTime( sensorID ):
     if sensorID in globalLastMeasurementTime:
         return globalLastMeasurementTime[sensorID]
 
-    logging.debug( 'key2-lastMeasurementTime:%d'%sensorID )
-    val = memcache.get( 'key2-lastMeasurementTime:%d'%sensorID )
+    logging.debug( 'key4-lastMeasurementTime:%d'%sensorID )
+    val = memcache.get( 'key4-lastMeasurementTime:%d'%sensorID )
     if val != None:
         ret = float(val)
         globalLastMeasurementTime[sensorID] = ret
@@ -1397,7 +1531,7 @@ def getSensorLastTime( sensorID ):
     if p is not None:
         ret = long( p.time )
 
-    memcache.set(  'key2-lastMeasurementTime:%d'%sensorID, ret, 24*3600 )
+    memcache.set(  'key4-lastMeasurementTime:%d'%sensorID, ret, 24*3600 )
     return ret
 
 
@@ -1418,8 +1552,8 @@ def getSensorLastIntegral( sensorID ):
     if sensorID in globalLastMeasurementIntegral:
         return globalLastMeasurementIntegral[sensorID]
 
-    logging.debug( 'key2-lastMeasurementIntegral:%d'%sensorID )
-    val = memcache.get( 'key2-lastMeasurementIntegral:%d'%sensorID )
+    logging.debug( 'key4-lastMeasurementIntegral:%d'%sensorID )
+    val = memcache.get( 'key4-lastMeasurementIntegral:%d'%sensorID )
     if val != None:
         ret = float(val)
         globalLastMeasurementIntegral[sensorID] = ret
@@ -1436,7 +1570,7 @@ def getSensorLastIntegral( sensorID ):
         if p.integral is not None:
             ret = p.integral
 
-    memcache.set(  'key2-lastMeasurementIntegral:%d'%sensorID, ret, 24*3600 )
+    memcache.set(  'key4-lastMeasurementIntegral:%d'%sensorID, ret, 24*3600 )
     return ret
 
 
@@ -1457,8 +1591,8 @@ def getSensorLastEnergy( sensorID ):
     if sensorID in globalLastMeasurementEnergy:
        return globalLastMeasurementEnergy[sensorID]
 
-    logging.debug( 'key2-lastMeasurementEnergy:%d'%sensorID )
-    val = memcache.get( 'key2-lastMeasurementEnergy:%d'%sensorID )
+    logging.debug( 'key4-lastMeasurementEnergy:%d'%sensorID )
+    val = memcache.get( 'key4-lastMeasurementEnergy:%d'%sensorID )
     if val != None:
         ret = float(val)
         globalLastMeasurementEnergy[sensorID] = ret
@@ -1475,7 +1609,7 @@ def getSensorLastEnergy( sensorID ):
         if p.joules is not None:
             ret = p.joules
 
-    memcache.set(  'key2-lastMeasurementEnergy:%d'%sensorID, ret, 24*3600 )
+    memcache.set(  'key4-lastMeasurementEnergy:%d'%sensorID, ret, 24*3600 )
     return ret
 
 
@@ -1554,13 +1688,13 @@ def findRecentMeasurements( sensorID ):
     return p
 
 
-def storeMeasurementByName( sensorName, value, mTime=0, sum=None, reset=False ,joules=None ):
+def storeMeasurementByName( sensorName, value, mTime=0, sum=None, reset=False ,joules=None, patchLevel=None ):
     sensorID = getSensorIDByName( sensorName )
     assert sensorID > 0
-    storeMeasurement( sensorID, value, mTime=mTime, sum=sum, reset=reset, joules=joules )
+    storeMeasurement( sensorID, value, mTime=mTime, sum=sum, reset=reset, joules=joules,  patchLevel=patchLevel )
 
 
-def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=None  ):
+def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=None,  patchLevel=None  ):
     #userID = findUserID( userName )
     #if userName == "fluffy": #  TODO - this is a hack to auto create fluffy on any store 
     #    userID = findUserID( userName, True )
@@ -1641,18 +1775,23 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=N
             v = ( integral - p.integral ) / len
             logging.debug( "No value so reverse computed prev=%f curr=%f len=%f v=%f"%(p.integral, integral, len, v) )
 
+    if patchLevel is None:
+       patchLevel = 0
+       
     m = Measurement2()
     m.sensorID = sensorID
     m.time = sTime
     m.value = v
     m.integral = integral
     m.joules = newJoules
-
+    m.patchLevel = patchLevel
+    
     if reset:
         m.value = float('nan')
         m.integral = 0.0
         m.joules = 0.0
 
+    patchMeasurement( m )
     m.put()
     logging.debug("# DB put for storeMeasurement" )
 
@@ -1677,15 +1816,15 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=N
   
     if mTime != 0 :
         #invalidate RecentMeasurement Cache
-        memcache.delete( 'key2-lastMeasurementTime:%d'%sensorID )
-        memcache.delete( 'key2-lastMeasurementValue:%d'%sensorID )
-        memcache.delete( 'key2-lastMeasurementEnergy:%d'%sensorID )
-        memcache.delete( 'key2-lastMeasurementIntegral:%d'%sensorID )
+        memcache.delete( 'key4-lastMeasurementTime:%d'%sensorID )
+        memcache.delete( 'key4-lastMeasurementValue:%d'%sensorID )
+        memcache.delete( 'key4-lastMeasurementEnergy:%d'%sensorID )
+        memcache.delete( 'key4-lastMeasurementIntegral:%d'%sensorID )
     else:
-        memcache.set(  'key2-lastMeasurementEnergy:%d'%sensorID, m.joules, 24*3600 )
-        memcache.set(  'key2-lastMeasurementIntegral:%d'%sensorID, m.integral, 24*3600 )
-        memcache.set(  'key2-lastMeasurementTime:%d'%sensorID, m.time, 24*3600 )
-        memcache.set(  'key2-lastMeasurementValue:%d'%sensorID, m.value , 24*3600 )
+        memcache.set(  'key4-lastMeasurementEnergy:%d'%sensorID, m.joules, 24*3600 )
+        memcache.set(  'key4-lastMeasurementIntegral:%d'%sensorID, m.integral, 24*3600 )
+        memcache.set(  'key4-lastMeasurementTime:%d'%sensorID, m.time, 24*3600 )
+        memcache.set(  'key4-lastMeasurementValue:%d'%sensorID, m.value , 24*3600 )
 
     #logging.debug( "Done update memcach values" )
      
@@ -1744,8 +1883,8 @@ def getHourlyDeltaSumHoursOld(userName,streamName,ptime):
 def getSensorIntegral(sensorID,utime,prev=None,next=None): # utime is unix integer time
     assert sensorID > 0
 
-    logging.debug( 'key2-integral:%d/%d'%(sensorID,utime) )
-    val = memcache.get( 'key2-integral:%d/%d'%(sensorID,utime) )
+    logging.debug( 'key4-integral:%d/%d'%(sensorID,utime) )
+    val = memcache.get( 'key4-integral:%d/%d'%(sensorID,utime) )
     if val != None:
         return val
 
@@ -1820,15 +1959,15 @@ def getSensorIntegral(sensorID,utime,prev=None,next=None): # utime is unix integ
         logging.debug("interpolated sec before=%d sec after=%d "%( utime-prev.time , next.time-utime ) )
         logging.debug("interpolated bv=%f av=%f ret=%f "%( prev.integral , next.integral, ret ) )
 
-    memcache.set( 'key2-integral:%d/%d'%(sensorID,utime), ret , 24*3600 )
+    memcache.set( 'key4-integral:%d/%d'%(sensorID,utime), ret , 24*3600 )
     return ret
 
 
 def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix integer time
     assert sensorID > 0
 
-    logging.debug( 'key2-getSensorEnergy:%d/%d'%(sensorID,utime) )
-    val = memcache.get( 'key2-getSensorEnergy:%d/%d'%(sensorID,utime) )
+    logging.debug( 'key4-getSensorEnergy:%d/%d'%(sensorID,utime) )
+    val = memcache.get( 'key4-getSensorEnergy:%d/%d'%(sensorID,utime) )
     if val != None:
         return val
 
@@ -1922,7 +2061,7 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
         logging.debug("interpolated bv=%f av=%f ret=%f "%( prev.joules , next.joules, ret ) )
 
     assert ret >= 0.0
-    memcache.set( 'key2-getSensorEnergy:%d/%d'%(sensorID,utime), ret , 24*3600 )
+    memcache.set( 'key4-getSensorEnergy:%d/%d'%(sensorID,utime), ret , 24*3600 )
     return ret
 
 

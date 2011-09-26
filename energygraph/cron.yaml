@@ -55,7 +55,7 @@ cron:
 
 - description: update wind kiteranch  
   url: /tasks/pollWindAB3/highasakite/
-  schedule: every 10 minutes 
+  schedule: every 5 minutes 
 
 - description: update calgary airport  
   url: /tasks/pollWindAB4/ab-52/

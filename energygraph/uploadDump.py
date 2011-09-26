@@ -46,7 +46,7 @@ def main():
     parser.add_option("-p", "--password", dest="password",
                       help="HTTP Digest password" , default="123456" )
     url = "http://www.fluffyhome.com"
-    url = "http://localhost:8081"
+    url = "http://localhost:8088"
 
     (options, args) = parser.parse_args()
     if len(args) > 2:
@@ -109,16 +109,21 @@ def main():
         data += '  { "n":"%s", "t":%d'%( sensorName, time )
 
         value = measurement.attrib.get("value")
-        if value:
+        if value is not None:
             data += ', "v":%f'%float( value )
             
         integral = measurement.attrib.get("integral")
-        if integral:
+        if integral is not None:
             data += ', "s":%f'%float( integral )
             
         joules = measurement.attrib.get("joules")
-        if joules:
+        if joules is not None:
             data += ', "j":%f'%float( joules )
+
+        patchLevel = measurement.attrib.get("patchLevel")
+        if patchLevel is None:
+            patchLevel = 0
+        data += ', "pl":%d'%int( patchLevel )
 
         data += ' }'
         

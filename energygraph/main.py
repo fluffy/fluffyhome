@@ -58,7 +58,10 @@ def log_exception(*args, **kwds):
 
 def main():
     logging.getLogger().setLevel(logging.WARNING)
-    #logging.getLogger().setLevel(logging.DEBUG)
+    #logging.getLogger().setLevel(logging.INFO)
+    if settings.DEBUG == True:
+        logging.getLogger().setLevel(logging.DEBUG)
+    
     if os.environ['SERVER_SOFTWARE'].startswith("Development"):
         logging.getLogger().setLevel(logging.DEBUG)
     
