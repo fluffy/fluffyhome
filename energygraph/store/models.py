@@ -1067,10 +1067,12 @@ def hourlyPatch():
     return c
 
 
-def getHourlyByUserIDTime( userID, start=None, end=None , hour=None ):
+def getHourlyByUserIDTime( userID, start=None, end=None , hour=None, hourOfWeek=None ):
     utime = long(  time.time() )
     utime = utime - utime % 3600
 
+    assert (hourOfWeek is None) or (hour is None)
+    
     if start is None:
         start = utime - 24*3600
     if end is None:
@@ -1084,10 +1086,12 @@ def getHourlyByUserIDTime( userID, start=None, end=None , hour=None ):
     query.filter( 'userID =', userID )
     if hour is not None:
         query.filter( 'hourOfDay =', hour )
+    if hourOfWeek is not None:
+        query.filter( 'hourOfWeek =', hourOfWeek )
     query.filter("time <= ", end) 
     query.filter("time >= ", start ) 
     query.order("-time") 
-    results = query.fetch(5000) 
+    results = query.fetch(5000) # TODO 
 
     return results
 

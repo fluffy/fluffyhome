@@ -575,7 +575,8 @@ def usageJson(request,userName,sensorName,type,period):
     end = now 
     step = 3600
     hour = None
-
+    hourOfWeek = None
+    
     if period == "day": 
         mid = now 
         start = mid - 24*3600
@@ -623,8 +624,8 @@ def usageJson(request,userName,sensorName,type,period):
         start = mid - 6 * 7 *24*3600
         end = mid
         step = 3600 * 24 * 7
-        hour = (start/3600) % 24
-
+        hourOfWeek = (start/3600) % (24*7)
+        hour = None
 
     if period == "Aug": # august this year - TODO - should be last AUG  
         mid = now - ( (now  + timeOffsetSeconds ) % (24*3600) ) # todo deal with  and 4 am is new midnight
@@ -644,7 +645,7 @@ def usageJson(request,userName,sensorName,type,period):
     userMeta = getUserMetaByUserID( userID )
 
     # get all the hourly values from the database
-    values = getHourlyByUserIDTime( userID, start, end , hour )
+    values = getHourlyByUserIDTime( userID, start, end , hour, hourOfWeek )
 
     for t in range( start , end, step ):
         ret += "   {c:[  \n"
