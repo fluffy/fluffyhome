@@ -14,7 +14,7 @@ from google.appengine.ext.db import Key
 
 
 def getPatchLevel():
-    return 2
+    return 3
 
 
 class Sensor(db.Model):
@@ -987,14 +987,16 @@ class Hourly2(db.Model):
 def hourlyPatchCount(): 
     level = getPatchLevel()
 
-    sensorID = getSensorIDByName( 'ECM1240-42340-ch2' )
+    sensorID = getSensorIDByName( 'ECM1240-42414-ch2' )
     assert sensorID is not None
 
     logging.debug("hourlyPatch sensorID = %d"%sensorID )
     
     query = Hourly2.all()
-    query.filter("patchLevel <", level) 
-    query.filter( 'sensorID =', sensorID )
+    query.filter("patchLevel <", level)
+    
+    #query.filter( 'hourOfDay =', 0 )
+    #query.filter( 'sensorID =', sensorID )
     
     logging.debug("# DB search for hourlyPatchCount" )     
     c = query.count(100000)
@@ -1029,10 +1031,11 @@ def hourlyPatchFast():
             result.hourOfWeek = (result.time / 3600) % (24*7) #added before patchLevel 2 
 
             patched.add( result )
-            logging.debug("Updated result # %d"%i )
+            logging.debug("Updated result #%d time=%i sensorID=%d"%(c,result.time,result.sensorID) )
             c = c+1
             
-    db.put_async( patched )
+    #db.put_async( patched )
+    db.put( patched )
     
     logging.info("hourlyPatchFast processed patched %d records"%(c) )   
     return c
@@ -1042,7 +1045,7 @@ def hourlyPatch():
     maxUpgrade = 50
 
     level = getPatchLevel()
-    sensorID = getSensorIDByName( 'ECM1240-42340-ch2' )
+    sensorID = getSensorIDByName( 'ECM1240-42414-ch2' )
 
     assert sensorID is not None
 
@@ -1299,7 +1302,7 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
         assert hourly.userID > 0 
   
     hourly.hourOfDay  = (hourly.time / 3600) % 24 
-    hourly.hourOfWeek = (hourly.time / 3600) % (24*7) #added before patchLevel 2 
+    hourly.hourOfWeek = (hourly.time / 3600) % (24*7) 
 
     hourly.integral = 0.0
     hourly.value = 0.0
@@ -1447,7 +1450,10 @@ def patchMeasurement( m ):
                 corr = raw + (1<<32)
             m.integral = float( corr )
             m.joules = m.integral
-            
+
+    if ( m.patchLevel < 3 ) and ( level >= 3 ): # This is a patch level 3 change
+        pass # nothing to do - this patch upgraded the hourOfWeek handled elswhere 
+ 
     m.patchLevel = getPatchLevel()
     #m.put()
     return True
