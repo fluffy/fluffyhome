@@ -61,7 +61,7 @@ def main():
     #logging.getLogger().setLevel(logging.INFO)
     if settings.DEBUG == True:
         logging.getLogger().setLevel(logging.DEBUG)
-    
+
     if os.environ['SERVER_SOFTWARE'].startswith("Development"):
         logging.getLogger().setLevel(logging.DEBUG)
     

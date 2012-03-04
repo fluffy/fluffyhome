@@ -327,11 +327,12 @@ def showGraphs( request, userName ):
                                             'host':request.META["HTTP_HOST"] }) 
 
 
+@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
 def patchHourly(request):
     val = hourlyPatch()
     return HttpResponse("<h1>Patched %d Hourly </h1>"%val)
 
-
+@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
 def patchHourlyCount(request):
     val = hourlyPatchCount()
     return HttpResponse("<h1>Counted %d hourly to patch</h1>"%val)
@@ -2101,7 +2102,7 @@ def postAlarmValues(request):
 
 def postSensorValues(request):
     enableQuota = False
-    enableQuota = True 
+    #enableQuota = True 
 
     ver = os.environ['SERVER_SOFTWARE']
     devel = ver.startswith("Development")
@@ -2118,23 +2119,27 @@ def postSensorValues(request):
     if ( ip2 != None ):
         ip = ip2
 
-    now = long( time.time() )
+    token = 0
+    if enableQuota:
+        now = long( time.time() )
 
-    minute = now - now % 60 # make window 1 minutes long 
-    cacheKey = "key4-ipTokenBucketMinute:%s/%s"%(ip,minute)
-    token = memcache.incr( cacheKey , initial_value=0 )
+        minute = now - now % 60 # make window 1 minutes long 
+        cacheKey = "key4-ipTokenBucketMinute:%s/%s"%(ip,minute)
+        token = memcache.incr( cacheKey , initial_value=0 )
 
-    rateLimit = 25 # Max number of request per minute from each IP address
-    if enableQuota and token >= rateLimit:
-        logging.debug( "IP %s exceed per minute rate limit"%ip )
-        logging.debug( "data in post is %s "%data )
-        if token == rateLimit:
-            # should we log this or not
-            logging.warning( "IP %s exceed per minute rate limit"%ip )
-        return HttpResponseForbidden( "<H1>User has exceed limit of %d requests per minute</H1>"%rateLimit )
+        rateLimit = 25 # Max number of request per minute from each IP address
+        if enableQuota and token >= rateLimit:
+            logging.debug( "IP %s exceed per minute rate limit"%ip )
+            logging.debug( "data in post is %s "%data )
+            if token == rateLimit:
+                # should we log this or not
+                logging.warning( "IP %s exceed per minute rate limit"%ip )
+            return HttpResponseForbidden( "<H1>User has exceed limit of %d requests per minute</H1>"%rateLimit )
         
     logging.debug("Got post of sensor values %s from %s count=%d"%(data,ip, token) )
-    addKnownIP( ip )
+
+    if enableQuota:
+        addKnownIP( ip )
     
     try:
         jData = json.loads( data )
@@ -2190,31 +2195,33 @@ def postSensorValues(request):
                 joules = float( m['j'] )
 
             if sensorExistsByName( name ):
-                day = now - now % (24*3600) # make window 24 hours long  
-                cacheKey = "key4-sensorTokenBucketDay%s/%s"%(name,day)
-                token = memcache.incr( cacheKey , initial_value=0 )
-                win = now - now % (60) # make window 1 min long  
-                cacheKey = "key4-sensorTokenBucketWindow%s/%s"%(name,win)
-                token = memcache.incr( cacheKey , initial_value=0 )
+                if enableQuota:
+                    day = now - now % (24*3600) # make window 24 hours long  
+                    cacheKey = "key4-sensorTokenBucketDay%s/%s"%(name,day)
+                    token = memcache.incr( cacheKey , initial_value=0 )
+                    win = now - now % (60) # make window 1 min long  
+                    cacheKey = "key4-sensorTokenBucketWindow%s/%s"%(name,win)
+                    token = memcache.incr( cacheKey , initial_value=0 )
 
-                rateLimit = 10 # Max number of request per minute from each sensor
-                if enableQuota and token >= rateLimit:
-                    logging.debug( "IP %s exceed per minute rate limit for sensors %s"%(ip,name) )
-                    logging.debug( "post data is %s"%(data) )
-                    if token == rateLimit:
-                        # should we log this or not
-                        logging.warning( "IP %s exceed per minute rate limit"%ip )
-                    return HttpResponseForbidden( "<H1>User has exceed limit of %d updates per minute for a sensor</H1>"%rateLimit )
+                    rateLimit = 10 # Max number of request per minute from each sensor
+                    if enableQuota and token >= rateLimit:
+                        logging.debug( "IP %s exceed per minute rate limit for sensors %s"%(ip,name) )
+                        logging.debug( "post data is %s"%(data) )
+                        if token == rateLimit:
+                            # should we log this or not
+                            logging.warning( "IP %s exceed per minute rate limit"%ip )
+                        return HttpResponseForbidden( "<H1>User has exceed limit of %d updates per minute for a sensor</H1>"%rateLimit )
     
                 logging.debug("Received measurment %s time=%d value=%s sum=%s units=%s joules=%s updateCount=%d"
                               %(name,mTime,value,sum,units,joules,token) ) 
                 storeMeasurementByName( name, value, mTime=mTime, sum=sum, reset=False, joules=joules, patchLevel=patchLevel )
-                addKnownIP( ip , name )
+                
+                if enableQuota:
+                    addKnownIP( ip , name )
             else:
                 logging.debug("Sensor to enroll %s at IP %s "%(name,ip) ) 
                 info = findEnroll( name, ip )
-    
-    
+       
         #sensorID= findSensorID( userName,sensorName, True ) #TODO - hack auto create new sensors 
         #if sensorID == 0 :
         #    return HttpResponseForbidden('<h1>Not a Valid sensor</h1>' )  

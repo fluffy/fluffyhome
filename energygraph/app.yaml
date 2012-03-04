@@ -1,5 +1,5 @@
 application: energygraph
-version: 6
+version: 7
 runtime: python
 api_version: 1
 
@@ -25,8 +25,8 @@ handlers:
 #- url: /stats.*
 #  script: $PYTHON_LIB/google/appengine/ext/appstats/ui.py
 
-- url: /admin/patchHourly/
-  script: main.py
+#- url: /admin/patchHourly/
+#  script: main.py
 
 - url: /admin/.*
   script: main.py

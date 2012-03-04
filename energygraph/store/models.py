@@ -451,6 +451,7 @@ def sensorExistsByName( sensorName ):
 
 
 def getSensorIDByName( sensorName ):
+    # TODO - look in a local in memory cache first. 
     logging.debug( 'key4-getSensorIDByName:%s'%(sensorName) )
     id = memcache.get( 'key4-getSensorIDByName:%s'%(sensorName) )
     if id != None:
@@ -1820,21 +1821,18 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=N
     except KeyError:
         pass
 
-    #logging.debug( "About to update memcach values" )
-  
     if mTime != 0 :
-        #invalidate RecentMeasurement Cache
+        logging.debug( "invalidating memcache values for sensor" )
         memcache.delete( 'key4-lastMeasurementTime:%d'%sensorID )
         memcache.delete( 'key4-lastMeasurementValue:%d'%sensorID )
         memcache.delete( 'key4-lastMeasurementEnergy:%d'%sensorID )
         memcache.delete( 'key4-lastMeasurementIntegral:%d'%sensorID )
     else:
+        logging.debug( "update memcache values for sensor" )
         memcache.set(  'key4-lastMeasurementEnergy:%d'%sensorID, m.joules, 24*3600 )
         memcache.set(  'key4-lastMeasurementIntegral:%d'%sensorID, m.integral, 24*3600 )
         memcache.set(  'key4-lastMeasurementTime:%d'%sensorID, m.time, 24*3600 )
         memcache.set(  'key4-lastMeasurementValue:%d'%sensorID, m.value , 24*3600 )
-
-    #logging.debug( "Done update memcach values" )
      
     # update the hourly values 
     #hourTime = long(sTime)
