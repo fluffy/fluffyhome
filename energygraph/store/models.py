@@ -450,8 +450,14 @@ def sensorExistsByName( sensorName ):
     return False
 
 
+globalSensorIDBySensorName = {}
+
 def getSensorIDByName( sensorName ):
-    # TODO - look in a local in memory cache first. 
+    global globalSensorIDBySensorName
+
+    if sensorName in globalSensorIDBySensorName:
+        return globalSensorIDBySensorName[sensorName]
+    
     logging.debug( 'key4-getSensorIDByName:%s'%(sensorName) )
     id = memcache.get( 'key4-getSensorIDByName:%s'%(sensorName) )
     if id != None:
@@ -468,6 +474,10 @@ def getSensorIDByName( sensorName ):
         memcache.set( 'key4-getSensorIDByName:%s'%(sensorName) , ret, 24*3600 )
     else:
         memcache.set( 'key4-getSensorIDByName:%s'%(sensorName) , ret, 5 ) # keep bad sensor from hammering DB
+
+    if ret != 0:
+        globalSensorIDBySensorName[sensorName] = ret
+         
     return ret 
 
 

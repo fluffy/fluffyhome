@@ -3,10 +3,11 @@
 cron:
 - description: update the hourly values 
   url: /tasks/update/*/*/*/
-  schedule: every 15 minutes synchronized
-- description: update the notifications to send email or sms for frozen sensors
-  url: /tasks/notify/*/*/
-  schedule: every 5 minutes synchronized
+  schedule: every 25 minutes synchronized
+
+#- description: update the notifications to send email or sms for frozen sensors
+#  url: /tasks/notify/*/*/
+#  schedule: every 5 minutes synchronized
 
 #- description: update the hourly graphs 
 #  url: /user/fluffy/history/All/cost/0day/json/
