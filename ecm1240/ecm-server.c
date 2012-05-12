@@ -176,13 +176,13 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
    int i;
    int doPost = 0;
    
-   if ( current->time > prev->time+60 ) doPost=1;
+   if ( current->time > prev->time+60*15 ) doPost=1;
 
    if ( abs( prev->currentX100[0] - current->currentX100[0] ) >= 30 ) doPost=1;
    if ( abs( prev->currentX100[1] - current->currentX100[1] ) >= 30 ) doPost=1;
    if ( abs( prev->voltageX10 - current->voltageX10 ) >= 5 ) doPost=1;
 
-   if ( prev->time + 10 >= current->time ) doPost=0; // time too, short, overried
+   if ( prev->time + 60 >= current->time ) doPost=0; // time too, short, overried
                                                  // any previos post 
    if (!doPost) 
    {
