@@ -16,6 +16,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseNotFound
 from django.http import HttpResponseForbidden
 from django.http import HttpResponseRedirect
+from django.http import HttpResponseGone
 from django.shortcuts import render_to_response
 from google.appengine.ext.db import djangoforms
 #from django import newforms as forms
@@ -2143,6 +2144,11 @@ def postSensorValues(request):
     if ( ip2 != None ):
         ip = ip2
 
+    if ip == "173.181.12.124" : # Corin's IP
+        logging.debug( "Black list Corin" )
+        return HttpResponse(  "<H1>Too much data from you IP - call Fluffy</H1>" ) # return a 200 
+        #return HttpResponseGone( "<H1>Too much data from you IP - call Fluffy</H1>" )
+              
     token = 0
     if enableQuota:
         now = long( time.time() )

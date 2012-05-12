@@ -1391,7 +1391,7 @@ def checkKnownIP( ip, sensorID=0, calledBy=""):
     if ip in globalKnownIP:
         return True
      
-    cachekey = "key4-checkKnownIPfoo:%s/%d"%(ip,sensorID)
+    cachekey = "key4-checkKnownIP:%s/%d"%(ip,sensorID)
     logging.debug( cachekey) 
     id = memcache.get( cachekey ) 
     if id != None:
