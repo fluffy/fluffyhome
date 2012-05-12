@@ -1457,20 +1457,22 @@ def thinMeasurements( sensorID, t ):
     query.filter( 'time >' , t-3600 )
     query.filter( 'time <=', t )
     query.order("-time") 
-    p=query.run( deadline=20, offset=1, batch_size=5, keys_only=True)
+    p=query.run( deadline=20, offset=1, batch_size=100, keys_only=True)
 
-    i=0
-    for x in p:
-        logging.debug( "found one to delete %d"%i )
-        db.delete( x )
-        i = i+1
-        if i%50 == 0 :
-            logging.debug( "Deleted %d measurements in thining and still going"%i )
-
-    logging.debug( "Deleted %d measurements in thining"%i )
-
+    #i=0
+    #for x in p:
+    #    logging.debug( "found one to delete %d"%i )
+    #    db.delete( x )
+    #    i = i+1
+    #    if i%50 == 0 :
+    #        logging.debug( "Deleted %d measurements in thining and still going"%i )
+    #logging.debug( "Deleted %d measurements in thining"%i )
     
+    futures = db.delete_async( p )
+    futures.get_result()
     
+
+
 def patchMeasurement( m ):
     if ( m is None ):
         return False
