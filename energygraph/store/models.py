@@ -1448,7 +1448,29 @@ class Measurement2(db.Model):
     patchLevel = db.IntegerProperty() # version that data has been upgraded too 
 
 
+def thinMeasurements( sensorID, t ):
+    # make so at interval from t  - oneHour to t, there is only one measurement (the last)
 
+    query = Measurement2.all() 
+    logging.debug("# DB search for thinMeasurements" )
+    query.filter( 'sensorID =', sensorID )
+    query.filter( 'time >' , t-3600 )
+    query.filter( 'time <=', t )
+    query.order("-time") 
+    p=query.run( deadline=20, offset=1, batch_size=5, keys_only=True)
+
+    i=0
+    for x in p:
+        logging.debug( "found one to delete %d"%i )
+        db.delete( x )
+        i = i+1
+        if i%50 == 0 :
+            logging.debug( "Deleted %d measurements in thining and still going"%i )
+
+    logging.debug( "Deleted %d measurements in thining"%i )
+
+    
+    
 def patchMeasurement( m ):
     if ( m is None ):
         return False

@@ -49,9 +49,15 @@ urlpatterns = patterns('',
  
     (r'^tasks/update/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[0-9]{8}T[0-9]{6}Z)/$', updateValues ), 
     (r'^tasks/update/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[\*])/$', updateValues ), 
+
     (r'^tasks/notify/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/$', updateNotify ), 
+
     (r'^tasks/refresh/(?P<userName>[a-zA-Z]\w{0,64})/$', loadAllSensors ), 
 
+    (r'^tasks/thin/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[\*])/$', thinValues ), 
+    (r'^tasks/thin/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[\-])/$', thinValues ), 
+    (r'^tasks/thin/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[0-9]{10})/$', thinValues ), 
+ 
     (r'^tasks/pollWindAB1/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB1 ), 
     (r'^tasks/pollWindAB2/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB2 ), 
     (r'^tasks/pollWindAB3/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB3 ), 

@@ -1,7 +1,7 @@
 # Copyright (c) 2010, Cullen Jennings. All rights reserved.
 
-DEBUG = True
 DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (

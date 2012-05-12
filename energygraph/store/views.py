@@ -1764,6 +1764,100 @@ def qTaskUpdate(userName,sensorName,t):
     taskUpdateValues(userName,sensorName,t)
 
 
+def taskThinValues(userName,sensorName,t):
+    logging.debug("In taskThinValues user=%s sensor=%s t=%s"%(userName,sensorName,t) )
+    
+    sensorID = getSensorIDByName( sensorName ) # todo - should check userName too
+    assert sensorID > 0
+
+    assert t is not None
+    t = long( t )
+    assert t > 0
+
+    now = long( time.time() )
+    oneMonth = long( 1*30*24*3600 )
+
+    if t + oneMonth >= now :
+        # this is bad - don't thin data this rencent
+        logging.error( "Trying to thin too rcent data %s %s %s"%(userName,sensorName,t) )
+        return
+
+    thinMeasurements( sensorID , t )
+    
+    
+    
+
+
+def qTaskThin(userName,sensorName,t):
+    logging.info("qTaskThin: user=%s sensor=%s time=%s"%(userName,sensorName,t) )
+ 
+    if userName == "*":
+        users = findAllUserNames() 
+        for u in users:
+            #taskqueue.add(url="/tasks/thin/%s/%s/%s/"%(u,sensorName,time) )
+            qTaskThin( u , sensorName, t )
+        return False
+        
+    userID = findUserIDByName( userName )
+    assert userID is not None
+
+    if sensorName == "*":
+        sensors = findAllSensorsByUserID(userID)
+            # q the non groups for computation before the groups to speed stuff up 
+        for sensor in sensors:
+            if sensor.killed != True:
+                if sensor.category != "Group":
+                    taskqueue.add(url="/tasks/thin/%s/%s/%s/"%( userName, sensor.sensorName , t) )
+                    #qTaskThin( userName, sensor.sensorName , t )
+        for sensor in sensors:
+            if sensor.killed != True:
+                if sensor.category == "Group":
+                    taskqueue.add(url="/tasks/thin/%s/%s/%s/"%( userName, sensor.sensorName , t) )
+                    #qTaskThin( userName, sensor.sensorName , t )
+        return False 
+
+    assert t is not None
+    oneMonth = 1*30*24*3600
+
+    if t == "*":
+        now = long( time.time() )
+        now = now - now%3600
+        for t in range( now-2*3600-oneMonth , now+1-oneMonth , 3600):
+            #taskqueue.add( url="/tasks/thin/%s/%s/%d/"%(user,sensorName,t) )
+            qTaskThin( userName, sensorName , t )
+        return False 
+    
+    if t == "-":
+        now = long( time.time() )
+        now = now - now%3600
+        for t in range( now-oneMonth*12*1 , now+1-oneMonth , 3600): # Q tasks fro 1 year range 
+            #taskqueue.add( url="/tasks/thin/%s/%s/%d/"%(user,sensorName,t) )
+            qTaskThin( userName, sensorName , t )
+        return False
+
+    assert t > 0 
+    taskThinValues(userName,sensorName,t)
+
+    return True
+
+
+def thinValues(request,userName,sensorName,pTime):
+    logging.info("TASK: Running task thinValues %s/%s/%s"%(userName,sensorName,pTime) )
+
+    #if userName != "*" and sensorName != "*":
+    #    if not streamExists(userName,sensorName) : # todo fix 
+    #        return HttpResponseNotFound('<h1>user=%s sensor name=%s not found</h1>'%(userName,sensorName) )
+     
+    didIt = qTaskThin( userName, sensorName, pTime )
+
+    if didIt:
+        logging.debug("TASK: did task thinValues %s/%s/%s"%(userName,sensorName,pTime) )
+        return HttpResponse('<h1>Did the thin Values</h1>'  )  
+    
+    logging.debug("TASK: finished quwing sub tasks for thinValues %s/%s/%s"%(userName,sensorName,pTime) )
+    return HttpResponse('<h1>Queued tasks to thin Values</h1>'  )  
+
+
 def updateValues(request,userName,sensorName,pTime):
     logging.info("TASK: Running task updateValues %s/%s/%s"%(userName,sensorName,pTime) )
 
@@ -1775,6 +1869,7 @@ def updateValues(request,userName,sensorName,pTime):
 
     logging.debug("TASK: completed task updateValues %s/%s/%s"%(userName,sensorName,pTime) )
     return HttpResponse('<h1>Queued tasks to updated Values</h1>'  )  
+
 
 
 def updateNotify(request,userName,sensorName):
