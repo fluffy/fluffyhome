@@ -7,12 +7,11 @@ endif
 
 set user=$1
 set pwd=$2
-set years = 2011
+set years = 2012
 
 switch ( $user )
   case fluffy:
     set sensors="alarm MAC0060350F3001-SHT-temp ECM1240-42340-ch1 000801ac231E-Temp 7159ee0c9de5-flushMain 7159ee0c9de5-heatA 7159ee0c9de5-heatB 7159ee0c9de5-mainHumidity 7159ee0c9de5-mainTemp 7159ee0c9de5-topHumidity 7159ee0c9de5-topTemp ECM1240-42340-aux1 ECM1240-42340-aux2 ECM1240-42340-aux3 ECM1240-42340-aux4 ECM1240-42340-aux5 ECM1240-42340-ch1 ECM1240-42340-ch2 ECM1240-42340-voltage ECM1240-42414-aux1 ECM1240-42414-aux2 ECM1240-42414-aux3 ECM1240-42414-aux4 ECM1240-42414-aux5 ECM1240-42414-ch1 ECM1240-42414-ch2 ECM1240-42414-voltage Insteon11BA19-flush1 MAC0060350F2812-pres MAC0060350F2812-volume MAC0060350F3001-BMP-pres MAC0060350F3001-BMP-temp MAC0060350F3001-SHT-hum  OneWire000801D2F1E4 OneWire000801EF221E TED5000-00-25-2F-20-08-E0-MTU1 TED5000-00-25-2F-20-08-E0-MTU2 ZB-0013A2004052 ZB-0013A2004052-ch1 arduinoTempA heaterA heaterB mainHumidity mainTemp topFloorHumidity topFloorTemp voltsError"
-    set years = "2010 2011"
     breaksw
   case theshire:
     set sensors="ECM1240-5707-ch1 ECM1240-5707-ch2"
@@ -33,7 +32,8 @@ setenv user fluffy
 foreach year ( $years )
 
 set maxDay = 365
-if ( $year != 2010 ) then
+set maxDay = 366
+if ( $year != 2011 ) then
   set maxDay = ` date "+%j" `
   @ maxDay = $maxDay - 2
 endif
