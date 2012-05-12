@@ -461,6 +461,7 @@ def getSensorIDByName( sensorName ):
     logging.debug( 'key4-getSensorIDByName:%s'%(sensorName) )
     id = memcache.get( 'key4-getSensorIDByName:%s'%(sensorName) )
     if id != None:
+        globalSensorIDBySensorName[sensorName] = id
         return id
 
     query = Sensor.all()
@@ -850,6 +851,11 @@ def getUserSettingEpoch(userName):
 
     logging.debug("Doing cache set in getUserSettingEpoch userName=%s ret=%d"%(userName,ret) )
     memcache.set( 'key4-UserSettingEpoch:%s'%(userName) , ret , 24*3600 )
+
+    #globalUserName = userName
+    #globalEpoch  = ret
+    #globalEpochTime = now
+
     return ret
 
 
@@ -900,8 +906,9 @@ def findUserNameBySensorID(sensorID):
     assert user.userName is not None
     ret = user.userName
 
-    globalUserNameBySensorID[sensorID] = ret
     memcache.set( 'key4-findUserNameBySensorID:%d'%(sensorID) , ret , 24*3600 )
+    globalUserNameBySensorID[sensorID] = ret
+
     return ret
 
 
@@ -1363,7 +1370,7 @@ class KnownIP(db.Model):
 
 def addKnownIP( ip, sensorName=None ):
     sensorID = 0
-    if sensorName !=None:
+    if sensorName != None:
         sensorID = getSensorIDByName( sensorName )
         
     if checkKnownIP( ip, sensorID, calledBy="addKnownIP"):
@@ -1376,11 +1383,19 @@ def addKnownIP( ip, sensorName=None ):
     return
 
 
+globalKnownIP = {}
+
 def checkKnownIP( ip, sensorID=0, calledBy=""):
+    global globalKnownIP 
+    # cache this in local mem and check that first 
+    if ip in globalKnownIP:
+        return True
+     
     cachekey = "key4-checkKnownIPfoo:%s/%d"%(ip,sensorID)
     logging.debug( cachekey) 
     id = memcache.get( cachekey ) 
     if id != None:
+        globalKnownIP[ip] = True;
         return True
  
     query = KnownIP.all()
@@ -1393,7 +1408,8 @@ def checkKnownIP( ip, sensorID=0, calledBy=""):
     if knownIP == None:
         return False
 
-    memcache.set( cachekey, True , 24*3600 ) 
+    memcache.set( cachekey, True , 24*3600 )
+    globalKnownIP[ip] = True;
     return True
 
 
@@ -1484,6 +1500,7 @@ def getSensorValue( sensorID ):
     global globalLastMeasurementEnergy 
     global globalLastMeasurementIntegral
     global globalLastMeasurementCacheTime
+    
     now = long( time.time() )
     if (now - globalLastMeasurementCacheTime) > 15:
         globalLastMeasurementTime = {}
@@ -1855,7 +1872,7 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=N
 
 
 def getCurrentUsageOld(user):
-    logging.info("Getting current usage for user %s"%user )
+    logging.debug("Getting current usage for user %s"%user )
 
     hydro = 0.0
     elec = findSensorPower( findSensorID( user, "All") , "Electricity" )

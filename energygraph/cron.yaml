@@ -3,7 +3,7 @@
 cron:
 - description: update the hourly values 
   url: /tasks/update/*/*/*/
-  schedule: every 25 minutes synchronized
+  schedule: every 25 minutes
 
 #- description: update the notifications to send email or sms for frozen sensors
 #  url: /tasks/notify/*/*/
@@ -19,57 +19,57 @@ cron:
 #  url: /tasks/refresh/fluffy/
 #  schedule: every 30 minutes 
 
-#- description: keep cache fresh  
-#  url: /wind/ab-south/
-#  schedule: every 30 minutes 
+- description: keep cache fresh  
+  url: /wind/ab-south/
+  schedule: every 30 minutes 
 
-#- description: update  wind red deer
-#  url: /tasks/pollWindAB2/red-deer/
-#  schedule: every 10 minutes 
-#- description: update  wind monarch
-#  url: /tasks/pollWindAB2/monarch/
-#  schedule: every 10 minutes 
-#- description: update  wind chestermere
-#  url: /tasks/pollWindAB2/chestermere/
-#  schedule: every 10 minutes 
-#- description: update  wind gleichen
-#  url: /tasks/pollWindAB2/gleichen/
-#  schedule: every 10 minutes 
-#- description: update  wind canmore
-#  url: /tasks/pollWindAB2/canmore/
-#  schedule: every 10 minutes 
-#
-#- description: update  wind Chestermere old 
-#  url: /tasks/pollWindAB1/1-10/
-#  schedule: every 10 minutes 
-#- description: update  wind Gleichen old 
-#  url: /tasks/pollWindAB1/1-14/
-#  schedule: every 10 minutes 
-#- description: update  wind Granum old 
-#  url: /tasks/pollWindAB1/2-08/
-#  schedule: every 10 minutes 
-#- description: update  wind Canmore old 
-#  url: /tasks/pollWindAB1/1-02/
-#  schedule: every 10 minutes 
-#- description: update  wind Monarch old 
-#  url: /tasks/pollWindAB1/3-08b/
-#  schedule: every 10 minutes 
-#
-#- description: update wind kiteranch  
-#  url: /tasks/pollWindAB3/highasakite/
-#  schedule: every 5 minutes 
-#
-#- description: update calgary airport  
-#  url: /tasks/pollWindAB4/ab-52/
-#  schedule: every 10 minutes 
-#
-#- description: update red deer airport  
-#  url: /tasks/pollWindAB4/ab-29/
-#  schedule: every 10 minutes 
-#
-#- description: update Lethbridge airport  
-#  url: /tasks/pollWindAB4/ab-30/
-#  schedule: every 10 minutes 
+- description: update  wind red deer
+  url: /tasks/pollWindAB2/red-deer/
+  schedule: every 10 minutes 
+- description: update  wind monarch
+  url: /tasks/pollWindAB2/monarch/
+  schedule: every 10 minutes 
+- description: update  wind chestermere
+  url: /tasks/pollWindAB2/chestermere/
+  schedule: every 10 minutes 
+- description: update  wind gleichen
+  url: /tasks/pollWindAB2/gleichen/
+  schedule: every 10 minutes 
+- description: update  wind canmore
+  url: /tasks/pollWindAB2/canmore/
+  schedule: every 10 minutes 
+
+- description: update  wind Chestermere old 
+  url: /tasks/pollWindAB1/1-10/
+  schedule: every 10 minutes 
+- description: update  wind Gleichen old 
+  url: /tasks/pollWindAB1/1-14/
+  schedule: every 10 minutes 
+- description: update  wind Granum old 
+  url: /tasks/pollWindAB1/2-08/
+  schedule: every 10 minutes 
+- description: update  wind Canmore old 
+  url: /tasks/pollWindAB1/1-02/
+  schedule: every 10 minutes 
+- description: update  wind Monarch old 
+  url: /tasks/pollWindAB1/3-08b/
+  schedule: every 10 minutes 
+
+- description: update wind kiteranch  
+  url: /tasks/pollWindAB3/highasakite/
+  schedule: every 5 minutes 
+
+- description: update calgary airport  
+  url: /tasks/pollWindAB4/ab-52/
+  schedule: every 10 minutes 
+
+- description: update red deer airport  
+  url: /tasks/pollWindAB4/ab-29/
+  schedule: every 10 minutes 
+
+- description: update Lethbridge airport  
+  url: /tasks/pollWindAB4/ab-30/
+  schedule: every 10 minutes 
 
 
 

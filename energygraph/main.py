@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Note the following license only appliens to this file and not other files in this directory or project
+# Note the following license only applies to this file and not other files in this directory or project
 
 #
 # Copyright 2007 Google Inc.
@@ -58,7 +58,7 @@ def log_exception(*args, **kwds):
 
 def main():
     logging.getLogger().setLevel(logging.WARNING)
-    #logging.getLogger().setLevel(logging.INFO)
+    logging.getLogger().setLevel(logging.INFO)
     if settings.DEBUG == True:
         logging.getLogger().setLevel(logging.DEBUG)
 

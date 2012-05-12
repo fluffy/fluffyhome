@@ -48,7 +48,7 @@ def twitterCallback(request):
     assert token, "Twitter callback URL did not contain a oauth token"
     assert verifier,  "Twitter callback URL did not contain a oauth token"
 
-    logging.info( "Twitter temp token in callback param is " + token )
+    logging.debug( "Twitter temp token in callback param is " + token )
  
     # find the user with that token
     query = User.all()
@@ -79,7 +79,7 @@ def twitterVerify(request,userName):
     tempToken['oauth_token'] = user.twitterTempToken
     tempToken['oauth_token_secret'] = user.twitterTempSecret
 
-    logging.info( "Twitter temp token in verify is " + user.twitterTempToken )
+    logging.debug( "Twitter temp token in verify is " + user.twitterTempToken )
  
     query = SystemData.all()
     sys = query.get()
@@ -96,7 +96,7 @@ def twitterVerify(request,userName):
         user.put()
     except:
         # don't have a valid access token
-        logging.info( "Did not get twitter access token"  )
+        logging.debug( "Did not get twitter access token"  )
 
     return HttpResponseRedirect( '/user/' + userName + '/prefs/' )
     
@@ -139,7 +139,7 @@ def twitterLogin(request,userName):
     user.twitterAccessSecret = ''
     user.put()
 
-    logging.info( "Twitter temp token in login is " + user.twitterTempToken )
+    logging.debug( "Twitter temp token in login is " + user.twitterTempToken )
     
     authURL = twitter.getAuthorizationURL( tempToken )
     assert( authURL )
@@ -215,14 +215,14 @@ def userPrefs( request, userName ):
     if request.method == 'POST': 
         form = EditUserForm(request.POST, instance=record)
         if form.is_valid():
-            logging.info( "input form IS valid" )
+            logging.debug( "input form IS valid" )
 
-            #logging.info( "form extra group = %s", form.cleaned_data['extraGroup'] )
+            #logging.debug( "form extra group = %s", form.cleaned_data['extraGroup'] )
 
             info = form.save(commit=False)
         
-            #logging.info( "form extra group = %s", info.extraGroup )
-            logging.info( "done" )
+            #logging.debug( "form extra group = %s", info.extraGroup )
+            logging.debug( "done" )
             
             msg ="Data succesfully saved"
 
@@ -249,7 +249,7 @@ def userPrefs( request, userName ):
         if record.twitterAccessToken != '':
             twitterEnabled = True
         
-    logging.info( "debug for form=%s"%form )
+    logging.debug( "debug for form=%s"%form )
     return render_to_response('userPrefs.html', { 'msg':msg, 
                                                   'form':form,
                                                   'user':userName,
@@ -354,6 +354,7 @@ def resetSensors(request,userName):
 def showPlotOLD_NO_USE(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
+        logging.debug( "Sensor name %s not found"%sensorName )   
         return HttpResponseNotFound('<h1>For user=userName=%s sensor=%s not found</h1>'%(userName,sensorName) )  
 
     data = { 'sensorName': sensorName ,
@@ -367,6 +368,7 @@ def showPlotOLD_NO_USE(request,userName,sensorName):
 def showLineGraph(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
+        logging.debug( "Sensor name %s not found"%sensorName )  
         return HttpResponseNotFound('<h1>For user=userName=%s sensor=%s not found</h1>'%(userName,sensorName) )  
 
     data = { 'sensorName': sensorName ,
@@ -380,6 +382,7 @@ def showLineGraph(request,userName,sensorName):
 def showLineGraphCSV(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == None:
+        logging.debug( "Sensor name %s not found"%sensorName )  
         return HttpResponseNotFound('<h1>user=%s stream name=%s not found</h1>'%(user,streamName) )  
 
     html = ""
@@ -436,6 +439,7 @@ def showLineGraphCSV(request,userName,sensorName):
 def showPlotJson_OLD_NO_USE(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == None:
+        logging.debug( "Sensor name %s not found"%sensorName )  
         return HttpResponseNotFound('<h1>user=%s stream name=%s not found</h1>'%(user,streamName) )  
 
     html = ""
@@ -636,7 +640,7 @@ def usageJson(request,userName,sensorName,type,period):
         step = 3600 * 24 * 7
         hour = (start/3600) % 24
 
-    logging.info( "start=%f end=%f"%(start,end) )
+    logging.debug( "start=%f end=%f"%(start,end) )
 
 
     userID =  findUserIdByName( userName )
@@ -648,6 +652,10 @@ def usageJson(request,userName,sensorName,type,period):
     # get all the hourly values from the database
     values = getHourlyByUserIDTime( userID, start, end , hour, hourOfWeek )
 
+    start = long( start )
+    end = long( end )
+    step = long( step )
+    
     for t in range( start , end, step ):
         ret += "   {c:[  \n"
 
@@ -813,10 +821,11 @@ def generateJson( tqxParams, vals , label, userName ):
 def todayJson(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
+        logging.debug( "Sensor name %s not found"%sensorName )  
         return HttpResponseNotFound('<h1>userName=%s stream name=%s not found</h1>'%(userName,sensorName) )  
 
     tqxParams = request.GET.get('tqx','')
-    logging.info( "foo=%s", tqxParams )
+    logging.debug( "foo=%s", tqxParams )
     
     #  get users time zone from DB
     userID =  findUserIdByName( userName )
@@ -880,6 +889,7 @@ def graphWindToday(request,sensorName):
     userName='wind'
     sensorID = findSensorID( userName, sensorName )
     if sensorID == 0 :
+        logging.debug( "Sensor name %s not found"%sensorName )  
         return HttpResponseNotFound('<h1>userName=%s sensor name=%s not found</h1>'%(userName,sensorName) )
 
     data = { 'sensorName': sensorName ,
@@ -894,6 +904,7 @@ def graphWindToday(request,sensorName):
 def graphToday(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == 0 :
+        logging.debug( "Sensor name %s not found"%sensorName )  
         return HttpResponseNotFound('<h1>userName=%s sensor name=%s not found</h1>'%(userName,sensorName) )
 
     data = { 'sensorName': sensorName ,
@@ -906,7 +917,7 @@ def graphToday(request,userName,sensorName):
 
 @digestProtect(realm='fluffyhome.com') 
 def dumpAlarm(request,userName,year,day):
-    logging.info( "dumping alarm for %s %s %s"%(userName,year,day ) )
+    logging.debug( "dumping alarm for %s %s %s"%(userName,year,day ) )
 
     year = int( year )
     day = int( day )
@@ -939,7 +950,7 @@ def dumpAlarm(request,userName,year,day):
             
 @digestProtect(realm='fluffyhome.com') 
 def dumpSensor(request,userName,sensorName,year,day):
-    logging.info( "dumping sensor for %s %s %s %s"%(userName,sensorName,year,day ) )
+    logging.debug( "dumping sensor for %s %s %s %s"%(userName,sensorName,year,day ) )
 
     year = int( year )
     day = int( day )
@@ -1140,6 +1151,7 @@ class EditSensorForm(djangoforms.ModelForm):
 def editSensor(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
+        logging.debug( "Sensor name %s not found"%sensorName )  
         return HttpResponseNotFound('<h1>userName=%s stream name=%s not found</h1>'%(userName,sensorName) )
     
     record = findSensor( sensorID ,"editSensor")
@@ -1151,12 +1163,12 @@ def editSensor(request,userName,sensorName):
     if request.method == 'POST': 
         form = EditSensorForm(request.POST, instance=record)
         if form.is_valid():
-            logging.info( "input form IS valid" )
+            logging.debug( "input form IS valid" )
             info = form.save(commit=False)
 
             x = form.clean()
             group =  x['inGroup2']
-            #logging.info( "inGroup2 = %s"%( group ))
+            #logging.debug( "inGroup2 = %s"%( group ))
             record.inGroup = group
             
             if record.sensorName == "All":
@@ -1184,7 +1196,7 @@ def editSensor(request,userName,sensorName):
                       }
         form = EditSensorForm( initVals, instance=record, auto_id=False  )
 
-    #logging.info( "debug for form=%s"%form )
+    #logging.debug( "debug for form=%s"%form )
     return render_to_response('editSensor.html', { 'msg':msg, 
                                              'form':form,
                                              'sensor': sensorData,
@@ -1253,14 +1265,17 @@ def createSensor(request,userName,sensorName):
             
         return HttpResponse('<h1>Updated sensor %s</h1>'%sensorName  )  
 
-    return HttpResponseNotFound('<h1>Problem with create sensor</h1>%s'%( sensorName ) )
+    logging.debug( "Problem creating sensor %s"%sensorName )  
+
+    return HttpResponseNotFound('<h1>Problem with create sensor %s </h1>'%( sensorName ) )
 
 
 
 def loadAllSensors(request,userName):
     # check user exists 
     if findUserIdByName(userName) == 0 :
-        return HttpResponseNotFound('<h1>Error: No user with name %s</h1>'%(userName) )  
+        logging.debug( "Problemfinding users %s"%userName )  
+        return HttpResponseNotFound('<h1>Error: No user with name %s </h1>'%(userName) )  
 
     sensorsIDs = findAllSensorsIDsByUserID( findUserIdByName( userName ) )
 
@@ -1268,14 +1283,15 @@ def loadAllSensors(request,userName):
         assert s > 0
         meta = findSensorMetaByID( s ,"showAllSensors" );
 
-    return HttpResponse('<h1>Updated sensor cache for user %s</h1>'%(userName) )  
+    return HttpResponse('<h1>Updated sensor cache for user %s </h1>'%(userName) )  
 
 
 def showAllWindSensors(request):
     # check user exists
     userName = 'wind'
     if findUserIdByName(userName) == 0 :
-        return HttpResponseNotFound('<h1>Error: No user with name %s</h1>'%(userName) )  
+        logging.debug( "Problemfinding users %s"%userName )  
+        return HttpResponseNotFound('<h1>Error: No user with name %s </h1>'%(userName) )  
 
     sensorDataList = []
 
@@ -1396,6 +1412,7 @@ def showAllSensors(request,userName):
 def showAllSensorsFunc(request,userName):
     # check user exists 
     if findUserIdByName(userName) == 0 :
+        logging.debug( "Problem finding users %s"%userName )  
         return HttpResponseNotFound('<h1>Error: No user with name %s</h1>'%(userName) )  
 
     sensorDataList = []
@@ -1542,6 +1559,7 @@ def usage(request,userName):
     # check user exists 
     userID = findUserIdByName(userName)
     if userID == 0 :
+        logging.debug( "Problem finding users %s"%userName )  
         return HttpResponseNotFound('<h1>Error: No user with name %s</h1>'%(userName) )  
 
     # todo , add proper checks for user/sensor exists for all pages 
@@ -1602,12 +1620,12 @@ def findSensorToEnroll(request,userName):
     if request.method == 'POST': 
         form = AddGroupForm(request.POST)
         if form.is_valid():
-            logging.info( "input form is valid" )
+            logging.debug( "input form is valid" )
 
             x = form.clean()
             name = x['name']
             
-            logging.info( "add new group name = %s", name )
+            logging.debug( "add new group name = %s", name )
             msg = "Created new %s group"%name 
             updateUserSettingsEpoch(userName)
 
@@ -1673,6 +1691,7 @@ def enrollOld(request,streamName):
     info = findEnroll( streamName, ip )
 
     if info.user == "":
+        logging.debug( "Problem with enroll" )  
         return HttpResponseNotFound('<p> Waiting for user to claim stream </p>' )
 
     url = "http://%s/sensor/%s/%s/value/"%(host,info.user,info.sensorName)
@@ -1753,7 +1772,7 @@ def updateValues(request,userName,sensorName,pTime):
      
     qTaskUpdate( userName, sensorName, pTime )
 
-    logging.info("TASK: completed task updateValues %s/%s/%s"%(userName,sensorName,pTime) )
+    logging.debug("TASK: completed task updateValues %s/%s/%s"%(userName,sensorName,pTime) )
     return HttpResponse('<h1>Queued tasks to updated Values</h1>'  )  
 
 
@@ -1904,7 +1923,7 @@ def pipes(request,user):
         measurement = query.get()
 
         if measurement == None:
-            logging.info( "No measurement record in DB for %s"%( str(pipe) )  )
+            logging.debug( "No measurement record in DB for %s"%( str(pipe) )  )
         else:
             pipe['time'] = measurement.time
             pipe['value'] = measurement.value
@@ -1932,6 +1951,7 @@ def store(request,userName,sensorName):
 
 def storeNoAuth(request,userName,sensorName): #old - should depricate 
     if request.method != 'PUT':
+        logging.warning( "Must use PUT %s %s"%(userName,sensorName) )
         return HttpResponseForbidden('<h1>Must use method PUT</h1>' )  
 
     data = request.raw_post_data
@@ -1939,6 +1959,7 @@ def storeNoAuth(request,userName,sensorName): #old - should depricate
     
     sensorID = findSensorID( userName,sensorName )
     if sensorID == 0 :
+        logging.warning( "Not a valid sensor %s %s"%(userName,sensorName) )        
         return HttpResponseForbidden('<h1>Not a Valid sensor</h1>' )  
 
     logging.debug( "Store user,sensor=%s,%s set to val=%s ip=%s "%(userName,sensorName,data,ip) )
@@ -1955,6 +1976,7 @@ def postAlarmValues(request):
         enableQuota = False # disable quotas for development environment
 
     if request.method != 'POST':
+        logging.debug( "must use post to update alarm" )        
         return  HttpResponseNotFound( "<H1>Must use a POST to update values</H1>" )
 
     data = request.raw_post_data
@@ -1975,6 +1997,7 @@ def postAlarmValues(request):
         if token == rateLimit:
             # should we log this or not
             logging.warning( "IP %s exceed per minute rate limit"%ip )
+        logging.debug( "IP %s exceed per minute rate limit"%ip )  
         return HttpResponseForbidden( "<H1>User has exceed limit of %d requests per minute</H1>"%rateLimit )
         
     logging.debug("Got post of alarm values %s from %s count=%d"%(data,ip, token) )
@@ -1984,7 +2007,6 @@ def postAlarmValues(request):
         jData = json.loads( data )
     except ValueError:
         logging.debug( "JSON data had error in parse")
-        #return HttpResponse( content="<H1>JSON data had error in parse: %s </H1>"%e , mimetype=None,  status=400 )
         return HttpResponseNotFound( "<H1>JSON data had error in parse</H1><br /><pre>%s</pre>"%data )
     
     try:
@@ -1993,6 +2015,7 @@ def postAlarmValues(request):
         logging.debug(" type is =%s"%str(type(jData)) )
         
         if ( type(jData) != dict ):
+            logging.debug( "JSON data was not an object" )        
             return HttpResponseNotFound( "<H1>JSON data was not an object</H1>" )
 
         account = 0
@@ -2025,12 +2048,12 @@ def postAlarmValues(request):
         cacheKey = "key4-alarmTokenBucketWindow%s/%s"%(account,win)
         token = memcache.incr( cacheKey , initial_value=0 )
         
-        rateLimit = 10 # Max number of request perg minute from each sensor
+        rateLimit = 20 # Max number of request per minute from each sensor
         if enableQuota and token >= rateLimit:
             if token == rateLimit:
                 # should we log this or not
-                logging.warning( "IP %s exceed per minute rate limit"%ip )
-                return HttpResponseForbidden( "<H1>User has exceed limit of %d updates per minute for a sensor</H1>"%rateLimit )
+                logging.warning( "IP %s exceed per minute rate limit for alarm updates"%ip )
+                return HttpResponseForbidden( "<H1>User has exceed limit of %d updates per minute for alarm</H1>"%rateLimit )
                 
         logging.debug("Received alarm account=%d user=%d eq=%d code=%d zone=%d part=%d"
                       %(account,user,eq,code,zone,part) )
@@ -2102,7 +2125,7 @@ def postAlarmValues(request):
 
 def postSensorValues(request):
     enableQuota = False
-    #enableQuota = True 
+    enableQuota = True 
 
     ver = os.environ['SERVER_SOFTWARE']
     devel = ver.startswith("Development")
@@ -2110,6 +2133,7 @@ def postSensorValues(request):
         enableQuota = False # disable quotas for development environment
 
     if request.method != 'POST':
+        logging.debug( "Must use a POST to update values" )        
         return  HttpResponseNotFound( "<H1>Must use a POST to update values</H1>" )
 
     data = request.raw_post_data
@@ -2134,7 +2158,8 @@ def postSensorValues(request):
             if token == rateLimit:
                 # should we log this or not
                 logging.warning( "IP %s exceed per minute rate limit"%ip )
-            return HttpResponseForbidden( "<H1>User has exceed limit of %d requests per minute</H1>"%rateLimit )
+            logging.debug( "IP %s exceed per minute rate limit for sensor"%ip )     
+            return HttpResponseForbidden( "<H1>User has exceed limit of %d requests per minute for sensor</H1>"%rateLimit )
         
     logging.debug("Got post of sensor values %s from %s count=%d"%(data,ip, token) )
 
@@ -2210,9 +2235,10 @@ def postSensorValues(request):
                         if token == rateLimit:
                             # should we log this or not
                             logging.warning( "IP %s exceed per minute rate limit"%ip )
-                        return HttpResponseForbidden( "<H1>User has exceed limit of %d updates per minute for a sensor</H1>"%rateLimit )
+                        logging.debug( "IP %s exceed per minute rate limit for sensor %s "%(ip,name) )
+                        return HttpResponseForbidden( "<H1>User has exceed limit of %d updates per minute for named sensor</H1>"%rateLimit )
     
-                logging.debug("Received measurment %s time=%d value=%s sum=%s units=%s joules=%s updateCount=%d"
+                logging.info("Received measurment %s time=%d value=%s sum=%s units=%s joules=%s updateCount=%d"
                               %(name,mTime,value,sum,units,joules,token) ) 
                 storeMeasurementByName( name, value, mTime=mTime, sum=sum, reset=False, joules=joules, patchLevel=patchLevel )
                 
@@ -2239,7 +2265,7 @@ def jsonFour(request,user):
     assert 0
     # stuff for daily pie chart 
     tqxParams = request.GET.get('tqx','')
-    logging.info( "foo=%s", tqxParams )
+    logging.debug( "foo=%s", tqxParams )
     
     reqId = '0'
     try:
