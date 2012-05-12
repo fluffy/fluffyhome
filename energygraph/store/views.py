@@ -26,6 +26,7 @@ from django import VERSION as DJANGO_VERSION
 from django.utils import simplejson as json  # fix when we can use Python 2.6 to just be import json 
 
 from google.appengine.api.labs import taskqueue
+from google.appengine.api.taskqueue  import Queue
 from google.appengine.ext import db
 from google.appengine.runtime import apiproxy_errors
 
@@ -1777,7 +1778,7 @@ def taskThinValues(userName,sensorName,t):
     now = long( time.time() )
     oneMonth = long( 1*30*24*3600 )
 
-    if t + oneMonth >= now :
+    if t + oneMonth*12 >= now :
         # this is bad - don't thin data this rencent
         logging.error( "Trying to thin too rcent data %s %s %s"%(userName,sensorName,t) )
         return
@@ -1790,7 +1791,9 @@ def taskThinValues(userName,sensorName,t):
 
 def qTaskThin(userName,sensorName,t):
     logging.info("qTaskThin: user=%s sensor=%s time=%s"%(userName,sensorName,t) )
- 
+
+    #thinqueue = taskqueue.Queue( "thin" );
+    
     if userName == "*":
         users = findAllUserNames() 
         for u in users:
@@ -1807,12 +1810,12 @@ def qTaskThin(userName,sensorName,t):
         for sensor in sensors:
             if sensor.killed != True:
                 if sensor.category != "Group":
-                    taskqueue.add(url="/tasks/thin/%s/%s/%s/"%( userName, sensor.sensorName , t) )
+                    taskqueue.add(url="/tasks/thin/%s/%s/%s/"%( userName, sensor.sensorName, t) )
                     #qTaskThin( userName, sensor.sensorName , t )
         for sensor in sensors:
             if sensor.killed != True:
                 if sensor.category == "Group":
-                    taskqueue.add(url="/tasks/thin/%s/%s/%s/"%( userName, sensor.sensorName , t) )
+                    taskqueue.add(url="/tasks/thin/%s/%s/%s/"%( userName, sensor.sensorName, t) )
                     #qTaskThin( userName, sensor.sensorName , t )
         return False 
 
@@ -1822,17 +1825,17 @@ def qTaskThin(userName,sensorName,t):
     if t == "*":
         now = long( time.time() )
         now = now - now%3600
-        for t in range( now-2*3600-oneMonth , now+1-oneMonth , 3600):
-            #taskqueue.add( url="/tasks/thin/%s/%s/%d/"%(user,sensorName,t) )
+        for t in range( now-2*3600-oneMonth*12 , now+1-oneMonth*12 , 3600):
+            #taskqueue.add( url="/tasks/thin/%s/%s/%d/"%( userName,sensorName,t) )
             qTaskThin( userName, sensorName , t )
         return False 
     
     if t == "-":
         now = long( time.time() )
         now = now - now%3600
-        for t in range( now-oneMonth*12*1 , now+1-oneMonth , 3600): # Q tasks fro 1 year range 
-            #taskqueue.add( url="/tasks/thin/%s/%s/%d/"%(user,sensorName,t) )
-            qTaskThin( userName, sensorName , t )
+        for t in range( now-oneMonth*14 , now+1-oneMonth*12 , 3600): # Q tasks for time range 
+            taskqueue.add( url="/tasks/thin/%s/%s/%d/"%( userName,sensorName,t ) )
+            #qTaskThin( userName, sensorName , t )
         return False
 
     assert t > 0 
