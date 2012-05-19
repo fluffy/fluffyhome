@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head %}
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load('visualization', '1', {packages: ['piechart','columnchart','table','barchart','gauge']} );
+    </script>
+   <script type="text/javascript">
+    var visualization1;
+
+    function drawVisualization1() {
+      var query = new google.visualization.Query(
+                  'http://{{host}}/user/{{user}}/history/All/cost/0day/json/' );
+     
+      // Send the query with a callback function.
+      query.send(handleQueryResponse1);
+    }
+    
+    function handleQueryResponse1(response) {
+      if (response.isError()) {
+        alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
+        return;
+      }
+    
+      var data = response.getDataTable();
+      //visualization1 = new google.visualization.Table(document.getElementById('visualization1'));
+      visualization1 = new google.visualization.ColumnChart(document.getElementById('visualization1'));
+      //visualization1 = new google.visualization.BarChart(document.getElementById('visualization1'));
+      visualization1.draw(data, { isStacked:true } );
+    }
+
+    google.setOnLoadCallback(drawVisualization1);
+    </script>
+
+    <script type='text/javascript'>
+      function drawGauge1() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Label');
+        data.addColumn('number', 'Value');
+        data.addRows(1);
+        data.setValue(0, 0, 'Gas (kW)');
+        data.setValue(0, 1, {{gaskW}});
+
+        var chart = new google.visualization.Gauge(document.getElementById('gauge1'));
+        var options = {width: 150, height: 150, max:75, redFrom: 65, redTo: 75,
+            yellowFrom:50, yellowTo: 65,
+            majorTicks: ['0','25','50','75'],
+            minorTicks: 5};
+        chart.draw(data, options);
+       }
+      google.setOnLoadCallback(drawGauge1);
+    </script>
+
+    <script type='text/javascript'>
+      function drawGauge2() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Label');
+        data.addColumn('number', 'Value');
+        data.addRows(1);
+        data.setValue(0, 0, 'Electic (kW)');
+        data.setValue(0, 1, {{eleckW}});
+
+        var chart = new google.visualization.Gauge(document.getElementById('gauge2'));
+        var options = {width: 150, height: 150, max:10, redFrom: 8, redTo: 10,
+            yellowFrom:6, yellowTo: 8,
+            majorTicks: ['0','1','2','3','4','5','6','7','9','10'],
+            minorTicks: 1 };
+        chart.draw(data, options);
+       }
+      google.setOnLoadCallback(drawGauge2);
+    </script>
+
+    <script type='text/javascript'>
+      function drawGauge3() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Label');
+        data.addColumn('number', 'Value');
+        data.addRows(1);
+        data.setValue(0, 0, 'Water (l/m)');
+        data.setValue(0, 1, {{hydroLpm}});
+
+        var chart = new google.visualization.Gauge(document.getElementById('gauge3'));
+        var options = {width: 150, height: 150, max:20, minorTicks: 5};
+        chart.draw(data, options);
+       }
+      google.setOnLoadCallback(drawGauge3);
+    </script>
+
+    <script type='text/javascript'>
+      function drawGauge4() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Label');
+        data.addColumn('number', 'Value');
+        data.addRows(1);
+        data.setValue(0, 0, 'Cost ($/h)');
+        data.setValue(0, 1, {{totCostPh}});
+
+        var chart = new google.visualization.Gauge(document.getElementById('gauge4'));
+        var options = {width: 150, height: 150, max:3, redFrom: 2, redTo: 3,
+            yellowFrom:1, yellowTo: 2,
+            majorTicks: ['0','1','2','3'], minorTicks: 5};
+        chart.draw(data, options);
+       }
+      google.setOnLoadCallback(drawGauge4);
+    </script>
+
+    <script type='text/javascript'>
+      function drawGauge5() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Label');
+        data.addColumn('number', 'Value');
+        data.addRows(1);
+        data.setValue(0, 0, 'CO2 (kg/h)');
+        data.setValue(0, 1, {{totC02kgph}});
+
+        var chart = new google.visualization.Gauge(document.getElementById('gauge5'));
+        var options = {width: 150, height: 150, max:20, redFrom: 15, redTo: 20,
+            yellowFrom:10, yellowTo: 15,
+            majorTicks: ['0', '5','10','15','20'],minorTicks: 5};
+        chart.draw(data, options);
+       }
+      google.setOnLoadCallback(drawGauge5);
+    </script>
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+<div class="section">
+  <h3 class="form-title" > Yesterday and Today </h3>
+</div>
+<div class="section-data" id="visualization1" style="height: 450px; width:750px;"></div>
+
+<div class="section">
+  <h3 class="form-title" >Usage</h3>
+</div>
+<div class="section-gauages"> 
+  <table><tr>
+    <td> <span id="gauge2" style="height: 150px; width:150px;"></span> </td>
+    <td> <span id="gauge1" style="height: 250px; width:150px;"></span> </td>
+    <td> <span id="gauge3" style="height: 150px; width:150px;"></span> </td> 
+    <td> <span id="gauge4" style="height: 150px; width:150px;"></span> </td>
+    <td> <span id="gauge5" style="height: 150px; width:150px;"></span> </td>
+  </tr></table>
+</div>
+{% endblock %}

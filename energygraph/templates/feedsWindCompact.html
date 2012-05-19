@@ -1,0 +1,38 @@
+{% extends "baseSmall.html" %}
+{% load i18n %}
+
+{% block head %}
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+{% for pipe in pipeList %}
+{% ifequal pipe.category "Tab" %}
+<div class="section">
+  <h3 class="form-title" >{{ pipe.label }}  </h3>
+</div>
+{% else %}
+<div class="section-item">
+  <div id="tools">
+     {% ifnotequal pipe.category "Group" %}
+      <a href="/wind/sensor/{{ pipe.name }}/history/today/">
+      <img src="/static/icons-emre-ozcelik/graph.png" width="32" height="32" border="0" alt="graph" />
+      </a>
+     {% endifnotequal %}
+ </div>
+  <div class="section-data"> <label>{{ pipe.label }}:</labeL>
+      {{ pipe.value }} {{ pipe.units }}    {% if pipe.temp %}  &nbsp;&nbsp; {{ pipe.temp }}&deg;C  {% endif %}
+</div>
+    {% if pipe.timeMin %}
+    <div class="section-subdata">
+      <label>&nbsp</label>
+      updated at {{ pipe.timeHour }}:{{ pipe.timeMin }} 
+   </div>
+    {% endif %}
+</div>
+<div class="divider"></div>
+{% endifequal %}
+{% endfor %}
+{% endblock %}

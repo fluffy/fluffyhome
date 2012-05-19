@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head %}
+   <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+   <script type="text/javascript">
+      google.load('visualization', '1', {packages: ['piechart','columnchart']} );
+   </script>
+   <script type="text/javascript">
+var visualization1;
+
+var fluffySensor = "All"
+var fluffyType = "kWh"
+var fluffyPeriod = "0day"
+
+function drawVisualization1()
+{
+  var query = new google.visualization.Query(
+                  'http://{{host}}/user/{{user}}/history/' +
+                    fluffySensor + '/' +
+                    fluffyType + '/' +
+                    fluffyPeriod +
+                    '/json/' );
+     
+  // Send the query with a callback function.
+  query.send(handleQueryResponse1);
+}
+    
+function handleQueryResponse1(response)
+{
+   if (response.isError())
+   {
+       alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
+       return;
+   }
+    
+   var data = response.getDataTable();
+   visualization1 = new google.visualization.ColumnChart(document.getElementById('visualization1'));
+   visualization1.draw(data, { isStacked:true } );
+}
+
+function redraw()
+{
+   drawVisualization1();
+}
+
+function updateType( val )
+{
+  fluffyType = val;
+  redraw();
+}
+
+function updateTimePeriod( val )
+{
+  fluffyPeriod = val;
+  redraw();
+}
+
+function updateSensor( val )
+{
+  fluffySensor = val;
+  redraw();
+}
+
+google.setOnLoadCallback(drawVisualization1);
+
+   </script>
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+
+<div class="section">
+  <h3 class="form-title" > Graph  </h3>
+</div>
+
+<div class="section-item">
+  <div class="section-data"> <label>Graph:</label>
+    <select name="sel1" onchange="updateType(this.value)" >
+      <option value="kWh">Energy</option>
+      <option value="gas">Gas</option>
+      <option value="elec">Electricity</option>
+      <option value="water">Water</option>
+      <option value="cost">Cost</option>
+      <option value="co2">CO2</option>
+    </select>
+  </div>
+</div>
+
+<div class="section-item">
+  <div class="section-data"> <label>For:</label>
+    <select name="sel2" onchange="updateSensor(this.value)" >
+      {% for sensor in sensors %}
+      <option value="{{ sensor.name }}">{{ sensor.label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div
+  
+<div class="section-item">
+  <div class="section-data"> <label>During:</label>
+    <select name="sel3" onchange="updateTimePeriod(this.value)" >
+      <option value="0day"  >Today</option>
+      <option value="1day"  >Yesterday</option>
+      <option value="2day"  >Last 2 days</option>
+      <option value="7day"  >Last 7 days</option>
+      <option value="30day" >Last 30 days</option>
+     <option value="6week" >Last 6 Week</option>
+     <option value="Aug" >Last August</option>
+<!--
+      <option value="0week">This Week</option>
+     <option value="0month">This Month</option>
+      <option value="1month">Last Month</option>
+      <option value="0year">This Year</option>
+      <option value="1year">Last Year</option>
+        -->
+    </select>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section-data" id="visualization1" style="height: 450px; width:750px;"></div>
+
+
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head %}
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load('visualization', '1', {packages: ['annotatedtimeline']});
+    </script>
+    <script type="text/javascript">
+    var visualization;
+
+    function drawVisualization() {
+      var query = new google.visualization.Query(
+                  'http://{{host}}/sensor/{{user}}/{{sensorName}}/history/json/' );
+     
+      // Send the query with a callback function.
+      query.send(handleQueryResponse);
+    }
+    
+    function handleQueryResponse(response) {
+      if (response.isError()) {
+        alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
+        return;
+      }
+    
+      var data = response.getDataTable();
+      visualization = new google.visualization.AnnotatedTimeLine(document.getElementById('visualization'));
+      visualization.draw(data, null);
+    }
+
+    google.setOnLoadCallback(drawVisualization);
+    </script>
+{% endblock %}
+
+{% block content %}
+
+<div class="section">
+  <h3 class="form-title" > {{label}} </h3>
+</div>
+<div id="visualization" style="height: 250px; width: 750px;"></div>
+    
+{% endblock %}

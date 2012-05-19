@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head %}
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+<form method="post" action="">
+
+<div class="section">
+  <h3 class="form-title" >{{ pipe.streamName }}</h3>
+</div>
+<div class="section-item">
+  {{ form.label.errors }}
+  <label for="id_label">{% trans "Label" %}</label>
+  {{ form.label }}
+</div>
+<div class="section-item">
+  {{ form.units.errors }}
+  <label for="id_units">{% trans "Units" %}</label>
+  {{ form.units }}
+</div>
+
+
+<div class="section">
+  <h3 class="form-title">{% trans "Update" %}</h3>
+</div>
+<div class="section-details">{{msg}}</div>
+<div class="section-item">
+  <label for="submit"></label>
+  <input type="submit" />
+</div>
+    
+</form>
+{% endblock %}
