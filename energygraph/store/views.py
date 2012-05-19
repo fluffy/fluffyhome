@@ -49,6 +49,16 @@ from energygraph.store.models import *
 #from oauthtwitter import OAuthApi
 
 
+class Memcache:
+    def get( o, x ):
+        return None
+    def set( o, x , y , z):
+        return
+memcache = Memcache()
+
+
+
+
 def twitterCallback(request):
     token = request.GET.get('oauth_token',None)
     verifier = request.GET.get('oauth_verifier',None)

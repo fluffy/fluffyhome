@@ -15,6 +15,15 @@ from sets import Set
 from django.db import models
 
 
+class Memcache:
+    def get( o, x ):
+        return None
+    def set( o, x , y , z):
+        return
+memcache = Memcache()
+
+
+
 def getPatchLevel():
     return 3
 
