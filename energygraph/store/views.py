@@ -18,25 +18,31 @@ from django.http import HttpResponseForbidden
 from django.http import HttpResponseRedirect
 from django.http import HttpResponseGone
 from django.shortcuts import render_to_response
-from google.appengine.ext.db import djangoforms
+
+#from django.template import Context, loader
+
+#from google.appengine.ext.db import djangoforms
+
 #from django import newforms as forms
 #from django.newforms import form_for_model,form_for_instance
+
 from django import forms
 from django import VERSION as DJANGO_VERSION
 from django.utils import simplejson as json  # fix when we can use Python 2.6 to just be import json 
 
-from google.appengine.api.labs import taskqueue
-from google.appengine.api.taskqueue  import Queue
-from google.appengine.ext import db
-from google.appengine.runtime import apiproxy_errors
 
-from google.appengine.api import mail
+#from google.appengine.api.labs import taskqueue
+#from google.appengine.api.taskqueue  import Queue
+#from google.appengine.ext import db
+#from google.appengine.runtime import apiproxy_errors
 
-from google.appengine.api import urlfetch
+#from google.appengine.api import mail
 
-from djangohttpdigest.decorators import digestProtect,digestLogin
+#from google.appengine.api import urlfetch
 
-from store.models import *
+#from djangohttpdigest.decorators import digestProtect,digestLogin
+
+from energygraph.store.models import *
 
 # TODO - need to uncomment these and install on notebook comp 
 #import oauth2 as oauth
@@ -103,7 +109,7 @@ def twitterVerify(request,userName):
     return HttpResponseRedirect( '/user/' + userName + '/prefs/' )
     
 
-@digestProtect(realm='fluffyhome.com') 
+#@digestProtect(realm='fluffyhome.com') 
 def twitterLogout(request,userName):
     # remove the twitter credentials
     query = User.all()
@@ -118,7 +124,7 @@ def twitterLogout(request,userName):
     return HttpResponseRedirect( '/user/' + userName + '/prefs/' )
 
 
-@digestProtect(realm='fluffyhome.com')  
+#@digestProtect(realm='fluffyhome.com')  
 def twitterLogin(request,userName):
     query = SystemData.all()
     sys = query.get()
@@ -149,7 +155,7 @@ def twitterLogin(request,userName):
     return HttpResponseRedirect( authURL )
    
     
-@digestProtect(realm='fluffyhome.com') 
+#@digestProtect(realm='fluffyhome.com') 
 def test1User(request,userName):
     #query = SystemData.all()
     #sys = query.get()
@@ -198,7 +204,7 @@ def editUser( request, userName ):
     return HttpResponse("<h1>Created user: %s with password %s </h1>"%(userName,password) )
  
 
-class EditUserForm(djangoforms.ModelForm):
+class EditUserForm( forms.ModelForm):
     class Meta:
         model = User
         exclude = [ 'userName','passwd','active','userID','settingEpoch' ]
@@ -207,7 +213,7 @@ class EditUserForm(djangoforms.ModelForm):
 
 
 
-@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
+#@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
 def userPrefs( request, userName ):
     msg = "Edit any values you wish to change above then press Update"
 
@@ -316,7 +322,7 @@ def showStats( request ):
 
 
 
-@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
+#@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
 def showGraphs( request, userName ):
     template = "showGraphs.html"
     
@@ -329,18 +335,18 @@ def showGraphs( request, userName ):
                                             'host':request.META["HTTP_HOST"] }) 
 
 
-@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
+#@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
 def patchHourly(request):
     val = hourlyPatch()
     return HttpResponse("<h1>Patched %d Hourly </h1>"%val)
 
-@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
+#@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
 def patchHourlyCount(request):
     val = hourlyPatchCount()
     return HttpResponse("<h1>Counted %d hourly to patch</h1>"%val)
 
 
-@digestProtect(realm='fluffyhome.com') 
+#@digestProtect(realm='fluffyhome.com') 
 def resetSensors(request,userName):
     # reset all values, integrals, and energy readings for all the users sensor
     
@@ -352,7 +358,7 @@ def resetSensors(request,userName):
     return HttpResponse("<h1>Reset all sensors</h1>")
 
 
-@digestProtect(realm='fluffyhome.com') 
+#@digestProtect(realm='fluffyhome.com') 
 def showPlotOLD_NO_USE(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
@@ -366,7 +372,7 @@ def showPlotOLD_NO_USE(request,userName,sensorName):
     return render_to_response('showPlot.html', data )
 
 
-@digestProtect(realm='fluffyhome.com') 
+#@digestProtect(realm='fluffyhome.com') 
 def showLineGraph(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
@@ -380,7 +386,7 @@ def showLineGraph(request,userName,sensorName):
     return render_to_response('lineGraph.html', data )
 
 
-#@digestProtect(realm='fluffyhome.com')  # todo - fix this security nightmare 
+##@digestProtect(realm='fluffyhome.com')  # todo - fix this security nightmare 
 def showLineGraphCSV(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == None:
@@ -437,7 +443,7 @@ def showLineGraphCSV(request,userName,sensorName):
     return response 
 
 
-#@digestProtect(realm='fluffyhome.com')  # todo - fix this security nightmare 
+##@digestProtect(realm='fluffyhome.com')  # todo - fix this security nightmare 
 def showPlotJson_OLD_NO_USE(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == None:
@@ -515,7 +521,7 @@ def findValueByTimeSensorID( values, time, sid ):
     return None
 
 
-#@digestProtect(realm='fluffyhome.com') # todo fix 
+##@digestProtect(realm='fluffyhome.com') # todo fix 
 def usageJson(request,userName,sensorName,type,period):
     tqxParams = request.GET.get('tqx','')
     
@@ -819,7 +825,7 @@ def generateJson( tqxParams, vals , label, userName ):
     return html
 
 
-#@digestProtect(realm='fluffyhome.com') # todo fix 
+##@digestProtect(realm='fluffyhome.com') # todo fix 
 def todayJson(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
@@ -902,7 +908,7 @@ def graphWindToday(request,sensorName):
     return render_to_response('graphTodaySmall.html', data )
 
 
-@digestProtect(realm='fluffyhome.com') 
+#@digestProtect(realm='fluffyhome.com') 
 def graphToday(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == 0 :
@@ -917,7 +923,7 @@ def graphToday(request,userName,sensorName):
     return render_to_response('graphToday.html', data )
 
 
-@digestProtect(realm='fluffyhome.com') 
+#@digestProtect(realm='fluffyhome.com') 
 def dumpAlarm(request,userName,year,day):
     logging.debug( "dumping alarm for %s %s %s"%(userName,year,day ) )
 
@@ -950,7 +956,7 @@ def dumpAlarm(request,userName,year,day):
     return response
 
             
-@digestProtect(realm='fluffyhome.com') 
+#@digestProtect(realm='fluffyhome.com') 
 def dumpSensor(request,userName,sensorName,year,day):
     logging.debug( "dumping sensor for %s %s %s %s"%(userName,sensorName,year,day ) )
 
@@ -1010,7 +1016,7 @@ def dumpMeta(request):
     return response
 
 
-@digestProtect(realm='fluffyhome.com') 
+#@digestProtect(realm='fluffyhome.com') 
 def dumpUser(request,userName):
     response = HttpResponse(mimetype='application/xml')
     response['Content-Disposition'] = 'attachment; filename=%s-dump.xml'%userName
@@ -1136,20 +1142,20 @@ def dumpSensorData( sensor, response ):
 
         
 
-class EditSensorForm(djangoforms.ModelForm):
+class EditSensorForm(forms.ModelForm):
     #inGroup = forms.TypedChoiceField(  coerce=int )
     inGroup2 = forms.TypedChoiceField(  coerce=int )
     class Meta:
         model = Sensor
         exclude = [ 'sensorID','userID','sensorName','inGroup','apiKey','tags','watts','public','killed','displayMin','displayMax' ]
     def __init__(self, *args, **kwargs):
-        super(djangoforms.ModelForm, self).__init__(*args, **kwargs)
+        super(forms.ModelForm, self).__init__(*args, **kwargs)
         self.fields['inGroup2'].choices = findAllGroupsIdNamePairs( kwargs['instance'].userID )
 
 
         
 
-@digestProtect(realm='fluffyhome.com') 
+#@digestProtect(realm='fluffyhome.com') 
 def editSensor(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
@@ -1206,7 +1212,7 @@ def editSensor(request,userName,sensorName):
                                              'host' : request.META["HTTP_HOST"] } )
 
 
-@digestProtect(realm='fluffyhome.com') 
+#@digestProtect(realm='fluffyhome.com') 
 def createSensor(request,userName,sensorName):
 
     userID = findUserIDByName( userName  )
@@ -1406,7 +1412,7 @@ def showAllWindSensors(request):
                                             'pipeList': sensorDataList ,
                                             'host':request.META["HTTP_HOST"] }) 
 
-@digestProtect(realm='fluffyhome.com') 
+#@digestProtect(realm='fluffyhome.com') 
 def showAllSensors(request,userName):
     return showAllSensorsFunc(request,userName=userName)
 
@@ -1554,7 +1560,7 @@ def showAllSensorsFunc(request,userName):
 
 
 
-@digestProtect(realm='fluffyhome.com') 
+#@digestProtect(realm='fluffyhome.com') 
 def usage(request,userName):
     #todo erro bad user 
 
@@ -1606,10 +1612,10 @@ def usage(request,userName):
     return render_to_response('usage.html', vars )
 
 
-class AddGroupForm(djangoforms.ModelForm):
+class AddGroupForm(forms.ModelForm):
     name = forms.RegexField( "^\w[\-\w]{0,64}$" ) 
 
-@digestProtect(realm='fluffyhome.com') 
+#@digestProtect(realm='fluffyhome.com') 
 def findSensorToEnroll(request,userName):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
@@ -1651,7 +1657,7 @@ def findSensorToEnroll(request,userName):
     
 
 
-@digestProtect(realm='fluffyhome.com') 
+#@digestProtect(realm='fluffyhome.com') 
 def addSensor(request,userName,sensorName):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
@@ -2033,9 +2039,21 @@ def pipes(request,user):
 
 
 def about(request):
-    ver = os.environ['SERVER_SOFTWARE']
+    ver = "TBD";
+    try:
+        ver = os.environ['SERVER_SOFTWARE']
+    except:
+        pass
     devel = ver.startswith("Development")
-   
+
+    #t = loader.get_template('about.html')
+    #c = Context( { 
+    #    'djangoVersion': "%s.%s.%s"%( DJANGO_VERSION[0],  DJANGO_VERSION[1], DJANGO_VERSION[2] ) ,
+    #    'pythonVersion': "%s"%( sys.version ) ,
+    #    'osVersion': "%s"%( ver ) ,
+    #    'host':request.META["HTTP_HOST"] })
+    #return HttpResponse(t.render(c), mimetype="application/xhtml+xml")
+
     return render_to_response('about.html' , { 
         'djangoVersion': "%s.%s.%s"%( DJANGO_VERSION[0],  DJANGO_VERSION[1], DJANGO_VERSION[2] ) ,
         'pythonVersion': "%s"%( sys.version ) ,
@@ -2043,7 +2061,7 @@ def about(request):
         'host':request.META["HTTP_HOST"] } )
 
 
-@digestProtect(realm='fluffyhome.com')  # old - should depricate 
+#@digestProtect(realm='fluffyhome.com')  # old - should depricate 
 def store(request,userName,sensorName):
     return storeNoAuth(request,userName,sensorName) 
 
@@ -2436,18 +2454,18 @@ def jsonFour(request,user):
     return response 
 
 
-@digestLogin(realm='fluffyhome.com')
+#@digestLogin(realm='fluffyhome.com')
 def login(request,user=None):
     return HttpResponseRedirect("/user/%s/status/"%user)
 
 
-@digestLogin(realm='fluffyhome.com')
+#@digestLogin(realm='fluffyhome.com')
 def enrollSensor2(request,sensorName,secret,user=None):
     return HttpResponseRedirect( "/user/%s/enroll/add/%s/"%(user,sensorName) )
 
 
 
-#@digestLogin(realm='fluffyhome.com')
+##@digestLogin(realm='fluffyhome.com')
 def pollWindAB1(request,loc,user=None):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 

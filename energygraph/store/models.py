@@ -8,44 +8,46 @@ from sets import Set
 
 # TODO switch to using memcache namespaces 
 
-from google.appengine.api import memcache
-from google.appengine.ext import db
-from google.appengine.ext.db import Key
+#from google.appengine.api import memcache
+#from google.appengine.ext import db
+#from google.appengine.ext.db import Key
+
+from django.db import models
 
 
 def getPatchLevel():
     return 3
 
 
-class Sensor(db.Model):
-    sensorID = db.IntegerProperty(required=True) # unique interger ID for this sensor 
-    sensorName = db.StringProperty(required=True) # For a given user, this is a unique name used in URIs
-    label = db.StringProperty(required=False,indexed=False) # human readable, changable, display name
-    userID = db.IntegerProperty(required=True) # user that owns this sensor 
-    apiKey = db.StringProperty(required=False,indexed=False) # TODO should we depricate this ?
+class Sensor(models.Model):
+    sensorID = models.IntegerField() # unique interger ID for this sensor 
+    sensorName = models.CharField() # For a given user, this is a unique name used in URIs
+    label = models.CharField() # human readable, changable, display name
+    userID = models.IntegerField() # user that owns this sensor 
+    apiKey = models.CharField() # TODO should we depricate this ?
 
-    public = db.BooleanProperty(indexed=False) # data is public 
-    hidden = db.BooleanProperty(indexed=False) # don't show the sensor on main displays of data 
-    ignore = db.BooleanProperty(indexed=False) # don't include sensor in calculations  
-    groupTotal = db.BooleanProperty(indexed=False) # don't show the sesnsor on main displays of data 
-    killed = db.BooleanProperty(indexed=False) # mark this true to effetively delete a sensor
+    public = models.BooleanField() # data is public 
+    hidden = models.BooleanField() # don't show the sensor on main displays of data 
+    ignore = models.BooleanField() # don't include sensor in calculations  
+    groupTotal = models.BooleanField() # don't show the sesnsor on main displays of data 
+    killed = models.BooleanField() # mark this true to effetively delete a sensor
 
-    category = db.StringProperty(indexed=True,required=False,choices=set(["Group", "Sensor"])) # dep , "Computed"
-    type = db.StringProperty(indexed=False,required=False,choices=set([ "None","Electricity","Gas","Water"   ] )) # rename resource
+    category = models.CharField( choices=set(["Group", "Sensor"])) # dep , "Computed"
+    type = models.CharField( choices=set([ "None","Electricity","Gas","Water"   ] )) # rename resource
                                                     #   , "Elecricity","Temp","Switch","Humidity", "Any" ])) #depricate lower ones
-    units = db.StringProperty(indexed=False,choices=set(["None","V","W","C","F","lps","A","%","RH%","Pa","km/h"])) #,'k' 'Ws' #TODO fix, degC and degF
-    unitsWhenOn = db.StringProperty(indexed=False,choices=set(["W","lps"])) 
+    units = models.CharField( choices=set(["None","V","W","C","F","lps","A","%","RH%","Pa","km/h"])) #,'k' 'Ws' #TODO fix, degC and degF
+    unitsWhenOn = models.CharField( choices=set(["W","lps"])) 
 
-    displayMin = db.FloatProperty(indexed=False) 
-    displayMax = db.FloatProperty(indexed=False) 
+    displayMin = models.FloatField() 
+    displayMax = models.FloatField() 
 
-    inGroup = db.IntegerProperty(required=False) # group this sensors is in
+    inGroup = models.IntegerField() # group this sensors is in
 
-    watts = db.FloatProperty(indexed=False) # TODO depricate this and use valueWhenOn
-    valueWhenOn = db.FloatProperty(indexed=False) 
-    threshold = db.FloatProperty(indexed=False) 
+    watts = models.FloatField() # TODO depricate this and use valueWhenOn
+    valueWhenOn = models.FloatField() 
+    threshold = models.FloatField() 
 
-    maxUpdateTime = db.IntegerProperty(indexed=False) # max time for update before sensor is considered "broken"
+    maxUpdateTime = models.IntegerField() # max time for update before sensor is considered "broken"
 
 
     
@@ -540,17 +542,17 @@ def findSensorID( userName, sensorName, create=False , createGroup=False ):
     return sensorID
 
 
-class AlarmData(db.Model):
-    time  = db.IntegerProperty() # time this messarement was made (seconds since unix epoch)
-    crit  = db.IntegerProperty() # 0=status, 1=info, 2=important, 3=alert 
-    notCrit  = db.IntegerProperty(required=False) # set to 1 if crit is 5, 0 otherwise
-    alarmID = db.IntegerProperty(required=False)
-    eq = db.IntegerProperty(required=False,indexed=False)
-    code = db.IntegerProperty(required=False) # todo should be true , and next one too 
-    part = db.IntegerProperty(required=False)
-    zone = db.IntegerProperty(required=False)
-    user = db.IntegerProperty(required=False)
-    note = db.StringProperty(required=False,indexed=False)
+class AlarmData(models.Model):
+    time  = models.IntegerField() # time this messarement was made (seconds since unix epoch)
+    crit  = models.IntegerField() # 0=status, 1=info, 2=important, 3=alert 
+    notCrit  = models.IntegerField() # set to 1 if crit is 5, 0 otherwise
+    alarmID = models.IntegerField()
+    eq = models.IntegerField()
+    code = models.IntegerField() # todo should be true , and next one too 
+    part = models.IntegerField()
+    zone = models.IntegerField()
+    user = models.IntegerField()
+    note = models.CharField()
 
 
 def addAlarmData( a, eq, c, p, crit, z=None, u=None, note=None ):
@@ -614,11 +616,11 @@ def findAlarmsBetween( alarmID, start, end ):
     return p
 
 
-class SystemData(db.Model):
-    nextSensorID = db.IntegerProperty()
-    nextUserID = db.IntegerProperty()
-    twitterConsumerToken  = db.StringProperty()
-    twitterConsumerSecret = db.StringProperty()
+class SystemData(models.Model):
+    nextSensorID = models.IntegerField()
+    nextUserID = models.IntegerField()
+    twitterConsumerToken  = models.CharField()
+    twitterConsumerSecret = models.CharField()
     
 
 def getSystemData():
@@ -665,31 +667,31 @@ def getNextUserID():
     return id
 
 
-class User(db.Model):
-    userName = db.StringProperty()
-    email  = db.StringProperty(indexed=False)
-    email2 = db.StringProperty(indexed=False)
-    email3 = db.StringProperty(indexed=False)
-    sms1   = db.StringProperty(indexed=False)
-    twitter = db.StringProperty(indexed=False)
-    purlKey = db.StringProperty(indexed=False)
-    passwd = db.StringProperty(indexed=False)
-    newPwd      = db.StringProperty(indexed=False)
-    newPwdAgain = db.StringProperty(indexed=False)
-    active = db.BooleanProperty(indexed=False)
-    userID = db.IntegerProperty() 
-    settingEpoch = db.IntegerProperty(indexed=False) # this increments each time the setting or sensors change for this user 
-    timeZoneOffset = db.FloatProperty(indexed=False)
-    midnightIs4Am = db.BooleanProperty(indexed=False)
-    gasCost = db.FloatProperty(indexed=False)
-    elecCost = db.FloatProperty(indexed=False)
-    waterCost = db.FloatProperty(indexed=False)
-    gasCO2 = db.FloatProperty(indexed=False)
-    elecCO2 = db.FloatProperty(indexed=False)
-    twitterAccessToken = db.StringProperty(indexed=False)
-    twitterAccessSecret = db.StringProperty(indexed=False)
-    twitterTempToken = db.StringProperty(indexed=True)
-    twitterTempSecret = db.StringProperty(indexed=False)
+class User(models.Model):
+    userName = models.CharField()
+    email  = models.CharField()
+    email2 = models.CharField()
+    email3 = models.CharField()
+    sms1   = models.CharField()
+    twitter = models.CharField()
+    purlKey = models.CharField()
+    passwd = models.CharField()
+    newPwd      = models.CharField()
+    newPwdAgain = models.CharField()
+    active = models.BooleanField()
+    userID = models.IntegerField() 
+    settingEpoch = models.IntegerField() # this increments each time the setting or sensors change for this user 
+    timeZoneOffset = models.FloatField()
+    midnightIs4Am = models.BooleanField()
+    gasCost = models.FloatField()
+    elecCost = models.FloatField()
+    waterCost = models.FloatField()
+    gasCO2 = models.FloatField()
+    elecCO2 = models.FloatField()
+    twitterAccessToken = models.CharField()
+    twitterAccessSecret = models.CharField()
+    twitterTempToken = models.CharField()
+    twitterTempSecret = models.CharField()
 
 
 
@@ -987,18 +989,18 @@ def findUserIdByName( userName ):
 
 
 
-class Hourly2(db.Model):
-    sensorID   = db.IntegerProperty() # system wide unique identifer for sensor 
-    userID     = db.IntegerProperty() # user that owns the sensor
-    patchLevel  = db.IntegerProperty() # version that data has been upgraded too 
-    time       = db.IntegerProperty() # time this messarement was made (seconds since unix epoch)
-    integral   = db.FloatProperty() # integral of value over time up to this meassurment (units * seconds)
-    value      = db.FloatProperty() # value of sensor at time of meassurment (units)
-    joules     = db.FloatProperty() # cumulative energy used in watt seconds (Joules) #TODO rename energy
-    hourOfDay  = db.IntegerProperty() # 0 to (24-1), hour of day messarement was made 
-    hourOfWeek  = db.IntegerProperty() # 0 to (24*7-1), hour of week messarement was made (Available in patchlevel >= 2)
-    groupOtherValue = db.FloatProperty() # for groups, value of groupTotal - sum of group values (units)
-    groupOtherEnergy = db.FloatProperty() # for groups, value of groupTotal - sum of group energy (units)
+class Hourly2(models.Model):
+    sensorID   = models.IntegerField() # system wide unique identifer for sensor 
+    userID     = models.IntegerField() # user that owns the sensor
+    patchLevel  = models.IntegerField() # version that data has been upgraded too 
+    time       = models.IntegerField() # time this messarement was made (seconds since unix epoch)
+    integral   = models.FloatField() # integral of value over time up to this meassurment (units * seconds)
+    value      = models.FloatField() # value of sensor at time of meassurment (units)
+    joules     = models.FloatField() # cumulative energy used in watt seconds (Joules) #TODO rename energy
+    hourOfDay  = models.IntegerField() # 0 to (24-1), hour of day messarement was made 
+    hourOfWeek  = models.IntegerField() # 0 to (24*7-1), hour of week messarement was made (Available in patchlevel >= 2)
+    groupOtherValue = models.FloatField() # for groups, value of groupTotal - sum of group values (units)
+    groupOtherEnergy = models.FloatField() # for groups, value of groupTotal - sum of group energy (units)
 
 
 
@@ -1362,10 +1364,10 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
 
 
 
-class KnownIP(db.Model):
-    ip       = db.StringProperty(required=True)
-    time     = db.IntegerProperty(required=False) # time this messarement was made (seconds since unix epoch)
-    sensorID = db.IntegerProperty(required=False) # system wide unique identifer for sensor
+class KnownIP(models.Model):
+    ip       = models.CharField()
+    time     = models.IntegerField() # time this messarement was made (seconds since unix epoch)
+    sensorID = models.IntegerField() # system wide unique identifer for sensor
 
 
 def addKnownIP( ip, sensorName=None ):
@@ -1439,13 +1441,13 @@ def findIPforSensorID( sensorID ):
     return ret
    
     
-class Measurement2(db.Model):
-    sensorID   = db.IntegerProperty() # system wide unique identifer for sensor
-    time       = db.IntegerProperty() # time this messarement was made (seconds since unix epoch)
-    integral   = db.FloatProperty() # integral of value over time up to this meassurment (units * seconds)
-    value      = db.FloatProperty() # value of sensor at time of meassurment (units)
-    joules     = db.FloatProperty() # cumulative energy used in watt seconds (Joules) # TODO rename energy
-    patchLevel = db.IntegerProperty() # version that data has been upgraded too 
+class Measurement2(models.Model):
+    sensorID   = models.IntegerField() # system wide unique identifer for sensor
+    time       = models.IntegerField() # time this messarement was made (seconds since unix epoch)
+    integral   = models.FloatField() # integral of value over time up to this meassurment (units * seconds)
+    value      = models.FloatField() # value of sensor at time of meassurment (units)
+    joules     = models.FloatField() # cumulative energy used in watt seconds (Joules) # TODO rename energy
+    patchLevel = models.IntegerField() # version that data has been upgraded too 
 
 
 def thinMeasurements( sensorID, t ):
@@ -2126,12 +2128,12 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
 
 
 
-class EnrollInfo(db.Model): #  TODO remove indexes on some of these 
-    sensorName = db.StringProperty() 
-    user = db.StringProperty()
-    ipAddr = db.StringProperty()
-    secret = db.StringProperty()
-    time = db.DateTimeProperty(auto_now_add=True)
+class EnrollInfo(models.Model): #  TODO remove indexes on some of these 
+    sensorName = models.CharField() 
+    user = models.CharField()
+    ipAddr = models.CharField()
+    secret = models.CharField()
+    time = models.DateTimeField(auto_now_add=True)
 
 
 def findEnroll( sensorName, ip ):
