@@ -4,7 +4,8 @@ import logging
 from datetime import timedelta
 from datetime import datetime
 import time
-from sets import Set
+
+#from sets import Set
 
 # TODO switch to using memcache namespaces 
 
@@ -30,10 +31,10 @@ def getPatchLevel():
 
 class Sensor(models.Model):
     sensorID = models.IntegerField() # unique interger ID for this sensor 
-    sensorName = models.CharField() # For a given user, this is a unique name used in URIs
-    label = models.CharField() # human readable, changable, display name
+    sensorName = models.CharField(max_length=64) # For a given user, this is a unique name used in URIs
+    label = models.CharField(max_length=128) # human readable, changable, display name
     userID = models.IntegerField() # user that owns this sensor 
-    apiKey = models.CharField() # TODO should we depricate this ?
+    apiKey = models.CharField(max_length=256) # TODO should we depricate this ?
 
     public = models.BooleanField() # data is public 
     hidden = models.BooleanField() # don't show the sensor on main displays of data 
@@ -41,11 +42,14 @@ class Sensor(models.Model):
     groupTotal = models.BooleanField() # don't show the sesnsor on main displays of data 
     killed = models.BooleanField() # mark this true to effetively delete a sensor
 
-    category = models.CharField( choices=set(["Group", "Sensor"])) # dep , "Computed"
-    type = models.CharField( choices=set([ "None","Electricity","Gas","Water"   ] )) # rename resource
+    category = models.CharField( max_length=15, choices=[ ("Group","Group"), ("Sensor","Sensor") ] ) # dep , "Computed"
+                                
+    type = models.CharField(max_length=15, choices=[ ("None","None"),("Electricity","Electricity"),("Gas","Gas"),("Water","Water")   ] ) # rename resource
                                                     #   , "Elecricity","Temp","Switch","Humidity", "Any" ])) #depricate lower ones
-    units = models.CharField( choices=set(["None","V","W","C","F","lps","A","%","RH%","Pa","km/h"])) #,'k' 'Ws' #TODO fix, degC and degF
-    unitsWhenOn = models.CharField( choices=set(["W","lps"])) 
+                                                    
+    units = models.CharField(max_length=10, choices=[("None","None"),("V","V"),("W","W"),("C","C"),("F","F"),("lps","lps"),("A","A"),("%","%"),("RH%","RH%"),("Pa","Pa"),("km/h","km/h")] ) #,'k' 'Ws' #TODO fix, degC and degF
+    
+    unitsWhenOn = models.CharField(max_length=10, choices=[("W","W"),("lps","lps")]) 
 
     displayMin = models.FloatField() 
     displayMax = models.FloatField() 
@@ -225,7 +229,7 @@ def findGroupTotalSensorID( groupID , ignoreList ):
     return ret
 
 
-def findSensorPower( sensorID , type="None" ,ignoreList=Set() ): #TODO - unify with getSensorPower 
+def findSensorPower( sensorID , type="None" ,ignoreList=set() ): #TODO - unify with getSensorPower 
     sensorMeta = findSensorMetaByID( sensorID )
     assert sensorMeta is not None
     ret = 0.0
@@ -251,7 +255,7 @@ def findSensorPower( sensorID , type="None" ,ignoreList=Set() ): #TODO - unify w
     return ret
 
 
-def findSensorWater( sensorID , type="None" , ignoreList=Set() ): #TODO - unify with getSensorPower 
+def findSensorWater( sensorID , type="None" , ignoreList=set() ): #TODO - unify with getSensorPower 
     sensorMeta = findSensorMetaByID( sensorID )
     assert sensorMeta is not None
     ret = 0.0
@@ -285,7 +289,7 @@ def findAllResourceSensors( userID , inGroupID=None ): #TODO  cache
     query.filter( 'userID =' , userID )
     sensors = query.fetch(256)
 
-    set = Set()
+    set = set()
     if inGroupID is not None:
         assert inGroupID > 0 , "failed with inGroupID='%s'"%inGroupID
         set.add( inGroupID )
@@ -561,7 +565,7 @@ class AlarmData(models.Model):
     part = models.IntegerField()
     zone = models.IntegerField()
     user = models.IntegerField()
-    note = models.CharField()
+    note = models.CharField(max_length=80)
 
 
 def addAlarmData( a, eq, c, p, crit, z=None, u=None, note=None ):
@@ -628,8 +632,8 @@ def findAlarmsBetween( alarmID, start, end ):
 class SystemData(models.Model):
     nextSensorID = models.IntegerField()
     nextUserID = models.IntegerField()
-    twitterConsumerToken  = models.CharField()
-    twitterConsumerSecret = models.CharField()
+    twitterConsumerToken  = models.CharField(max_length=80)
+    twitterConsumerSecret = models.CharField(max_length=80)
     
 
 def getSystemData():
@@ -677,16 +681,16 @@ def getNextUserID():
 
 
 class User(models.Model):
-    userName = models.CharField()
-    email  = models.CharField()
-    email2 = models.CharField()
-    email3 = models.CharField()
-    sms1   = models.CharField()
-    twitter = models.CharField()
-    purlKey = models.CharField()
-    passwd = models.CharField()
-    newPwd      = models.CharField()
-    newPwdAgain = models.CharField()
+    userName = models.CharField(max_length=80)
+    email  = models.CharField(max_length=80)
+    email2 = models.CharField(max_length=80)
+    email3 = models.CharField(max_length=80)
+    sms1   = models.CharField(max_length=80)
+    twitter = models.CharField(max_length=80)
+    purlKey = models.CharField(max_length=80)
+    passwd = models.CharField(max_length=80)
+    newPwd      = models.CharField(max_length=80)
+    newPwdAgain = models.CharField(max_length=80)
     active = models.BooleanField()
     userID = models.IntegerField() 
     settingEpoch = models.IntegerField() # this increments each time the setting or sensors change for this user 
@@ -697,10 +701,10 @@ class User(models.Model):
     waterCost = models.FloatField()
     gasCO2 = models.FloatField()
     elecCO2 = models.FloatField()
-    twitterAccessToken = models.CharField()
-    twitterAccessSecret = models.CharField()
-    twitterTempToken = models.CharField()
-    twitterTempSecret = models.CharField()
+    twitterAccessToken = models.CharField(max_length=80)
+    twitterAccessSecret = models.CharField(max_length=80)
+    twitterTempToken = models.CharField(max_length=80)
+    twitterTempSecret = models.CharField(max_length=80)
 
 
 
@@ -949,18 +953,20 @@ def findUserIDByName( userName ):
     
 
 def findUserByName( userName ):
-    query = User.all()
+    #query = User.all()
     logging.debug("# DB search for findUserByName" )
-    query.filter( 'userName =', userName )
-    user = query.get()
+    #query.filter( 'userName =', userName )
+    #user = query.get()
+    user = User.objects.get( userName=userName )
     return user
 
 
 def findUserByID( userID ):
-    query = User.all()
+    #query = User.all()
     logging.debug("# DB search for findUserByID" )
-    query.filter( 'userID =', userID )
-    user = query.get()
+    #query.filter( 'userID =', userID )
+    #user = query.get()
+    user = User.objects.get( userID=userID )
     assert user is not None
     return user
 
@@ -1052,7 +1058,7 @@ def hourlyPatchFast():
     #memcache.set('key4-hourly_path_cursor_%d_a'%level,cursor, 2*24*3600 )
 
     c=0
-    patched = Set()
+    patched = set()
     for result in results:
         if result.patchLevel < 3:
             result.patchLevel = level
@@ -1135,7 +1141,7 @@ def getHourlyEnergyTotalByGroupID( groupID, utime ):
     if val != None:
         return val
 
-    gt = findGroupTotalSensorID( groupID , Set() )
+    gt = findGroupTotalSensorID( groupID , set() )
     if gt != 0:
         ret = getHourlyEnergyBySensorID( gt, utime )
     else:
@@ -1171,7 +1177,7 @@ def getHourlyEnergyOtherByGroupID( groupID, utime ):
 
     #logging.debug( "Start getHourlyEnergyOtherByGroupID for group %s"%(getSensorLabelByID( groupID ) ) )
 
-    gt = findGroupTotalSensorID( groupID , Set() )
+    gt = findGroupTotalSensorID( groupID , set() )
     if gt == 0:
         # no group total found
         return 0.0
@@ -1374,7 +1380,7 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
 
 
 class KnownIP(models.Model):
-    ip       = models.CharField()
+    ip       = models.CharField(max_length=80)
     time     = models.IntegerField() # time this messarement was made (seconds since unix epoch)
     sensorID = models.IntegerField() # system wide unique identifer for sensor
 
@@ -1431,7 +1437,7 @@ def findAllKnownIP():
     query.order("-time") 
     ips = query.fetch(1024)
 
-    ret = Set()
+    ret = set()
     for ip in ips:
         ret.add( ip.ip )
     return ret
@@ -2138,10 +2144,10 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
 
 
 class EnrollInfo(models.Model): #  TODO remove indexes on some of these 
-    sensorName = models.CharField() 
-    user = models.CharField()
-    ipAddr = models.CharField()
-    secret = models.CharField()
+    sensorName = models.CharField(max_length=80) 
+    user = models.CharField(max_length=80)
+    ipAddr = models.CharField(max_length=80)
+    secret = models.CharField(max_length=80)
     time = models.DateTimeField(auto_now_add=True)
 
 
