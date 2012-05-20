@@ -57,13 +57,13 @@ def log_exception(*args, **kwds):
 #    django.core.signals.got_request_exception)
 
 def main():
-    logging.getLogger().setLevel(logging.WARNING)
-    logging.getLogger().setLevel(logging.INFO)
-    if settings.DEBUG == True:
-        logging.getLogger().setLevel(logging.DEBUG)
+    #logging.getLogger().setLevel(logging.WARNING)
+    #logging.getLogger().setLevel(logging.INFO)
+    #if settings.DEBUG == True:
+    #    logging.getLogger().setLevel(logging.DEBUG)
 
-    if os.environ['SERVER_SOFTWARE'].startswith("Development"):
-        logging.getLogger().setLevel(logging.DEBUG)
+    #if os.environ['SERVER_SOFTWARE'].startswith("Development"):
+    #    logging.getLogger().setLevel(logging.DEBUG)
     
     # Create a Django application for WSGI.
     application = django.core.handlers.wsgi.WSGIHandler()

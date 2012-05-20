@@ -1,19 +1,12 @@
 # Copyright (c) 2010, Cullen Jennings. All rights reserved.
 
-
 from django.conf.urls.defaults import *
 from django.views.generic.simple import redirect_to
 
-#from pachube.views import *
 from store.views import *
 
 urlpatterns = patterns('',
-   # (r'^pachube/(?P<feed>\d{1,8})/(?P<stream>\d{1,3})/view/$', view1 ), 
-   # (r'^pachube/(?P<feed>\d{1,8})/(?P<stream>\d{1,3})/json/$', json ), 
-   # (r'^pachube/(?P<feed>\d{1,8})/(?P<stream>\d{1,3})/table/$', view3 ), 
-   # (r'^pachube/(?P<feed>\d{1,8})/(?P<stream>\d{1,3})/chart/$', view4 ), 
-
-
+ 
     (r'^wind/$', redirect_to, { 'url':'/wind/ab-south/'} ), 
     (r'^wind/ab-south/$', showAllWindSensors ), 
     (r'^wind/sensor/(?P<sensorName>[\w][\-\w]{0,64})/history/today/$', graphWindToday ), 
@@ -74,15 +67,4 @@ urlpatterns = patterns('',
     (r'^about/$', about ), 
     (r'^login/$', login ), 
 
-
-   #old names 
-    # (r'^enroll/(?P<streamName>[a-zA-Z][\-\w]{0,64})/$', enroll ), 
-
-    #(r'^user/(?P<user>[a-zA-Z]\w{0,64})/status/elec/$', totalElec ), 
-    #(r'^user/(?P<user>[a-zA-Z]\w{0,64})/status/json/$', jsonFour ), 
-
-    # (r'^sensor/(?P<userName>[a-zA-Z]\w{0,64})/(?P<sensorName>[\w][\-\w]{0,64})/value/$', store ), 
-
-    # (r'^store/(?P<userName>[a-zA-Z]\w{0,64})/(?P<sensorName>[\w][\-\w]{0,64})/$', storeNoAuth ), 
-    # (r'^admin/', include('django.contrib.admin.urls')),
 )

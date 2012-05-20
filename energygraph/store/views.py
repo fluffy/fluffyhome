@@ -968,8 +968,6 @@ def dumpSensorData( sensor, response ):
         if sensor.userID is not None:
             attr += " userName='%s'"%findUserNameBySensorID( sensor.sensorID )
             
-        attr += " apiKey='%s'"%sensor.apiKey 
-
         attr += " public='%d'"%sensor.public 
         attr += " hidden='%d'"%sensor.hidden
         attr += " ignore='%d'"%sensor.ignore 
@@ -1297,6 +1295,9 @@ def showAllSensorsFunc(request,userName):
     assert allGroupSensorID > 0, "There is no group named 'All' for user %s"%userName
 
     sensorsIDs = findAllSensorsIDsByUserID( findUserIdByName( userName ) )
+
+    #logging.debug( "Found sernsor id len=%s "% len( sensorsIDs ) )  
+    #logging.debug( "Found sernsor id %s "%str( sensorsIDs ) )
     
     # find all the groups in sorted order 
     groupList = []
