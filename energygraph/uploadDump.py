@@ -46,7 +46,7 @@ def main():
     parser.add_option("-p", "--password", dest="password",
                       help="HTTP Digest password" , default="123456" )
     url = "http://www.fluffyhome.com"
-    url = "http://localhost:8088"
+    url = "http://localhost:8000"
 
     (options, args) = parser.parse_args()
     if len(args) > 2:

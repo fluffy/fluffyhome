@@ -30,7 +30,7 @@ def getPatchLevel():
 
 
 class Sensor(models.Model):
-    sensorID = models.IntegerField() # unique interger ID for this sensor 
+    sensorID = models.IntegerField(primary_key=True) # unique interger ID for this sensor 
     sensorName = models.CharField(max_length=64) # For a given user, this is a unique name used in URIs
     label = models.CharField(max_length=128) # human readable, changable, display name
     userID = models.IntegerField() # user that owns this sensor 
@@ -710,6 +710,7 @@ def getNextUserID():
 
 
 class User(models.Model):
+    userID = models.IntegerField(primary_key=True) 
     userName = models.CharField(max_length=80)
     email  = models.CharField(max_length=80)
     email2 = models.CharField(max_length=80)
@@ -721,7 +722,6 @@ class User(models.Model):
     newPwd      = models.CharField(max_length=80)
     newPwdAgain = models.CharField(max_length=80)
     active = models.BooleanField()
-    userID = models.IntegerField() 
     settingEpoch = models.IntegerField() # this increments each time the setting or sensors change for this user 
     timeZoneOffset = models.FloatField()
     midnightIs4Am = models.BooleanField()
@@ -1055,7 +1055,7 @@ class Hourly2(models.Model):
     time       = models.IntegerField() # time this messarement was made (seconds since unix epoch)
     integral   = models.FloatField() # integral of value over time up to this meassurment (units * seconds)
     value      = models.FloatField() # value of sensor at time of meassurment (units)
-    joules     = models.FloatField() # cumulative energy used in watt seconds (Joules) #TODO rename energy
+    energy     = models.FloatField() # cumulative energy used in watt seconds (Joules) 
     hourOfDay  = models.IntegerField() # 0 to (24-1), hour of day messarement was made 
     hourOfWeek  = models.IntegerField() # 0 to (24*7-1), hour of week messarement was made (Available in patchlevel >= 2)
     groupOtherValue = models.FloatField() # for groups, value of groupTotal - sum of group values (units)
@@ -1301,9 +1301,9 @@ def getHourlyEnergyBySensorID( sensorID, utime ): # TODO - can we get rid of thi
         
     assert hourly is not None
 
-    assert hourly.joules >= 0.0
-    memcache.set(  'key4-getHourlyEnergyBySensorID:%d/%d'%(sensorID,utime), hourly.joules, 24*3600 )
-    return hourly.joules
+    assert hourly.energy >= 0.0
+    memcache.set(  'key4-getHourlyEnergyBySensorID:%d/%d'%(sensorID,utime), hourly.energy, 24*3600 )
+    return hourly.energy
 
 
 
@@ -1404,7 +1404,7 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
 
     hourly.integral = 0.0
     hourly.value = 0.0
-    hourly.joules = 0.0
+    hourly.energy = 0.0
     hourly.groupOtherValue = 0.0
     hourly.groupOtherEnergy = 0.0
     hourly.patchLevel = 0
@@ -1420,10 +1420,10 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
     if prev is not None:
         hourly.integral = getSensorIntegral(sensorID,utime,prev,next)
         hourly.value = prev.value
-        hourly.joules = getSensorEnergy(sensorID,utime,prev,next)
+        hourly.energy = getSensorEnergy(sensorID,utime,prev,next)
 
     if getSensorCategoryByID( sensorID ) == "Group":
-        hourly.joules = getHourlyEnergyTotalByGroupID(sensorID,utime)
+        hourly.energy = getHourlyEnergyTotalByGroupID(sensorID,utime)
         hourly.groupOtherValue = 0.0 # TODO 
         hourly.value = 0.0 # TODO
         hourly.integral = 0.0 #  TODO ? not clear what this would be 
@@ -1434,7 +1434,7 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
 
     logging.debug( "hourly integral = %f"%hourly.integral )
     logging.debug( "hourly value = %f"%hourly.value )
-    logging.debug( "hourly joules = %f"%hourly.joules )
+    logging.debug( "hourly energy = %f"%hourly.energy )
     if getSensorCategoryByID( sensorID ) == "Group":
         logging.debug( "hourly other = %f"%hourly.groupOtherEnergy )
 
@@ -1528,7 +1528,7 @@ class Measurement2(models.Model):
     time       = models.IntegerField() # time this messarement was made (seconds since unix epoch)
     integral   = models.FloatField() # integral of value over time up to this meassurment (units * seconds)
     value      = models.FloatField() # value of sensor at time of meassurment (units)
-    joules     = models.FloatField() # cumulative energy used in watt seconds (Joules) # TODO rename energy
+    energy     = models.FloatField() # cumulative energy used in watt seconds (Joules) 
     patchLevel = models.IntegerField() # version that data has been upgraded too 
 
 
@@ -1584,7 +1584,7 @@ def patchMeasurement( m ):
             if ( (raw>>31)&1 ):
                 corr = raw + (1<<32)
             m.integral = float( corr )
-            m.joules = m.integral
+            m.energy = m.integral
 
     if ( m.patchLevel < 3 ) and ( level >= 3 ): # This is a patch level 3 change
         pass # nothing to do - this patch upgraded the hourOfWeek handled elswhere 
@@ -1767,8 +1767,8 @@ def getSensorLastEnergy( sensorID ):
     
     ret = 0.0
     if p is not None:
-        if p.joules is not None:
-            ret = p.joules
+        if p.energy is not None:
+            ret = p.energy
 
     memcache.set(  'key4-lastMeasurementEnergy:%d'%sensorID, ret, 24*3600 )
     return ret
@@ -1850,13 +1850,13 @@ def findRecentMeasurements( sensorID ):
     return p
 
 
-def storeMeasurementByName( sensorName, value, mTime=0, sum=None, reset=False ,joules=None, patchLevel=None ):
+def storeMeasurementByName( sensorName, value, mTime=0, sum=None, reset=False ,energy=None, patchLevel=None ):
     sensorID = getSensorIDByName( sensorName )
     assert sensorID > 0
-    storeMeasurement( sensorID, value, mTime=mTime, sum=sum, reset=reset, joules=joules,  patchLevel=patchLevel )
+    storeMeasurement( sensorID, value, mTime=mTime, sum=sum, reset=reset, energy=energy,  patchLevel=patchLevel )
 
 
-def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=None,  patchLevel=None  ):
+def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , energy=None,  patchLevel=None  ):
     #userID = findUserID( userName )
     #if userName == "fluffy": #  TODO - this is a hack to auto create fluffy on any store 
     #    userID = findUserID( userName, True )
@@ -1883,7 +1883,7 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=N
     logging.debug( "Store time in epoch seconds = %d"%sTime )
 
     integral = 0.0 
-    newJoules = 0.0
+    newEnergy = 0.0
 
     #sensor = findSensor( sensorID ,"storeMeasurement" )
     #assert sensor is not None, "Problem finding sensor with ID %s "%sensorID
@@ -1913,26 +1913,26 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=N
 
                 integral += len*val
 
-                if p.joules is None:
-                    newJoules = 0.0
+                if p.energy is None:
+                    newEnergy = 0.0
                 else:
-                    newJoules = p.joules
+                    newEnergy = p.energy
 
                 watts = getSensorPower( sensorID , p.value )
-                newJoules = newJoules + watts * len 
+                newEnergy = newEnergy + watts * len 
 
-                #logging.debug( "Updating integral by len=%d val=%f watts=%f joules=%f"%(len,val,watts,newJoules) )
+                #logging.debug( "Updating integral by len=%d val=%f watts=%f energy=%f"%(len,val,watts,newEnergy) )
 
     if sum is not None:
         integral = sum
         logging.debug( "Updating integral using provided sum %f"%sum )
         if getSensorUnitsByID(sensorID) == 'W':
-            newJoules = sum
-            #logging.debug( "Updating joules using provided sum %f"%sum )
+            newEnergy = sum
+            #logging.debug( "Updating energy using provided sum %f"%sum )
 
-    if joules is not None:
-        newJoules = joules
-        #logging.debug( "Updating joules using passed in joules value of %f"%joules )
+    if energy is not None:
+        newEnergy = energy
+        #logging.debug( "Updating energy using passed in energy value of %f"%energy )
 
     if (value is None) and (p is not None):
         if ( sTime > p.time ):
@@ -1950,13 +1950,13 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=N
     m.time = sTime
     m.value = v
     m.integral = integral
-    m.joules = newJoules
+    m.energy = newEnergy
     m.patchLevel = patchLevel
     
     if reset:
         m.value = float('nan')
         m.integral = 0.0
-        m.joules = 0.0
+        m.energy = 0.0
 
     patchMeasurement( m )
     m.save()
@@ -1987,7 +1987,7 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , joules=N
         memcache.delete( 'key4-lastMeasurementIntegral:%d'%sensorID )
     else:
         logging.debug( "update memcache values for sensor" )
-        memcache.set(  'key4-lastMeasurementEnergy:%d'%sensorID, m.joules, 24*3600 )
+        memcache.set(  'key4-lastMeasurementEnergy:%d'%sensorID, m.energy, 24*3600 )
         memcache.set(  'key4-lastMeasurementIntegral:%d'%sensorID, m.integral, 24*3600 )
         memcache.set(  'key4-lastMeasurementTime:%d'%sensorID, m.time, 24*3600 )
         memcache.set(  'key4-lastMeasurementValue:%d'%sensorID, m.value , 24*3600 )
@@ -2181,9 +2181,9 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
         except:
             pass
 
-    if prev != None and prev.joules == None:
+    if prev != None and prev.energy == None:
         prev = None
-    if next != None and next.joules == None:
+    if next != None and next.energy == None:
         next = None 
 
     ret = 0.0
@@ -2198,19 +2198,19 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
     if ( prev is not None ) and ( next is None ):
         watts = getSensorPower( sensorID , prev.value )
         if watts != watts : # test for NaN
-            assert prev.joules == prev.joules # check for NaN
-            assert prev.joules >= 0
-            ret = prev.joules 
-            logging.debug("extrapolate for with no sensor reading from prev=%f ",prev.joules)
+            assert prev.energy == prev.energy # check for NaN
+            assert prev.energy >= 0
+            ret = prev.energy 
+            logging.debug("extrapolate for with no sensor reading from prev=%f ",prev.energy)
         else:
             len = utime - prev.time
             assert  len >= 0
             assert watts == watts # check for NaN
             assert watts >= 0.0
-            assert prev.joules == prev.joules # check for NaN
-            assert prev.joules >= 0
-            ret = prev.joules + watts*len
-            logging.debug("extrapolate for %d seconds, watts=%f prev=%f ",len, watts,prev.joules)
+            assert prev.energy == prev.energy # check for NaN
+            assert prev.energy >= 0
+            ret = prev.energy + watts*len
+            logging.debug("extrapolate for %d seconds, watts=%f prev=%f ",len, watts,prev.energy)
 
     # if no before, just use after zero. Can cache this 
     if ( prev is None) and ( next is not None ):
@@ -2220,25 +2220,25 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
     # if have before and after, interpolate between the two. Cache in DB and memory 
     if ( prev is not None ) and ( next is not None ):
         if  prev.time == next.time :
-            assert next.joules == next.joules # check for NaN
-            assert prev.joules == prev.joules # check for NaN
-            assert prev.joules >= 0.0
-            assert next.joules >= 0.0
-            ret = (prev.joules+next.joules) / 2
+            assert next.energy == next.energy # check for NaN
+            assert prev.energy == prev.energy # check for NaN
+            assert prev.energy >= 0.0
+            assert next.energy >= 0.0
+            ret = (prev.energy+next.energy) / 2
         else:
             len = next.time - prev.time
             tim = utime - prev.time
             assert len > 0
             assert tim >= 0
             assert tim <= len
-            assert next.joules == next.joules # check for NaN
-            assert prev.joules == prev.joules # check for NaN
-            assert next.joules >= 0.0
-            assert prev.joules >= 0.0
-            delta = next.joules - prev.joules
-            ret =  prev.joules + delta*tim/len
+            assert next.energy == next.energy # check for NaN
+            assert prev.energy == prev.energy # check for NaN
+            assert next.energy >= 0.0
+            assert prev.energy >= 0.0
+            delta = next.energy - prev.energy
+            ret =  prev.energy + delta*tim/len
         logging.debug("interpolated sec before=%d sec after=%d "%( utime-prev.time , next.time-utime ) )
-        logging.debug("interpolated bv=%f av=%f ret=%f "%( prev.joules , next.joules, ret ) )
+        logging.debug("interpolated bv=%f av=%f ret=%f "%( prev.energy , next.energy, ret ) )
 
     assert ret >= 0.0
     memcache.set( 'key4-getSensorEnergy:%d/%d'%(sensorID,utime), ret , 24*3600 )

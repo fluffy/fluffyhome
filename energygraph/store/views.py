@@ -219,7 +219,7 @@ class EditUserForm( forms.ModelForm):
         model = User
         exclude = [ 'userName','passwd','active','userID','settingEpoch' ]
     def __init__(self, *args, **kwargs):
-        super(djangoforms.ModelForm, self).__init__(*args, **kwargs)
+        super( forms.ModelForm, self).__init__(*args, **kwargs)
 
 
 
