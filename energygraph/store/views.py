@@ -1508,7 +1508,7 @@ def showAllSensorsFunc(request,userName):
             total = 0 
             sum = 0
             total = findSensorPower( sensorID ) 
-            sum = findGroupPower( sensorID , None, Set() ) 
+            sum = findGroupPower( sensorID , None, set() ) 
             if ( total-sum != 0 ): # add an other group
                 sensorDataList.append( copy.deepcopy(sensorData) )
                 sensorData['category'] = "Group"
