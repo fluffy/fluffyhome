@@ -13,7 +13,6 @@ urlpatterns = patterns('',
    # (r'^pachube/(?P<feed>\d{1,8})/(?P<stream>\d{1,3})/table/$', view3 ), 
    # (r'^pachube/(?P<feed>\d{1,8})/(?P<stream>\d{1,3})/chart/$', view4 ), 
 
-    (r'^twitterCallback/$', twitterCallback ), 
 
     (r'^wind/$', redirect_to, { 'url':'/wind/ab-south/'} ), 
     (r'^wind/ab-south/$', showAllWindSensors ), 
@@ -23,9 +22,7 @@ urlpatterns = patterns('',
     (r'^user/(?P<userName>[a-zA-Z]\w{0,64})/graphs/$', showGraphs ), 
     (r'^user/(?P<userName>[a-zA-Z]\w{0,64})/prefs/$', userPrefs ), 
     (r'^user/(?P<userName>[a-zA-Z]\w{0,64})/dump/$', dumpUser ), 
-    (r'^user/(?P<userName>[a-zA-Z]\w{0,64})/twitterLogin/$', twitterLogin ), 
-    (r'^user/(?P<userName>[a-zA-Z]\w{0,64})/twitterLogout/$', twitterLogout ), 
-    (r'^user/(?P<userName>[a-zA-Z]\w{0,64})/twitterVerify/$', twitterVerify ), 
+
     (r'^user/(?P<userName>[a-zA-Z]\w{0,64})/enroll/add/(?P<sensorName>[\w][\-\w]{0,64})/$', addSensor ), 
     (r'^user/(?P<userName>[a-zA-Z]\w{0,64})/enroll/find/$', findSensorToEnroll ), 
     (r'^user/(?P<userName>[a-zA-Z]\w{0,64})/status/$', usage ), 

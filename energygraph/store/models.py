@@ -21,6 +21,9 @@ class Memcache:
         return None
     def set( o, x , y , z):
         return
+    def delete( o , k ):
+        return
+    
 memcache = Memcache()
 
 
@@ -34,7 +37,6 @@ class Sensor(models.Model):
     sensorName = models.CharField(max_length=64) # For a given user, this is a unique name used in URIs
     label = models.CharField(max_length=128) # human readable, changable, display name
     userID = models.IntegerField() # user that owns this sensor 
-    apiKey = models.CharField(max_length=256) # TODO should we depricate this ?
 
     public = models.BooleanField() # data is public 
     hidden = models.BooleanField() # don't show the sensor on main displays of data 
@@ -551,7 +553,6 @@ def findSensorID( userName, sensorName, create=False , createGroup=False ):
     sensor.label = sensorName
     sensor.groupTotal = False
     
-    sensor.apiKey = ""
     sensor.watts = 0.0
     sensor.valueWhenOn = 0.0
     sensor.threshold = float( "inf" )
@@ -712,28 +713,27 @@ def getNextUserID():
 class User(models.Model):
     userID = models.IntegerField(primary_key=True) 
     userName = models.CharField(max_length=80)
-    email  = models.CharField(max_length=80)
-    email2 = models.CharField(max_length=80)
-    email3 = models.CharField(max_length=80)
-    sms1   = models.CharField(max_length=80)
-    twitter = models.CharField(max_length=80)
-    purlKey = models.CharField(max_length=80)
-    passwd = models.CharField(max_length=80)
-    newPwd      = models.CharField(max_length=80)
-    newPwdAgain = models.CharField(max_length=80)
+    email  = models.CharField(max_length=80,blank=True)
+    email2 = models.CharField(max_length=80,blank=True)
+    email3 = models.CharField(max_length=80,blank=True)
+    sms1   = models.CharField(max_length=80,blank=True)
+    twitter = models.CharField(max_length=256,blank=True)
+    purlKey = models.CharField(max_length=256,blank=True)
+    passwd = models.CharField(max_length=80,blank=True)
+    newPwd      = models.CharField(max_length=80,blank=True)
+    newPwdAgain = models.CharField(max_length=80,blank=True)
     active = models.BooleanField()
     settingEpoch = models.IntegerField() # this increments each time the setting or sensors change for this user 
     timeZoneOffset = models.FloatField()
-    midnightIs4Am = models.BooleanField()
     gasCost = models.FloatField()
     elecCost = models.FloatField()
     waterCost = models.FloatField()
     gasCO2 = models.FloatField()
     elecCO2 = models.FloatField()
-    twitterAccessToken = models.CharField(max_length=80)
-    twitterAccessSecret = models.CharField(max_length=80)
-    twitterTempToken = models.CharField(max_length=80)
-    twitterTempSecret = models.CharField(max_length=80)
+    twitterAccessToken = models.CharField(max_length=256,blank=True)
+    twitterAccessSecret = models.CharField(max_length=256,blank=True)
+    twitterTempToken = models.CharField(max_length=256,blank=True)
+    twitterTempSecret = models.CharField(max_length=256,blank=True)
 
 
 
@@ -796,7 +796,6 @@ def createUser( userName , password ):
     user.purlKey = ""
 
     user.timeZoneOffset = -8.0
-    user.midnightIs4Am = False
     user.gasCost = 0.0288
     user.elecCost = 0.06889
     user.waterCost = 0.001307

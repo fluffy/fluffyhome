@@ -54,151 +54,9 @@ class Memcache:
         return None
     def set( o, x , y , z):
         return
+    def incr( o , t , initial_value ):
+        return 0
 memcache = Memcache()
-
-
-
-
-def twitterCallback(request):
-    token = request.GET.get('oauth_token',None)
-    verifier = request.GET.get('oauth_verifier',None)
-
-    assert token, "Twitter callback URL did not contain a oauth token"
-    assert verifier,  "Twitter callback URL did not contain a oauth token"
-
-    logging.debug( "Twitter temp token in callback param is " + token )
- 
-    # find the user with that token
-    query = User.all()
-    query.filter( 'twitterTempToken =', token )
-    user = query.get()
-    assert( user )
-     
-    return HttpResponseRedirect( '/user/' + user.userName + '/twitterVerify?tok=' + token + '&verify=' + verifier )
-
-
-#@digestProtect(realm='fluffyhome.com') 
-def twitterVerify(request,userName):
-    token = request.GET.get('tok',None)
-    verifier = request.GET.get('verify',None)
-
-    assert token, "Twitter callback URL did not contain a oauth token"
-    assert verifier,  "Twitter callback URL did not contain a oauth token"
-  
-    # get the temp credential
-    query = User.all()
-    query.filter( 'userName =', userName )
-    user = query.get()
-    assert( user )
-
-    assert user.twitterTempToken == token
-    
-    tempToken = {}
-    tempToken['oauth_token'] = user.twitterTempToken
-    tempToken['oauth_token_secret'] = user.twitterTempSecret
-
-    logging.debug( "Twitter temp token in verify is " + user.twitterTempToken )
- 
-    query = SystemData.all()
-    sys = query.get()
-    assert( sys )
-    assert( sys.twitterConsumerToken )
-    
-    twitter = OAuthApi( sys.twitterConsumerToken, sys.twitterConsumerSecret )
-
-    accessToken = twitter.getAccessToken( tempToken, verifier )
-
-    try:
-        user.twitterAccessToken  = accessToken['oauth_token']
-        user.twitterAccessSecret = accessToken['oauth_token_secret']
-        user.put()
-    except:
-        # don't have a valid access token
-        logging.debug( "Did not get twitter access token"  )
-
-    return HttpResponseRedirect( '/user/' + userName + '/prefs/' )
-    
-
-#@digestProtect(realm='fluffyhome.com') 
-def twitterLogout(request,userName):
-    # remove the twitter credentials
-    query = User.all()
-    query.filter( 'userName =', userName )
-    user = query.get()
-    assert( user )
-    user.twitterTempToken = ''
-    user.twitterTempSecret = ''
-    user.twitterAccessToken = ''
-    user.twitterAccessSecret = ''
-    user.put()
-    return HttpResponseRedirect( '/user/' + userName + '/prefs/' )
-
-
-#@digestProtect(realm='fluffyhome.com')  
-def twitterLogin(request,userName):
-    query = SystemData.all()
-    sys = query.get()
-    assert( sys )
-    assert( sys.twitterConsumerToken )
-    
-    twitter = OAuthApi( sys.twitterConsumerToken,  sys.twitterConsumerSecret )
-
-    tempToken = twitter.getRequestToken()
-    assert( tempToken)
-    
-    # save the temp credential
-    query = User.all()
-    query.filter( 'userName =', userName )
-    user = query.get()
-    assert( user )
-    user.twitterTempToken = tempToken['oauth_token']
-    user.twitterTempSecret = tempToken['oauth_token_secret']
-    user.twitterAccessToken = ''
-    user.twitterAccessSecret = ''
-    user.put()
-
-    logging.debug( "Twitter temp token in login is " + user.twitterTempToken )
-    
-    authURL = twitter.getAuthorizationURL( tempToken )
-    assert( authURL )
-
-    return HttpResponseRedirect( authURL )
-   
-    
-#@digestProtect(realm='fluffyhome.com') 
-def test1User(request,userName):
-    #query = SystemData.all()
-    #sys = query.get()
-    #if  sys.twitterConsumerToken== None:
-    #    sys.twitterConsumerToken = ""
-    #    sys.twitterConsumerSecret = ""
-    #    sys.put()
-    #
-    #query = User.all()
-    #query.filter( 'userName =', userName )
-    #user = query.get()
-    #if user.twitterAccessToken == None:
-    #    user.twitterAccessToken  = ""
-    #    user.twitterAccessSecret  = ""
-    #    user.put()
-    
-    form = []
-    msg = "my message"
-    
-    consumer_key = ""
-    consumer_secret = ""
-
-    access_tok = ""
-    access_tok_secret = ""
-
-    #twitter = OAuthApi(consumer_key, consumer_secret, access_tok, access_tok_secret)
-    #res = twitter.VerifyCredentials()
-    #msg = res['status']['text']
-    
-    return render_to_response('userPrefs.html', { 'msg':msg, 
-                                                  'form':form,
-                                                  'user':userName, 
-                                                  'host' : request.META["HTTP_HOST"] } )
 
 
     
@@ -253,7 +111,7 @@ def userPrefs( request, userName ):
                 else:
                     msg ="New passwords did not match and password was not changed"
 
-            record.put()
+            record.save()
             updateUserSettingsEpoch(userName)
         else:
             logging.error( "Error in form data to edit sensor form=%s"%( str( form )) )
@@ -701,7 +559,7 @@ def usageJson(request,userName,sensorName,type,period):
                 if sensor['group'] is True:
                     start = value.groupOtherEnergy 
                 else:
-                    start = value.joules
+                    start = value.energy
                     startI = value.integral
 
             value = findValueByTimeSensorID( values , t+step , sensorID )
@@ -709,7 +567,7 @@ def usageJson(request,userName,sensorName,type,period):
                 if sensor['group'] is True:
                     end = value.groupOtherEnergy 
                 else:
-                    end = value.joules
+                    end = value.energy
                     endI = value.integral
 
             v = 0.0 
@@ -997,9 +855,9 @@ def dumpSensor(request,userName,sensorName,year,day):
         if m.integral != None:
             if m.integral == m.integral: # test NaN
                 md += "integral='%f' "%m.integral
-        if m.joules != None:
-            if m.joules == m.joules: # test NaN
-                md += "joules='%f' "%m.joules
+        if m.energy != None:
+            if m.energy == m.energy: # test NaN
+                md += "energy='%f' "%m.energy
         if m.patchLevel != None:
             md += "patchLevel='%d' "%m.patchLevel
         md += "/>\n"
@@ -1050,9 +908,9 @@ def dumpUser(request,userName):
             if m.integral != None:
                 if m.integral == m.integral: # test NaN
                     md += "integral='%f' "%m.integral
-            if m.joules != None:
-                if m.joules == m.joules: # test NaN
-                    md += "joules='%f' "%m.joules
+            if m.energy != None:
+                if m.energy == m.energy: # test NaN
+                    md += "energy='%f' "%m.energy
             if m.patchLevel != None:
                 md += "patchLevel='%d' "%m.patchLevel
             md += "/>\n"
@@ -1192,7 +1050,7 @@ def editSensor(request,userName,sensorName):
             if record.sensorName == "All":
                 record.inGroup = 0
 
-            record.put()
+            record.save()
             updateUserSettingsEpoch(userName)
             msg ="Data succesfully saved"
         else:
@@ -1278,7 +1136,7 @@ def createSensor(request,userName,sensorName):
             groupID = findSensorID(userName,groupName,create=True)
             record.inGroup = groupID
 
-        record.put()
+        record.save()
         updateUserSettingsEpoch(userName)
             
         return HttpResponse('<h1>Updated sensor %s</h1>'%sensorName  )  
@@ -1546,7 +1404,7 @@ def showAllSensorsFunc(request,userName):
                          
                     e = getSensorLastEnergy( sensorID  ) 
                     if e is not None:
-                        sensorData['joules'] = e / (3600.0 * 1000.0) # convert J to kWH
+                        sensorData['energy'] = e / (3600.0 * 1000.0) # convert J to kWH
                     i = getSensorLastIntegral( sensorID ) 
                     if i is not None:
                         sensorData['integral'] = i
@@ -2254,7 +2112,11 @@ def postSensorValues(request):
     enableQuota = False
     enableQuota = True 
 
-    ver = os.environ['SERVER_SOFTWARE']
+    ver = "TBD"
+    try:
+        ver = os.environ['SERVER_SOFTWARE']
+    except:
+        pass
     devel = ver.startswith("Development")
     if ( devel ): 
         enableQuota = False # disable quotas for development environment
@@ -2305,7 +2167,8 @@ def postSensorValues(request):
         #return HttpResponse( content="<H1>JSON data had error in parse: %s </H1>"%e , mimetype=None,  status=400 )
         return HttpResponseNotFound( "<H1>JSON data had error in parse</H1><br /><pre>%s</pre>"%data )
     
-    try:
+    #try:
+    if True:
         #TODO validate user input data here for security 
         logging.debug("j=%s"%str(jData) )
 
@@ -2347,9 +2210,9 @@ def postSensorValues(request):
             if m.has_key('pl'):
                 patchLevel = int( m['pl'] )
 
-            joules = None  
+            energy = None  
             if m.has_key('j'):  # depricate 
-                joules = float( m['j'] )
+                energy = float( m['j'] )
 
             if sensorExistsByName( name ):
                 if enableQuota:
@@ -2370,9 +2233,9 @@ def postSensorValues(request):
                         logging.debug( "IP %s exceed per minute rate limit for sensor %s "%(ip,name) )
                         return HttpResponseForbidden( "<H1>User has exceed limit of %d updates per minute for named sensor</H1>"%rateLimit )
     
-                logging.info("Received measurment %s time=%d value=%s sum=%s units=%s joules=%s updateCount=%d"
-                              %(name,mTime,value,sum,units,joules,token) ) 
-                storeMeasurementByName( name, value, mTime=mTime, sum=sum, reset=False, joules=joules, patchLevel=patchLevel )
+                logging.info("Received measurment %s time=%d value=%s sum=%s units=%s energy=%s updateCount=%d"
+                              %(name,mTime,value,sum,units,energy,token) ) 
+                storeMeasurementByName( name, value, mTime=mTime, sum=sum, reset=False, energy=energy, patchLevel=patchLevel )
                 
                 if enableQuota:
                     addKnownIP( ip , name )
@@ -2385,9 +2248,10 @@ def postSensorValues(request):
         #    return HttpResponseForbidden('<h1>Not a Valid sensor</h1>' )  
         #logging.debug( "Store user,sensor=%s,%s set to val=%s "%(userName,sensorName,data) )
         #storeMeasurement( sensorID,data)
-    except apiproxy_errors.OverQuotaError, message:
-        logging.error( "Out of quota to store data in postSensorValues: %s"%message)
-        return HttpResponseNotFound( "<H1>Out of quota to store data in postSensorValues</H1>" )
+
+    #except apiproxy_errors.OverQuotaError, message:
+    #    logging.error( "Out of quota to store data in postSensorValues: %s"%message)
+    #    return HttpResponseNotFound( "<H1>Out of quota to store data in postSensorValues</H1>" )
          
     return HttpResponse() # return a 200 
 
