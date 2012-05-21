@@ -85,6 +85,9 @@ STATICFILES_FINDERS = (
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'TODO-CHANGE-THIS-lskdjflljkjhykjh7ojk23467rkj8j'
+if 'DATABASE_URL' in os.environ:
+    SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -202,6 +205,21 @@ LOGGING = {
         },
     'loggers': {
         'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+            },
+        'django.request': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+            },
+        'django.db.backends': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+            },
+        'energygraph': {
             'handlers': ['file'],
             'level': 'DEBUG',
             'propagate': True,

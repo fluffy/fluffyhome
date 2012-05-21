@@ -58,6 +58,7 @@ class Memcache:
         return 0
 memcache = Memcache()
 
+logger = logging.getLogger('energygraph')
 
     
     
@@ -91,14 +92,14 @@ def userPrefs( request, userName ):
     if request.method == 'POST': 
         form = EditUserForm(request.POST, instance=record)
         if form.is_valid():
-            logging.debug( "input form IS valid" )
+            logger.debug( "input form IS valid" )
 
-            #logging.debug( "form extra group = %s", form.cleaned_data['extraGroup'] )
+            #logger.debug( "form extra group = %s", form.cleaned_data['extraGroup'] )
 
             info = form.save(commit=False)
         
-            #logging.debug( "form extra group = %s", info.extraGroup )
-            logging.debug( "done" )
+            #logger.debug( "form extra group = %s", info.extraGroup )
+            logger.debug( "done" )
             
             msg ="Data succesfully saved"
 
@@ -114,7 +115,7 @@ def userPrefs( request, userName ):
             record.save()
             updateUserSettingsEpoch(userName)
         else:
-            logging.error( "Error in form data to edit sensor form=%s"%( str( form )) )
+            logger.error( "Error in form data to edit sensor form=%s"%( str( form )) )
             msg = "Some problem processing form"
             
     else:
@@ -125,7 +126,7 @@ def userPrefs( request, userName ):
         if record.twitterAccessToken != '':
             twitterEnabled = True
         
-    logging.debug( "debug for form=%s"%form )
+    logger.debug( "debug for form=%s"%form )
     return render_to_response('userPrefs.html', { 'msg':msg, 
                                                   'form':form,
                                                   'user':userName,
@@ -230,7 +231,7 @@ def resetSensors(request,userName):
 def showPlotOLD_NO_USE(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
-        logging.debug( "Sensor name %s not found"%sensorName )   
+        logger.debug( "Sensor name %s not found"%sensorName )   
         return HttpResponseNotFound('<h1>For user=userName=%s sensor=%s not found</h1>'%(userName,sensorName) )  
 
     data = { 'sensorName': sensorName ,
@@ -244,7 +245,7 @@ def showPlotOLD_NO_USE(request,userName,sensorName):
 def showLineGraph(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
-        logging.debug( "Sensor name %s not found"%sensorName )  
+        logger.debug( "Sensor name %s not found"%sensorName )  
         return HttpResponseNotFound('<h1>For user=userName=%s sensor=%s not found</h1>'%(userName,sensorName) )  
 
     data = { 'sensorName': sensorName ,
@@ -258,7 +259,7 @@ def showLineGraph(request,userName,sensorName):
 def showLineGraphCSV(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == None:
-        logging.debug( "Sensor name %s not found"%sensorName )  
+        logger.debug( "Sensor name %s not found"%sensorName )  
         return HttpResponseNotFound('<h1>user=%s stream name=%s not found</h1>'%(user,streamName) )  
 
     html = ""
@@ -302,7 +303,7 @@ def showLineGraphCSV(request,userName,sensorName):
             prevValue = value 
 
         except ValueError:
-            logging.debug( "Non numberic value in measurement value=%s"%( str(value) ) )
+            logger.debug( "Non numberic value in measurement value=%s"%( str(value) ) )
 
     response = HttpResponse()
     #response = HttpResponse("text/plain")
@@ -315,7 +316,7 @@ def showLineGraphCSV(request,userName,sensorName):
 def showPlotJson_OLD_NO_USE(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == None:
-        logging.debug( "Sensor name %s not found"%sensorName )  
+        logger.debug( "Sensor name %s not found"%sensorName )  
         return HttpResponseNotFound('<h1>user=%s stream name=%s not found</h1>'%(user,streamName) )  
 
     html = ""
@@ -368,7 +369,7 @@ def showPlotJson_OLD_NO_USE(request,userName,sensorName):
             prevValue = value 
 
         except ValueError:
-            logging.debug( "Non numberic value in measurement value=%s"%( str(value) ) )
+            logger.debug( "Non numberic value in measurement value=%s"%( str(value) ) )
 
     html += "  ] } \n" #close rows, then table
     html += "} );\n" #close whole object 
@@ -400,7 +401,7 @@ def usageJson(request,userName,sensorName,type,period):
     except (ValueError,KeyError):
         pass
 
-    logging.debug("usageJson reqId = %s"%reqId)
+    logger.debug("usageJson reqId = %s"%reqId)
 
     now = long( time.time() )
     now = now - now%3600
@@ -516,7 +517,7 @@ def usageJson(request,userName,sensorName,type,period):
         step = 3600 * 24 * 7
         hour = (start/3600) % 24
 
-    logging.debug( "start=%f end=%f"%(start,end) )
+    logger.debug( "start=%f end=%f"%(start,end) )
 
 
     userID =  findUserIdByName( userName )
@@ -686,7 +687,7 @@ def generateJson( tqxParams, vals , label, userName ):
             sample = "   {c:[  {v:'%s:00'} , {v:%f}  ]}, \n"%( str(hour) , number )
             html += sample
         except ValueError:
-            logging.debug( "Non numberic value in measurement value=%s"%( str(value) ) )
+            logger.debug( "Non numberic value in measurement value=%s"%( str(value) ) )
 
     html += "  ] } \n" #close rows, then table
     html += "} );\n" #close whole object 
@@ -697,11 +698,11 @@ def generateJson( tqxParams, vals , label, userName ):
 def todayJson(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
-        logging.debug( "Sensor name %s not found"%sensorName )  
+        logger.debug( "Sensor name %s not found"%sensorName )  
         return HttpResponseNotFound('<h1>userName=%s stream name=%s not found</h1>'%(userName,sensorName) )  
 
     tqxParams = request.GET.get('tqx','')
-    logging.debug( "foo=%s", tqxParams )
+    logger.debug( "foo=%s", tqxParams )
     
     #  get users time zone from DB
     userID =  findUserIdByName( userName )
@@ -745,7 +746,7 @@ def todayJson(request,userName,sensorName):
 #            v = 10000 # TODO VERY BAD 
 #        if ( v < 0 ):
 #            v = 15000 # TODO VERY BAD 
-        logging.debug("sensor=%s hour=%d start=%s end=%s i=%s v=%s"%( getSensorLabelByID(sensorID),
+        logger.debug("sensor=%s hour=%d start=%s end=%s i=%s v=%s"%( getSensorLabelByID(sensorID),
                                                                       (t/3600) % 24 ,
                                                                       start,end,i,v ) )
 
@@ -765,7 +766,7 @@ def graphWindToday(request,sensorName):
     userName='wind'
     sensorID = findSensorID( userName, sensorName )
     if sensorID == 0 :
-        logging.debug( "Sensor name %s not found"%sensorName )  
+        logger.debug( "Sensor name %s not found"%sensorName )  
         return HttpResponseNotFound('<h1>userName=%s sensor name=%s not found</h1>'%(userName,sensorName) )
 
     data = { 'sensorName': sensorName ,
@@ -780,7 +781,7 @@ def graphWindToday(request,sensorName):
 def graphToday(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == 0 :
-        logging.debug( "Sensor name %s not found"%sensorName )  
+        logger.debug( "Sensor name %s not found"%sensorName )  
         return HttpResponseNotFound('<h1>userName=%s sensor name=%s not found</h1>'%(userName,sensorName) )
 
     data = { 'sensorName': sensorName ,
@@ -793,7 +794,7 @@ def graphToday(request,userName,sensorName):
 
 #@digestProtect(realm='fluffyhome.com') 
 def dumpAlarm(request,userName,year,day):
-    logging.debug( "dumping alarm for %s %s %s"%(userName,year,day ) )
+    logger.debug( "dumping alarm for %s %s %s"%(userName,year,day ) )
 
     year = int( year )
     day = int( day )
@@ -826,7 +827,7 @@ def dumpAlarm(request,userName,year,day):
             
 #@digestProtect(realm='fluffyhome.com') 
 def dumpSensor(request,userName,sensorName,year,day):
-    logging.debug( "dumping sensor for %s %s %s %s"%(userName,sensorName,year,day ) )
+    logger.debug( "dumping sensor for %s %s %s %s"%(userName,sensorName,year,day ) )
 
     year = int( year )
     day = int( day )
@@ -1025,7 +1026,7 @@ class EditSensorForm(forms.ModelForm):
 def editSensor(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
-        logging.debug( "Sensor name %s not found"%sensorName )  
+        logger.debug( "Sensor name %s not found"%sensorName )  
         return HttpResponseNotFound('<h1>userName=%s stream name=%s not found</h1>'%(userName,sensorName) )
     
     record = findSensor( sensorID ,"editSensor")
@@ -1037,12 +1038,12 @@ def editSensor(request,userName,sensorName):
     if request.method == 'POST': 
         form = EditSensorForm(request.POST, instance=record)
         if form.is_valid():
-            logging.debug( "input form IS valid" )
+            logger.debug( "input form IS valid" )
             info = form.save(commit=False)
 
             x = form.clean()
             group =  x['inGroup2']
-            #logging.debug( "inGroup2 = %s"%( group ))
+            #logger.debug( "inGroup2 = %s"%( group ))
             record.inGroup = group
             
             if record.sensorName == "All":
@@ -1052,7 +1053,7 @@ def editSensor(request,userName,sensorName):
             updateUserSettingsEpoch(userName)
             msg ="Data succesfully saved"
         else:
-            logging.error( "Error in form data to edit sensor form=%s"%( str( form )) )
+            logger.error( "Error in form data to edit sensor form=%s"%( str( form )) )
             msg = "Some problem processing form"
     else:
         initVals =  { 'category':record.category,
@@ -1070,7 +1071,7 @@ def editSensor(request,userName,sensorName):
                       }
         form = EditSensorForm( initVals, instance=record, auto_id=False  )
 
-    #logging.debug( "debug for form=%s"%form )
+    #logger.debug( "debug for form=%s"%form )
     return render_to_response('editSensor.html', { 'msg':msg, 
                                              'form':form,
                                              'sensor': sensorData,
@@ -1091,7 +1092,7 @@ def createSensor(request,userName,sensorName):
     assert record is not None, "can't find record in DB"
 
     if request.method == 'POST': 
-        #logging.debug( "POST data is %s"%str(request.POST) ) 
+        #logger.debug( "POST data is %s"%str(request.POST) ) 
         data = request.POST
 
         record.label = data.get("label");
@@ -1139,7 +1140,7 @@ def createSensor(request,userName,sensorName):
             
         return HttpResponse('<h1>Updated sensor %s</h1>'%sensorName  )  
 
-    logging.debug( "Problem creating sensor %s"%sensorName )  
+    logger.debug( "Problem creating sensor %s"%sensorName )  
 
     return HttpResponseNotFound('<h1>Problem with create sensor %s </h1>'%( sensorName ) )
 
@@ -1148,7 +1149,7 @@ def createSensor(request,userName,sensorName):
 def loadAllSensors(request,userName):
     # check user exists 
     if findUserIdByName(userName) == 0 :
-        logging.debug( "Problemfinding users %s"%userName )  
+        logger.debug( "Problemfinding users %s"%userName )  
         return HttpResponseNotFound('<h1>Error: No user with name %s </h1>'%(userName) )  
 
     sensorsIDs = findAllSensorsIDsByUserID( findUserIdByName( userName ) )
@@ -1164,7 +1165,7 @@ def showAllWindSensors(request):
     # check user exists
     userName = 'wind'
     if findUserIdByName(userName) == 0 :
-        logging.debug( "Problemfinding users %s"%userName )  
+        logger.debug( "Problemfinding users %s"%userName )  
         return HttpResponseNotFound('<h1>Error: No user with name %s </h1>'%(userName) )  
 
     sensorDataList = []
@@ -1198,7 +1199,7 @@ def showAllWindSensors(request):
         if not found:
             # this sensor is not in a valid group, move to all 
             meta['inGroup'] = allGroupSensorID
-            logging.warning( "Moved sensor %s to All group"%meta['sensorName'] )
+            logger.warning( "Moved sensor %s to All group"%meta['sensorName'] )
 
     # for each group, output it's tab then all the sensors/groups in it in sorted order 
     outList = []
@@ -1286,7 +1287,7 @@ def showAllSensors(request,userName):
 def showAllSensorsFunc(request,userName):
     # check user exists 
     if findUserIdByName(userName) == 0 :
-        logging.debug( "Problem finding users %s"%userName )  
+        logger.debug( "Problem finding users %s"%userName )  
         return HttpResponseNotFound('<h1>Error: No user with name %s</h1>'%(userName) )  
 
     sensorDataList = []
@@ -1296,8 +1297,8 @@ def showAllSensorsFunc(request,userName):
 
     sensorsIDs = findAllSensorsIDsByUserID( findUserIdByName( userName ) )
 
-    #logging.debug( "Found sernsor id len=%s "% len( sensorsIDs ) )  
-    #logging.debug( "Found sernsor id %s "%str( sensorsIDs ) )
+    #logger.debug( "Found sernsor id len=%s "% len( sensorsIDs ) )  
+    #logger.debug( "Found sernsor id %s "%str( sensorsIDs ) )
     
     # find all the groups in sorted order 
     groupList = []
@@ -1323,7 +1324,7 @@ def showAllSensorsFunc(request,userName):
         if not found:
             # this sensor is not in a valid group, move to all 
             meta['inGroup'] = allGroupSensorID
-            logging.warning( "Moved sensor %s to All group"%meta['sensorName'] )
+            logger.warning( "Moved sensor %s to All group"%meta['sensorName'] )
 
     # for each group, output it's tab then all the sensors/groups in it in sorted order 
     outList = []
@@ -1436,7 +1437,7 @@ def usage(request,userName):
     # check user exists 
     userID = findUserIdByName(userName)
     if userID == 0 :
-        logging.debug( "Problem finding users %s"%userName )  
+        logger.debug( "Problem finding users %s"%userName )  
         return HttpResponseNotFound('<h1>Error: No user with name %s</h1>'%(userName) )  
 
     # todo , add proper checks for user/sensor exists for all pages 
@@ -1497,12 +1498,12 @@ def findSensorToEnroll(request,userName):
     if request.method == 'POST': 
         form = AddGroupForm(request.POST)
         if form.is_valid():
-            logging.debug( "input form is valid" )
+            logger.debug( "input form is valid" )
 
             x = form.clean()
             name = x['name']
             
-            logging.debug( "add new group name = %s", name )
+            logger.debug( "add new group name = %s", name )
             msg = "Created new %s group"%name 
             updateUserSettingsEpoch(userName)
 
@@ -1512,7 +1513,7 @@ def findSensorToEnroll(request,userName):
             return HttpResponseRedirect( "/sensor/%s/%s/meta/"%(userName,sensorName) )
 
         else:
-            logging.error( "Error in the create group Name of '%s'"%( str( form )) )
+            logger.error( "Error in the create group Name of '%s'"%( str( form )) )
             msg = "Group Name must only have alphanumeric, underscore, or dash and start with alphanumeric character"
             
     else:
@@ -1568,7 +1569,7 @@ def enrollOld(request,streamName):
     info = findEnroll( streamName, ip )
 
     if info.user == "":
-        logging.debug( "Problem with enroll" )  
+        logger.debug( "Problem with enroll" )  
         return HttpResponseNotFound('<p> Waiting for user to claim stream </p>' )
 
     url = "http://%s/sensor/%s/%s/value/"%(host,info.user,info.sensorName)
@@ -1580,7 +1581,7 @@ def enrollOld(request,streamName):
 
 
 def taskUpdateValues(userName,sensorName,t):
-    logging.debug("In taskUpdateValues user=%s sensor=%s t=%s"%(userName,sensorName,t) )
+    logger.debug("In taskUpdateValues user=%s sensor=%s t=%s"%(userName,sensorName,t) )
     
     sensorID = getSensorIDByName( sensorName ) # todo - should check userName too
     assert sensorID > 0
@@ -1593,7 +1594,7 @@ def taskUpdateValues(userName,sensorName,t):
 
                   
 def qTaskUpdate(userName,sensorName,t):
-    logging.info("qTaskUpdate: user=%s sensor=%s time=%s"%(userName,sensorName,t) )
+    logger.info("qTaskUpdate: user=%s sensor=%s time=%s"%(userName,sensorName,t) )
  
     if userName == "*":
         users = findAllUserNames() 
@@ -1641,7 +1642,7 @@ def qTaskUpdate(userName,sensorName,t):
 
 
 def taskThinValues(userName,sensorName,t):
-    logging.debug("In taskThinValues user=%s sensor=%s t=%s"%(userName,sensorName,t) )
+    logger.debug("In taskThinValues user=%s sensor=%s t=%s"%(userName,sensorName,t) )
     
     sensorID = getSensorIDByName( sensorName ) # todo - should check userName too
     assert sensorID > 0
@@ -1655,7 +1656,7 @@ def taskThinValues(userName,sensorName,t):
 
     if t + oneMonth*12 >= now :
         # this is bad - don't thin data this rencent
-        logging.error( "Trying to thin too rcent data %s %s %s"%(userName,sensorName,t) )
+        logger.error( "Trying to thin too rcent data %s %s %s"%(userName,sensorName,t) )
         return
 
     thinMeasurements( sensorID , t )
@@ -1665,7 +1666,7 @@ def taskThinValues(userName,sensorName,t):
 
 
 def qTaskThin(userName,sensorName,t):
-    logging.info("qTaskThin: user=%s sensor=%s time=%s"%(userName,sensorName,t) )
+    logger.info("qTaskThin: user=%s sensor=%s time=%s"%(userName,sensorName,t) )
 
     #thinqueue = taskqueue.Queue( "thin" );
     
@@ -1720,7 +1721,7 @@ def qTaskThin(userName,sensorName,t):
 
 
 def thinValues(request,userName,sensorName,pTime):
-    logging.info("TASK: Running task thinValues %s/%s/%s"%(userName,sensorName,pTime) )
+    logger.info("TASK: Running task thinValues %s/%s/%s"%(userName,sensorName,pTime) )
 
     #if userName != "*" and sensorName != "*":
     #    if not streamExists(userName,sensorName) : # todo fix 
@@ -1729,15 +1730,15 @@ def thinValues(request,userName,sensorName,pTime):
     didIt = qTaskThin( userName, sensorName, pTime )
 
     if didIt:
-        logging.debug("TASK: did task thinValues %s/%s/%s"%(userName,sensorName,pTime) )
+        logger.debug("TASK: did task thinValues %s/%s/%s"%(userName,sensorName,pTime) )
         return HttpResponse('<h1>Did the thin Values</h1>'  )  
     
-    logging.debug("TASK: finished quwing sub tasks for thinValues %s/%s/%s"%(userName,sensorName,pTime) )
+    logger.debug("TASK: finished quwing sub tasks for thinValues %s/%s/%s"%(userName,sensorName,pTime) )
     return HttpResponse('<h1>Queued tasks to thin Values</h1>'  )  
 
 
 def updateValues(request,userName,sensorName,pTime):
-    logging.info("TASK: Running task updateValues %s/%s/%s"%(userName,sensorName,pTime) )
+    logger.info("TASK: Running task updateValues %s/%s/%s"%(userName,sensorName,pTime) )
 
     #if userName != "*" and sensorName != "*":
     #    if not streamExists(userName,sensorName) : # todo fix 
@@ -1745,13 +1746,13 @@ def updateValues(request,userName,sensorName,pTime):
      
     qTaskUpdate( userName, sensorName, pTime )
 
-    logging.debug("TASK: completed task updateValues %s/%s/%s"%(userName,sensorName,pTime) )
+    logger.debug("TASK: completed task updateValues %s/%s/%s"%(userName,sensorName,pTime) )
     return HttpResponse('<h1>Queued tasks to updated Values</h1>'  )  
 
 
 
 def updateNotify(request,userName,sensorName):
-    logging.info("TASK: Running task updateNotify %s %s"%(userName,sensorName,) )
+    logger.info("TASK: Running task updateNotify %s %s"%(userName,sensorName,) )
 
     if userName == "*" :
         users = findAllUserNames()
@@ -1769,12 +1770,12 @@ def updateNotify(request,userName,sensorName):
                 if sensor.category != "Group":
                     checkNotify(userName, sensor.sensorName )
 
-    logging.info("TASK: completed task updateNotify %s %s"%(userName,sensorName) )
+    logger.info("TASK: completed task updateNotify %s %s"%(userName,sensorName) )
     return HttpResponse('<h1>Completed tasks to updated Value</h1>'  )  
 
 
 def checkNotify(userName, sensorName):
-    logging.debug( "CheckNotify %s %s "%(  userName, sensorName  ) )
+    logger.debug( "CheckNotify %s %s "%(  userName, sensorName  ) )
 
     assert userName != "*"
     assert sensorName != "*"
@@ -1794,7 +1795,7 @@ def checkNotify(userName, sensorName):
                 # sensor just went to frozen
                 mTime = lastTime+1
                 storeMeasurement( sensorID, float('nan'), mTime )
-                logging.debug( "Sensor just went frozen %s %s "%(  userName, meta['sensorName']  ) )
+                logger.debug( "Sensor just went frozen %s %s "%(  userName, meta['sensorName']  ) )
                 sendNotify(userName,  meta['sensorName'],
                            "Sensor %s is frozen"%( meta['label'] ), 
                            "Sensor %s stoped reporting %s minutes ago"%( meta['label'], (now-lastTime)/60.0 )
@@ -1816,7 +1817,7 @@ def sendNotify(userName, sensorName, summary, note ):
                                     to = userMeta['email1'],
                                     body = note)
         message.send()
-        logging.debug( "Sent email To:%s Subject:%s Body:%s"%(  userMeta['email1'], summary, note ) )
+        logger.debug( "Sent email To:%s Subject:%s Body:%s"%(  userMeta['email1'], summary, note ) )
 
 
                 
@@ -1833,12 +1834,12 @@ def updateAllValues(request):
                 if sensor.killed != True:
                     if sensor.category != "Group":
                         taskUpdateValues( userName, sensor.sensorName , t )
-                        logging.debug( "Updated %s/%s/%d"%(  userName, sensor.sensorName , (t-now)/3600 ) )
+                        logger.debug( "Updated %s/%s/%d"%(  userName, sensor.sensorName , (t-now)/3600 ) )
             for sensor in sensors: # do the ones that ARE a group
                 if sensor.killed != True:
                     if sensor.category == "Group":
                         taskUpdateValues( userName, sensor.sensorName , t )
-                        logging.debug( "Updated %s/%s/%d"%(  userName, sensor.sensorName , (t-now)/3600 ) )
+                        logger.debug( "Updated %s/%s/%d"%(  userName, sensor.sensorName , (t-now)/3600 ) )
 
     return HttpResponse('<h1>Completed update all hourly values</h1>'  )  
 
@@ -1856,12 +1857,12 @@ def updateAllValuesNow(request): # this is just like updateAllValues but it ques
                 if sensor.killed != True:
                     if sensor.category != "Group":
                         qTaskUpdate( userName, sensor.sensorName , t )
-                        logging.debug( "Updated %s/%s/%d"%(  userName, sensor.sensorName , (t-now)/3600 ) )
+                        logger.debug( "Updated %s/%s/%d"%(  userName, sensor.sensorName , (t-now)/3600 ) )
             for sensor in sensors:  # do the ones that ARE a group
                 if sensor.killed != True:
                     if sensor.category == "Group":
                         qTaskUpdate( userName, sensor.sensorName , t )
-                        logging.debug( "Updated %s/%s/%d"%(  userName, sensor.sensorName , (t-now)/3600 ) )
+                        logger.debug( "Updated %s/%s/%d"%(  userName, sensor.sensorName , (t-now)/3600 ) )
 
     return HttpResponse('<h1>Completed update all hourly values</h1>'  )  
 
@@ -1887,7 +1888,7 @@ def pipes(request,user):
         try:
             key = result.streamID.key()
         except AttributeError:
-            logging.info( "found bad StreamID in database %s"%( str(pipe) )  )
+            logger.info( "found bad StreamID in database %s"%( str(pipe) )  )
             continue
         
         # get most recent value 
@@ -1897,7 +1898,7 @@ def pipes(request,user):
         measurement = query.get()
 
         if measurement == None:
-            logging.debug( "No measurement record in DB for %s"%( str(pipe) )  )
+            logger.debug( "No measurement record in DB for %s"%( str(pipe) )  )
         else:
             pipe['time'] = measurement.time
             pipe['value'] = measurement.value
@@ -1937,7 +1938,7 @@ def store(request,userName,sensorName):
 
 def storeNoAuth(request,userName,sensorName): #old - should depricate 
     if request.method != 'PUT':
-        logging.warning( "Must use PUT %s %s"%(userName,sensorName) )
+        logger.warning( "Must use PUT %s %s"%(userName,sensorName) )
         return HttpResponseForbidden('<h1>Must use method PUT</h1>' )  
 
     data = request.raw_post_data
@@ -1945,10 +1946,10 @@ def storeNoAuth(request,userName,sensorName): #old - should depricate
     
     sensorID = findSensorID( userName,sensorName )
     if sensorID == 0 :
-        logging.warning( "Not a valid sensor %s %s"%(userName,sensorName) )        
+        logger.warning( "Not a valid sensor %s %s"%(userName,sensorName) )        
         return HttpResponseForbidden('<h1>Not a Valid sensor</h1>' )  
 
-    logging.debug( "Store user,sensor=%s,%s set to val=%s ip=%s "%(userName,sensorName,data,ip) )
+    logger.debug( "Store user,sensor=%s,%s set to val=%s ip=%s "%(userName,sensorName,data,ip) )
     storeMeasurement( sensorID,data)
     return HttpResponse() # return a 200 
 
@@ -1962,7 +1963,7 @@ def postAlarmValues(request):
         enableQuota = False # disable quotas for development environment
 
     if request.method != 'POST':
-        logging.debug( "must use post to update alarm" )        
+        logger.debug( "must use post to update alarm" )        
         return  HttpResponseNotFound( "<H1>Must use a POST to update values</H1>" )
 
     data = request.raw_post_data
@@ -1982,26 +1983,26 @@ def postAlarmValues(request):
     if enableQuota and token >= rateLimit:
         if token == rateLimit:
             # should we log this or not
-            logging.warning( "IP %s exceed per minute rate limit"%ip )
-        logging.debug( "IP %s exceed per minute rate limit"%ip )  
+            logger.warning( "IP %s exceed per minute rate limit"%ip )
+        logger.debug( "IP %s exceed per minute rate limit"%ip )  
         return HttpResponseForbidden( "<H1>User has exceed limit of %d requests per minute</H1>"%rateLimit )
         
-    logging.debug("Got post of alarm values %s from %s count=%d"%(data,ip, token) )
+    logger.debug("Got post of alarm values %s from %s count=%d"%(data,ip, token) )
     addKnownIP( ip )
     
     try:
         jData = json.loads( data )
     except ValueError:
-        logging.debug( "JSON data had error in parse")
+        logger.debug( "JSON data had error in parse")
         return HttpResponseNotFound( "<H1>JSON data had error in parse</H1><br /><pre>%s</pre>"%data )
     
     try:
         #TODO validate user input data here for security 
-        logging.debug("j=%s"%str(jData) )
-        logging.debug(" type is =%s"%str(type(jData)) )
+        logger.debug("j=%s"%str(jData) )
+        logger.debug(" type is =%s"%str(type(jData)) )
         
         if ( type(jData) != dict ):
-            logging.debug( "JSON data was not an object" )        
+            logger.debug( "JSON data was not an object" )        
             return HttpResponseNotFound( "<H1>JSON data was not an object</H1>" )
 
         account = 0
@@ -2038,10 +2039,10 @@ def postAlarmValues(request):
         if enableQuota and token >= rateLimit:
             if token == rateLimit:
                 # should we log this or not
-                logging.warning( "IP %s exceed per minute rate limit for alarm updates"%ip )
+                logger.warning( "IP %s exceed per minute rate limit for alarm updates"%ip )
                 return HttpResponseForbidden( "<H1>User has exceed limit of %d updates per minute for alarm</H1>"%rateLimit )
                 
-        logging.debug("Received alarm account=%d user=%d eq=%d code=%d zone=%d part=%d"
+        logger.debug("Received alarm account=%d user=%d eq=%d code=%d zone=%d part=%d"
                       %(account,user,eq,code,zone,part) )
 
         #TODO evil hack to fix IT100 API problems
@@ -2099,11 +2100,11 @@ def postAlarmValues(request):
             storeMeasurementByName( name,  value )
             addKnownIP( ip, name )
         else:
-            logging.debug("Sensor to enroll %s at IP %s "%(name,ip) ) 
+            logger.debug("Sensor to enroll %s at IP %s "%(name,ip) ) 
             info = findEnroll( name, ip )
     
     except apiproxy_errors.OverQuotaError, message:
-        logging.error( "Out of quota to store data in postSensorValues: %s"%message)
+        logger.error( "Out of quota to store data in postSensorValues: %s"%message)
         return HttpResponseNotFound( "<H1>Out of quota to store data in postSensorValues</H1>" )
          
     return HttpResponse() # return a 200 
@@ -2123,7 +2124,7 @@ def postSensorValues(request):
         enableQuota = False # disable quotas for development environment
 
     if request.method != 'POST':
-        logging.debug( "Must use a POST to update values" )        
+        logger.debug( "Must use a POST to update values" )        
         return  HttpResponseNotFound( "<H1>Must use a POST to update values</H1>" )
 
     data = request.raw_post_data
@@ -2134,7 +2135,7 @@ def postSensorValues(request):
         ip = ip2
 
     if ip == "173.181.12.124" : # Corin's IP
-        logging.debug( "Black list Corin" )
+        logger.debug( "Black list Corin" )
         return HttpResponse(  "<H1>Too much data from you IP - call Fluffy</H1>" ) # return a 200 
         #return HttpResponseGone( "<H1>Too much data from you IP - call Fluffy</H1>" )
               
@@ -2148,15 +2149,15 @@ def postSensorValues(request):
 
         rateLimit = 25 # Max number of request per minute from each IP address
         if enableQuota and token >= rateLimit:
-            logging.debug( "IP %s exceed per minute rate limit"%ip )
-            logging.debug( "data in post is %s "%data )
+            logger.debug( "IP %s exceed per minute rate limit"%ip )
+            logger.debug( "data in post is %s "%data )
             if token == rateLimit:
                 # should we log this or not
-                logging.warning( "IP %s exceed per minute rate limit"%ip )
-            logging.debug( "IP %s exceed per minute rate limit for sensor"%ip )     
+                logger.warning( "IP %s exceed per minute rate limit"%ip )
+            logger.debug( "IP %s exceed per minute rate limit for sensor"%ip )     
             return HttpResponseForbidden( "<H1>User has exceed limit of %d requests per minute for sensor</H1>"%rateLimit )
         
-    logging.debug("Got post of sensor values %s from %s count=%d"%(data,ip, token) )
+    logger.debug("Got post of sensor values %s from %s count=%d"%(data,ip, token) )
 
     if enableQuota:
         addKnownIP( ip )
@@ -2164,16 +2165,16 @@ def postSensorValues(request):
     try:
         jData = json.loads( data )
     except ValueError:
-        logging.debug( "JSON data had error in parse")
+        logger.debug( "JSON data had error in parse")
         #return HttpResponse( content="<H1>JSON data had error in parse: %s </H1>"%e , mimetype=None,  status=400 )
         return HttpResponseNotFound( "<H1>JSON data had error in parse</H1><br /><pre>%s</pre>"%data )
     
     #try:
     if True:
         #TODO validate user input data here for security 
-        logging.debug("j=%s"%str(jData) )
+        logger.debug("j=%s"%str(jData) )
 
-        logging.debug(" type is =%s"%str(type(jData)) )
+        logger.debug(" type is =%s"%str(type(jData)) )
 
         bt=0
         bn=str( "" )
@@ -2226,32 +2227,32 @@ def postSensorValues(request):
 
                     rateLimit = 10 # Max number of request per minute from each sensor
                     if enableQuota and token >= rateLimit:
-                        logging.debug( "IP %s exceed per minute rate limit for sensors %s"%(ip,name) )
-                        logging.debug( "post data is %s"%(data) )
+                        logger.debug( "IP %s exceed per minute rate limit for sensors %s"%(ip,name) )
+                        logger.debug( "post data is %s"%(data) )
                         if token == rateLimit:
                             # should we log this or not
-                            logging.warning( "IP %s exceed per minute rate limit"%ip )
-                        logging.debug( "IP %s exceed per minute rate limit for sensor %s "%(ip,name) )
+                            logger.warning( "IP %s exceed per minute rate limit"%ip )
+                        logger.debug( "IP %s exceed per minute rate limit for sensor %s "%(ip,name) )
                         return HttpResponseForbidden( "<H1>User has exceed limit of %d updates per minute for named sensor</H1>"%rateLimit )
     
-                logging.info("Received measurment %s time=%d value=%s sum=%s units=%s energy=%s updateCount=%d"
+                logger.info("Received measurment %s time=%d value=%s sum=%s units=%s energy=%s updateCount=%d"
                               %(name,mTime,value,sum,units,energy,token) ) 
                 storeMeasurementByName( name, value, mTime=mTime, sum=sum, reset=False, energy=energy, patchLevel=patchLevel )
                 
                 if enableQuota:
                     addKnownIP( ip , name )
             else:
-                logging.debug("Sensor to enroll %s at IP %s "%(name,ip) ) 
+                logger.debug("Sensor to enroll %s at IP %s "%(name,ip) ) 
                 info = findEnroll( name, ip )
        
         #sensorID= findSensorID( userName,sensorName, True ) #TODO - hack auto create new sensors 
         #if sensorID == 0 :
         #    return HttpResponseForbidden('<h1>Not a Valid sensor</h1>' )  
-        #logging.debug( "Store user,sensor=%s,%s set to val=%s "%(userName,sensorName,data) )
+        #logger.debug( "Store user,sensor=%s,%s set to val=%s "%(userName,sensorName,data) )
         #storeMeasurement( sensorID,data)
 
     #except apiproxy_errors.OverQuotaError, message:
-    #    logging.error( "Out of quota to store data in postSensorValues: %s"%message)
+    #    logger.error( "Out of quota to store data in postSensorValues: %s"%message)
     #    return HttpResponseNotFound( "<H1>Out of quota to store data in postSensorValues</H1>" )
          
     return HttpResponse() # return a 200 
@@ -2262,7 +2263,7 @@ def jsonFour(request,user):
     assert 0
     # stuff for daily pie chart 
     tqxParams = request.GET.get('tqx','')
-    logging.debug( "foo=%s", tqxParams )
+    logger.debug( "foo=%s", tqxParams )
     
     reqId = '0'
     try:
@@ -2316,7 +2317,7 @@ def jsonFour(request,user):
                 sample = "   {c:[  {v:'%s'} , {v:%f}  ]}, \n"%( name , kWh )
                 html += sample
             except ValueError:
-                logging.debug( "Non numberic value in measurement value=%s"%( str(value) ) )
+                logger.debug( "Non numberic value in measurement value=%s"%( str(value) ) )
 
     html += "  ] } \n" #close rows, then table
     html += "} );\n" #close whole object 
@@ -2354,7 +2355,7 @@ def pollWindAB1(request,loc,user=None):
     if result.status_code == 200:
         m = re.search('Air Temperature:\D*(?P<data>[\d.]*)',result.content)
         if m == None:
-            logging.warning("Problem parsing out air temp from %s"%url )
+            logger.warning("Problem parsing out air temp from %s"%url )
         else:
             temp = m.group('data')
             html += "<p> temp = %s </p>"%temp
@@ -2367,7 +2368,7 @@ def pollWindAB1(request,loc,user=None):
 
         m = re.search('Wind Speed:\D*(?P<data>[\d.]*)',result.content)
         if m == None:
-            logging.warning("Problem parsing out wind speed from %s"%url )
+            logger.warning("Problem parsing out wind speed from %s"%url )
         else:
             speed = m.group('data')
             html += "<p> speed = %s </p>"%speed
@@ -2380,7 +2381,7 @@ def pollWindAB1(request,loc,user=None):
 
         m = re.search('at (?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
         if m == None:
-            logging.warning("Problem parsing out update from %s"%url )
+            logger.warning("Problem parsing out update from %s"%url )
         else:
             time = int( m.group('hour') )%12  * 100 +  int( m.group('min') )
             html += "<p> time = %s </p>"%time
@@ -2393,7 +2394,7 @@ def pollWindAB1(request,loc,user=None):
 
     else:
         html += "<p> Problem in fetch </p>"
-        logging.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
+        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
         
     response = HttpResponse()
     response.write( html );
@@ -2413,7 +2414,7 @@ def pollWindAB2(request,loc,user=None):
     if result.status_code == 200:
         m = re.search('Air Temperature:\D*(?P<data>[\d.]*)',result.content)
         if m == None:
-            logging.warning("Problem parsing out air temp from %s"%url )
+            logger.warning("Problem parsing out air temp from %s"%url )
         else:
             temp = m.group('data')
             html += "<p> temp = %s </p>"%temp
@@ -2426,7 +2427,7 @@ def pollWindAB2(request,loc,user=None):
 
         m = re.search('Wind Speed:\D*(?P<data>[\d.]*)',result.content)
         if m == None:
-            logging.warning("Problem parsing out wind speed from %s"%url )
+            logger.warning("Problem parsing out wind speed from %s"%url )
         else:
             speed = m.group('data')
             html += "<p> speed = %s </p>"%speed
@@ -2439,7 +2440,7 @@ def pollWindAB2(request,loc,user=None):
 
         m = re.search('at (?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
         if m == None:
-            logging.warning("Problem parsing out update from %s"%url )
+            logger.warning("Problem parsing out update from %s"%url )
         else:
             time = int( m.group('hour') )%12  * 100 +  int( m.group('min') )
             html += "<p> speed = %s </p>"%time
@@ -2452,7 +2453,7 @@ def pollWindAB2(request,loc,user=None):
 
     else:
         html += "<p> Problem in fetch </p>"
-        logging.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
+        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
         
     response = HttpResponse()
     response.write( html );
@@ -2472,7 +2473,7 @@ def pollWindAB3(request,loc,user=None):
     if result.status_code == 200:
         m = re.search('Outside Temp</td>\s*.*>(?P<data>[\d.]{3,7}) C',result.content)
         if m == None:
-            logging.warning("Problem parsing out air temp from %s"%url )
+            logger.warning("Problem parsing out air temp from %s"%url )
         else:
             temp = m.group('data')
             html += "<p> temp = %s </p>"%temp
@@ -2485,7 +2486,7 @@ def pollWindAB3(request,loc,user=None):
 
         m = re.search('Wind Speed</td>\s*.*>(?P<data>[\d.]{1,3}) km/h',result.content)
         if m == None:
-            logging.warning("Problem parsing out wind speed from %s"%url )
+            logger.warning("Problem parsing out wind speed from %s"%url )
         else:
             speed = m.group('data')
             html += "<p> speed = %s </p>"%speed
@@ -2499,7 +2500,7 @@ def pollWindAB3(request,loc,user=None):
 
         m = re.search('as of (?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
         if m == None:
-            logging.warning("Problem parsing out update from %s"%url )
+            logger.warning("Problem parsing out update from %s"%url )
         else:
             time = int( m.group('hour') )%12  * 100 +  int( m.group('min') )
             html += "<p> time = %s </p>"%time
@@ -2512,7 +2513,7 @@ def pollWindAB3(request,loc,user=None):
 
     else:
         html += "<p> Problem in fetch </p>"
-        logging.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
+        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
         
     response = HttpResponse()
     response.write( html );
@@ -2532,7 +2533,7 @@ def pollWindAB4(request,loc,user=None):
     if result.status_code == 200:
         m = re.search('Temperature:</dt><dd>(?P<data>[\d.]{1,5})&deg;C',result.content)
         if m == None:
-            logging.warning("Problem parsing out air temp from %s"%url )
+            logger.warning("Problem parsing out air temp from %s"%url )
         else:
             temp = m.group('data')
             html += "<p> temp = %s </p>"%temp
@@ -2545,7 +2546,7 @@ def pollWindAB4(request,loc,user=None):
 
         m = re.search('Wind Speed:</dt><dd>[NSWE]* (?P<data>[\d.]{1,5}) km/h',result.content)
         if m == None:
-            logging.warning("Problem parsing out wind speed from %s"%url )
+            logger.warning("Problem parsing out wind speed from %s"%url )
         else:
             speed = m.group('data')
             html += "<p> speed = %s </p>"%speed
@@ -2559,7 +2560,7 @@ def pollWindAB4(request,loc,user=None):
 
         m = re.search('Observed at:[a-zA-Z'+"'"+' ]*(?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
         if m == None:
-            logging.warning("Problem parsing out update from %s"%url )
+            logger.warning("Problem parsing out update from %s"%url )
         else:
             time = int( m.group('hour') )%12  * 100 +  int( m.group('min') )
             html += "<p> time = %s </p>"%time
@@ -2572,7 +2573,7 @@ def pollWindAB4(request,loc,user=None):
 
     else:
         html += "<p> Problem in fetch </p>"
-        logging.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
+        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
         
     response = HttpResponse()
     response.write( html );
