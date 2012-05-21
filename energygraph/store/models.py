@@ -4,17 +4,7 @@ import logging
 from datetime import timedelta
 from datetime import datetime
 import time
-
-#import pickle # can remove this - was just for debug 
-
 #from sets import Set
-
-# TODO switch to using memcache namespaces 
-
-#from google.appengine.api import memcache
-#from google.appengine.ext import db
-#from google.appengine.ext.db import Key
-
 from django.db import models
 
 
@@ -28,9 +18,7 @@ class Memcache:
     
 memcache = Memcache()
 
-
 logger = logging.getLogger('energygraph')
-
 
 
 def getPatchLevel():
@@ -291,30 +279,30 @@ def findSensorWater( sensorID , type="None" , ignoreList=set() ): #TODO - unify 
 def findAllResourceSensors( userID , inGroupID=None ): #TODO  cache 
     assert userID > 0
 
-    query = Sensor.objects.all()
+    query = Sensor.objects
     logger.debug("# DB search for findAllResourceSensors" )
     query = query.filter( userID = userID )
     sensors = query.all()
 
-    set = set()
+    mySet = set()
     if inGroupID is not None:
         assert inGroupID > 0 , "failed with inGroupID='%s'"%inGroupID
-        set.add( inGroupID )
+        mySet.add( inGroupID )
         done = False
         while not done:
             done = True
             for s in sensors: # if this sensor belongs to a group in the set, then add it and keep going 
-                if s.sensorID not in set:
-                    if s.inGroup in set:
-                        set.add( s.sensorID )
+                if s.sensorID not in mySet:
+                    if s.inGroup in mySet:
+                        mySet.add( s.sensorID )
                         done = False
     else:
         for s in sensors:
-            set.add( s.sensorID )
+            mySet.add( s.sensorID )
 
     ret = []
     for sensor in sensors:
-        if (sensor.killed != True) and (sensor.ignore != True) and ( sensor.sensorID in set ):
+        if (sensor.killed != True) and (sensor.ignore != True) and ( sensor.sensorID in mySet ):
             if sensor.category == "Sensor" and sensor.groupTotal != True :
                 if( (sensor.units == "W") or  (sensor.units == "lps") or  (sensor.units == "lpm") or
                     (sensor.units == "%" and sensor.unitsWhenOn == "W" and sensor.valueWhenOn > 0.0 ) or
@@ -336,7 +324,7 @@ def findAllResourceSensors( userID , inGroupID=None ): #TODO  cache
 
 
 def findAllNonGroupSensors( ):
-    query = Sensor.objects.all()
+    query = Sensor.objects
     logger.debug("# DB search for findAllResourceSensors" )
     sensors = query.all()
 
@@ -355,7 +343,7 @@ def findAllNonGroupSensors( ):
 
 
 def findAllSensorsInGroup( groupID , calledBy="" ):
-    query = Sensor.all()
+    query = Sensor.objects
     logger.debug("# DB search for findAllSensorsInGroup calledby %s "%calledBy )
 
     query = query.filter( inGroup = groupID )
@@ -377,7 +365,7 @@ def findAllSensorIDsInGroup( groupID , calledBy="" ):
     if id != None:
         return id
 
-    query = Sensor.objects.all()
+    query = Sensor.objects
     logger.debug("# DB search for findAllSensorIDsInGroup calledby %s "%calledBy )
     query = query.filter( inGroup = groupID )
     sensors = query.all()
@@ -395,7 +383,7 @@ def findAllSensorIDsInGroup( groupID , calledBy="" ):
 
 
 def findAllSensorsByUserID( userID ):
-    query = Sensor.all()
+    query = Sensor.objects
     logger.debug("# DB search for findAllSensorsByUserID" )
     query = query.filter( userID = userID )
     sensors = query.all()
@@ -416,7 +404,7 @@ def findAllSensorsIDsByUserID( userID ):
     if id != None:
         return id
 
-    query = Sensor.objects.all()
+    query = Sensor.objects
     logger.debug("# DB search for findAllSensorsIDsByUserID" )
     query = query.filter( userID = userID )
     sensors = query.all()
@@ -432,7 +420,7 @@ def findAllSensorsIDsByUserID( userID ):
 
 def findAllGroupsIdNamePairs( userID ):
     ret = []
-    query = Sensor.objects.all()
+    query = Sensor.objects
     logger.debug("# DB search for findAllGroupsIdNamePairs" )
     query = query.filter( userID = userID )
     query = query.filter( category = "Group" )
@@ -446,7 +434,7 @@ def findAllGroupsIdNamePairs( userID ):
 
 def findAllSensorIdNamePairs( userID ):
     ret = []
-    query = Sensor.objects.all()
+    query = Sensor.objects
     logger.debug("# DB search forfindAllSensorIdNamePairs " )
     query = query.filter( userID = userID )
     query = query.exclude( category = "Group" )
@@ -628,7 +616,7 @@ def findRecentAlarmData( alarmID ):
     t = now
     t = t - 2*24*60*60
 
-    query = AlarmData.objects.all() 
+    query = AlarmData.objects 
     logger.debug("# DB search for findRecentAlarmData" )
     query = query.filter( alarmID = alarmID )
     #query = query.exclude( code = 602 ) # can't do this in GAE 
@@ -641,7 +629,7 @@ def findRecentAlarmData( alarmID ):
 
 
 def findAlarmsBetween( alarmID, start, end ):
-    query = AlarmData.objects.all() 
+    query = AlarmData.objects 
     logger.debug("# DB search for findAlarmBetween" )
     query = query.filter( alarmID = alarmID )
     query = query.filter( time__gte =  start )
@@ -669,7 +657,7 @@ class SystemData(models.Model):
     
 
 def getSystemData():
-    query = SystemData.objects.all()
+    query = SystemData.objects
     logger.debug("# DB search for getSystemData" )
     try:
         sys = query.get()
@@ -776,7 +764,7 @@ def getUserPasswordHash( userName ):
 
 
 def findAllUserNames( ):
-    query = User.objects.all()
+    query = User.objects
     logger.debug("# DB search for findAllUserNames" )
     users = query.all()
     ret = []
@@ -992,7 +980,7 @@ def findUserIDByName( userName ):
     
 
 def findUserByName( userName ):
-    #query = User.objects.all()
+    #query = User.objects
     logger.debug("# DB search for findUserByName" )
     #query = query.filter( 'userName =', userName )
     #user = query.get()
@@ -1006,7 +994,7 @@ def findUserByName( userName ):
 
 
 def findUserByID( userID ):
-    #query = User.objects.all()
+    #query = User.objects
     logger.debug("# DB search for findUserByID" )
     #query = query.filter( 'userID =', userID )
     #user = query.get()
@@ -1076,7 +1064,7 @@ def hourlyPatchCount():
 
     logger.debug("hourlyPatch sensorID = %d"%sensorID )
     
-    query = Hourly2.objects.all()
+    query = Hourly2.objects
     query = query.filter( patchLevel__lt = level)
     
     #query = query.filter( 'hourOfDay =', 0 )
@@ -1093,7 +1081,7 @@ def hourlyPatchFast():
     level = getPatchLevel()
     maxUpgrade = 1000
     
-    query = Hourly2.objects.all()
+    query = Hourly2.objects
     query = query.filter( patchLevel__lt = level) 
     logger.debug("# DB search for hourlyPatch" )
 
@@ -1135,7 +1123,7 @@ def hourlyPatch():
 
     logger.debug("hourlyPatch sensorID = %d"%sensorID )
     
-    query = Hourly2.objects.all()
+    query = Hourly2.objects
     query = query.filter( patchLevel__lt = level) 
     query = query.filter( sensorID = sensorID )
     #query = query.order_by("time")  # can't do this and do comparison to patchLevel
@@ -1166,7 +1154,7 @@ def getHourlyByUserIDTime( userID, start=None, end=None , hour=None, hourOfWeek=
     if end > utime:
         end = utime
 
-    query = Hourly2.objects.all() 
+    query = Hourly2.objects 
     logger.debug("# DB search for getHourlyByUserIDTime" )
     query = query.filter( userID = userID )
     if hour is not None:
@@ -1385,16 +1373,20 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
     query = query.filter( time = utime) 
     #hourly = query.get()
 
-    assert( False ) # fix this 
-    records = query.all()[0:1000]
+    
+    #records = query.all()[0:1000]
+    #if len( records ) > 0:
+    #    hourly = records.pop()
+    #if len( records ) > 0:
+    #    logger.debug("# DB delete extra records for computeHourlyBySensorID" )
+    #    db.delete( records )
     
     hourly = None
-    if len( records ) > 0:
-        hourly = records.pop()
-    if len( records ) > 0:
-        logger.debug("# DB delete extra records for computeHourlyBySensorID" )
-        db.delete( records )
-
+    try:
+       hourly = query.get()
+    except:
+        pass
+    
     if hourly is None:
         hourly = Hourly2()
         hourly.sensorID = sensorID
@@ -1503,7 +1495,7 @@ def checkKnownIP( ip, sensorID=0, calledBy=""):
 
 
 def findAllKnownIP():
-    query = KnownIP.objects.all()
+    query = KnownIP.objects
     logger.debug("# DB search for findAllKnownIP" )
     query = query.filter( sensorID = 0 )
     query = query.order_by("-time") 
@@ -1516,7 +1508,7 @@ def findAllKnownIP():
 
 
 def findIPforSensorID( sensorID ):
-    query = KnownIP.objects.all()
+    query = KnownIP.objects
     logger.debug("# DB search for findAllKnownIP" )
     query = query.filter( sensorID = sensorID )
     query = query.order_by("-time") 
@@ -1540,7 +1532,7 @@ class Measurement2(models.Model):
 def thinMeasurements( sensorID, t ):
     # make so at interval from t  - oneHour to t, there is only one measurement (the last)
 
-    query = Measurement2.objects.all() 
+    query = Measurement2.objects 
     logger.debug("# DB search for thinMeasurements" )
     query = query.filter( sensorID = sensorID )
     query = query.filter( time_gt = t-3600 )
@@ -1819,7 +1811,7 @@ def getSensorPower( sensorID , value=None):
     
 
 def findMeasurementsBetween( sensorID, start, end ):
-    query = Measurement2.objects.all() 
+    query = Measurement2.objects 
     logger.debug("# DB search for findMeasurementsBetween" )
     query = query.filter( sensorID = sensorID )
     query = query.filter( time__gte =  start )
@@ -1845,7 +1837,7 @@ def findRecentMeasurements( sensorID ):
     t = now
     t = t - 36*60*60
 
-    query = Measurement2.objects.all() 
+    query = Measurement2.objects 
     logger.debug("# DB search for findRecentMeasurements" )
     query = query.filter( sensorID = sensorID )
     query = query.filter( time_gt = t )
@@ -2290,7 +2282,7 @@ def findEnroll( sensorName, ip ):
 
 
 def findSensorsToEnroll( ip ):
-    query = EnrollInfo.objects.all()
+    query = EnrollInfo.objects
     logger.debug("# DB search for findSensorsToEnroll ip=%s "%ip )
     query = query.filter( ipAddr = ip )
     query = query.filter( user = "" )

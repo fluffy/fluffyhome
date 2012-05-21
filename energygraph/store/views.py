@@ -19,37 +19,16 @@ from django.http import HttpResponseRedirect
 from django.http import HttpResponseGone
 from django.shortcuts import render_to_response
 
-#from django.template import Context, loader
-
-#from google.appengine.ext.db import djangoforms
-
-#from django import newforms as forms
-#from django.newforms import form_for_model,form_for_instance
-
 from django import forms
-#from django.db import models
-
 
 from django import VERSION as DJANGO_VERSION
 from django.utils import simplejson as json  # fix when we can use Python 2.6 to just be import json 
 
 
-#from google.appengine.api.labs import taskqueue
-#from google.appengine.api.taskqueue  import Queue
-#from google.appengine.ext import db
-#from google.appengine.runtime import apiproxy_errors
-
-#from google.appengine.api import mail
-
-#from google.appengine.api import urlfetch
-
 #from djangohttpdigest.decorators import digestProtect,digestLogin
 
 from energygraph.store.models import *
 
-# TODO - need to uncomment these and install on notebook comp 
-#import oauth2 as oauth
-#from oauthtwitter import OAuthApi
 
 
 class Memcache:
