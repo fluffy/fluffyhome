@@ -5,6 +5,8 @@ from datetime import timedelta
 from datetime import datetime
 import time
 
+#import pickle # can remove this - was just for debug 
+
 #from sets import Set
 
 # TODO switch to using memcache namespaces 
@@ -291,7 +293,7 @@ def findAllResourceSensors( userID , inGroupID=None ): #TODO  cache
 
     query = Sensor.objects.all()
     logger.debug("# DB search for findAllResourceSensors" )
-    query.filter( userID = userID )
+    query = query.filter( userID = userID )
     sensors = query.all()
 
     set = set()
@@ -356,7 +358,7 @@ def findAllSensorsInGroup( groupID , calledBy="" ):
     query = Sensor.all()
     logger.debug("# DB search for findAllSensorsInGroup calledby %s "%calledBy )
 
-    query.filter( inGroup = groupID )
+    query = query.filter( inGroup = groupID )
     sensors = query.all()
 
     ret = []
@@ -377,7 +379,7 @@ def findAllSensorIDsInGroup( groupID , calledBy="" ):
 
     query = Sensor.objects.all()
     logger.debug("# DB search for findAllSensorIDsInGroup calledby %s "%calledBy )
-    query.filter( inGroup = groupID )
+    query = query.filter( inGroup = groupID )
     sensors = query.all()
 
     ret = []
@@ -395,7 +397,7 @@ def findAllSensorIDsInGroup( groupID , calledBy="" ):
 def findAllSensorsByUserID( userID ):
     query = Sensor.all()
     logger.debug("# DB search for findAllSensorsByUserID" )
-    query.filter( userID = userID )
+    query = query.filter( userID = userID )
     sensors = query.all()
     
     ret = []
@@ -416,7 +418,7 @@ def findAllSensorsIDsByUserID( userID ):
 
     query = Sensor.objects.all()
     logger.debug("# DB search for findAllSensorsIDsByUserID" )
-    query.filter( userID = userID )
+    query = query.filter( userID = userID )
     sensors = query.all()
 
     ret = []
@@ -432,8 +434,8 @@ def findAllGroupsIdNamePairs( userID ):
     ret = []
     query = Sensor.objects.all()
     logger.debug("# DB search for findAllGroupsIdNamePairs" )
-    query.filter( userID = userID )
-    query.filter( category = "Group" )
+    query = query.filter( userID = userID )
+    query = query.filter( category = "Group" )
     sensors = query.all()
     for sensor in sensors:
         if not sensor.killed:
@@ -446,8 +448,8 @@ def findAllSensorIdNamePairs( userID ):
     ret = []
     query = Sensor.objects.all()
     logger.debug("# DB search forfindAllSensorIdNamePairs " )
-    query.filter( userID = userID )
-    query.filter( category != "Group" )
+    query = query.filter( userID = userID )
+    query = query.exclude( category = "Group" )
     sensors = query.all()
     for sensor in sensors:
         if not sensor.killed:
@@ -458,7 +460,7 @@ def findAllSensorIdNamePairs( userID ):
 def findSensor( sensorID , calledBy="" ):
     query = Sensor.objects
     logger.debug("# DB search for findSensor called by %s "%calledBy )
-    query.filter( sensorID = sensorID )
+    query = query.filter( sensorID = sensorID )
     sensor = None
     try:
         sensor = query.get()
@@ -490,7 +492,7 @@ def getSensorIDByName( sensorName ):
 
     query = Sensor.objects
     logger.debug("# DB search for getSensorIDByName" )
-    query.filter( sensorName = sensorName )
+    query = query.filter( sensorName = sensorName )
     sensor = None
     try:
         sensor = query.get()
@@ -506,7 +508,8 @@ def getSensorIDByName( sensorName ):
 
     if ret != 0:
         globalSensorIDBySensorName[sensorName] = ret
-         
+
+    logger.debug( 'getSensorIDByName: sensorName %s has ID of %d'%(sensorName,ret) )
     return ret 
 
 
@@ -525,8 +528,8 @@ def findSensorID( userName, sensorName, create=False , createGroup=False ):
 
     query = Sensor.objects
     logger.debug("# DB search for findSensorID" )
-    query.filter( userID=userID )
-    query.filter( sensorName=sensorName )
+    query = query.filter( userID=userID )
+    query = query.filter( sensorName=sensorName )
     sensor = None
     try:
         sensor = query.get()
@@ -627,11 +630,11 @@ def findRecentAlarmData( alarmID ):
 
     query = AlarmData.objects.all() 
     logger.debug("# DB search for findRecentAlarmData" )
-    query.filter( alarmID = alarmID )
-    #query.filter( 'code !=', 602 ) # can't do this in GAE 
-    #query.filter( 'notCrit =', 0 ) # filter out stuff where crit = 5 
-    query.filter( time > t )
-    query.order_by("-time") 
+    query = query.filter( alarmID = alarmID )
+    #query = query.exclude( code = 602 ) # can't do this in GAE 
+    #query = query.filter( notCrit = 0 ) # filter out stuff where crit = 5 
+    query = query.filter( time_gt = t )
+    query = query.order_by("-time") 
     p = query.all()[0:100]
 
     return p
@@ -640,10 +643,10 @@ def findRecentAlarmData( alarmID ):
 def findAlarmsBetween( alarmID, start, end ):
     query = AlarmData.objects.all() 
     logger.debug("# DB search for findAlarmBetween" )
-    query.filter( alarmID = alarmID )
-    query.filter( time >= start )
-    query.filter( time < end )
-    query.order_by("-time")
+    query = query.filter( alarmID = alarmID )
+    query = query.filter( time__gte =  start )
+    query = query.filter( time__lt = end )
+    query = query.order_by("-time")
 
     maxLimit = 10000
     p = query.all()[0:maxLimit]
@@ -971,7 +974,7 @@ def findUserIDByName( userName ):
 
     query = User.objects
     logger.debug("# DB search for findUserIDByName" )
-    query.filter( userName = userName )
+    query = query.filter( userName = userName )
     user = None
     try:
         user = query.get()
@@ -991,7 +994,7 @@ def findUserIDByName( userName ):
 def findUserByName( userName ):
     #query = User.objects.all()
     logger.debug("# DB search for findUserByName" )
-    #query.filter( 'userName =', userName )
+    #query = query.filter( 'userName =', userName )
     #user = query.get()
     user = None
     try:
@@ -1005,7 +1008,7 @@ def findUserByName( userName ):
 def findUserByID( userID ):
     #query = User.objects.all()
     logger.debug("# DB search for findUserByID" )
-    #query.filter( 'userID =', userID )
+    #query = query.filter( 'userID =', userID )
     #user = query.get()
     user = None
     try:
@@ -1074,10 +1077,10 @@ def hourlyPatchCount():
     logger.debug("hourlyPatch sensorID = %d"%sensorID )
     
     query = Hourly2.objects.all()
-    query.filter("patchLevel <", level)
+    query = query.filter( patchLevel__lt = level)
     
-    #query.filter( 'hourOfDay =', 0 )
-    #query.filter( 'sensorID =', sensorID )
+    #query = query.filter( 'hourOfDay =', 0 )
+    #query = query.filter( 'sensorID =', sensorID )
     
     logger.debug("# DB search for hourlyPatchCount" )     
     c = query.count(100000)
@@ -1091,7 +1094,7 @@ def hourlyPatchFast():
     maxUpgrade = 1000
     
     query = Hourly2.objects.all()
-    query.filter("patchLevel < ", level) 
+    query = query.filter( patchLevel__lt = level) 
     logger.debug("# DB search for hourlyPatch" )
 
     #cursor = memcache.get('key4-hourly_path_cursor_%d_a'%level)
@@ -1133,9 +1136,9 @@ def hourlyPatch():
     logger.debug("hourlyPatch sensorID = %d"%sensorID )
     
     query = Hourly2.objects.all()
-    query.filter("patchLevel <", level) 
-    query.filter( sensorID = sensorID )
-    #query.order_by("time")  # can't do this and do comparison to patchLevel
+    query = query.filter( patchLevel__lt = level) 
+    query = query.filter( sensorID = sensorID )
+    #query = query.order_by("time")  # can't do this and do comparison to patchLevel
     logger.debug("# DB search for hourlyPatch" )
     records = query.all()[0:maxUpgrade]
 
@@ -1165,14 +1168,14 @@ def getHourlyByUserIDTime( userID, start=None, end=None , hour=None, hourOfWeek=
 
     query = Hourly2.objects.all() 
     logger.debug("# DB search for getHourlyByUserIDTime" )
-    query.filter( userID = userID )
+    query = query.filter( userID = userID )
     if hour is not None:
-        query.filter( hourOfDay = hour )
+        query = query.filter( hourOfDay = hour )
     if hourOfWeek is not None:
-        query.filter( hourOfWeek = hourOfWeek )
-    query.filter(time <=  end) 
-    query.filter(time >=  start ) 
-    query.order_by("-time") 
+        query = query.filter( hourOfWeek = hourOfWeek )
+    query = query.filter( time__lte =  end) 
+    query = query.filter( time__gte =   start ) 
+    query = query.order_by("-time") 
     results = query.all()
 
     return results
@@ -1290,8 +1293,8 @@ def getHourlyEnergyBySensorID( sensorID, utime ): # TODO - can we get rid of thi
 
     query = Hourly2.objects
     logger.debug("# DB search for getHourlyEnergyBySensorID" )
-    query.filter( sensorID = sensorID )
-    query.filter( time = utime)
+    query = query.filter( sensorID = sensorID )
+    query = query.filter( time = utime)
     hourly = None
     try:
         hourly = query.get()
@@ -1324,8 +1327,8 @@ def getHourlyIntegralBySensorID( sensorID, utime ):
 
     query = Hourly2.objects
     logger.debug("# DB search for getHourlyIntegralBySensorID" )
-    query.filter( sensorID = sensorID )
-    query.filter( time = utime) 
+    query = query.filter( sensorID = sensorID )
+    query = query.filter( time = utime) 
     hourly = None
     try:
         hourly = query.get()
@@ -1355,9 +1358,9 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
     if prev is None:
         query = Measurement2.objects
         logger.debug("# DB search for prev computeHourlyBySensorID" )
-        query.filter( sensorID = sensorID )
-        query.filter( time <= utime )
-        query.order_by("-time") 
+        query = query.filter( sensorID = sensorID )
+        query = query.filter( time__lte = utime )
+        query = query.order_by("-time") 
         prev = None
         try:
             prev = query.get()
@@ -1367,9 +1370,9 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
     if next is None:
         query = Measurement2.objects
         logger.debug("# DB search for next computeHourlyBySensorID " )
-        query.filter( sensorID = sensorID )
-        query.filter( time >= utime )
-        query.order_by("time") 
+        query = query.filter( sensorID = sensorID )
+        query = query.filter( time__gte =  utime )
+        query = query.order_by("time") 
         next = None
         try:
             next = query.get()
@@ -1378,8 +1381,8 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
 
     query = Hourly2.objects
     logger.debug("# DB search for computeHourlyBySensorID" )
-    query.filter( sensorID = sensorID )
-    query.filter( time = utime) 
+    query = query.filter( sensorID = sensorID )
+    query = query.filter( time = utime) 
     #hourly = query.get()
 
     assert( False ) # fix this 
@@ -1482,9 +1485,9 @@ def checkKnownIP( ip, sensorID=0, calledBy=""):
  
     query = KnownIP.objects
     logger.debug("# DB search for KnownIP=%s sensorID=%d calledby=%s "%(ip,sensorID,calledBy) )
-    query.filter( ip = ip )
-    query.filter( sensorID = sensorID )
-    query.order_by("-time") 
+    query = query.filter( ip = ip )
+    query = query.filter( sensorID = sensorID )
+    query = query.order_by("-time") 
     knownIP = None
     try:
         knownIP = query.get()
@@ -1502,8 +1505,8 @@ def checkKnownIP( ip, sensorID=0, calledBy=""):
 def findAllKnownIP():
     query = KnownIP.objects.all()
     logger.debug("# DB search for findAllKnownIP" )
-    query.filter( sensorID = 0 )
-    query.order_by("-time") 
+    query = query.filter( sensorID = 0 )
+    query = query.order_by("-time") 
     ips = query.all()
 
     ret = set()
@@ -1515,8 +1518,8 @@ def findAllKnownIP():
 def findIPforSensorID( sensorID ):
     query = KnownIP.objects.all()
     logger.debug("# DB search for findAllKnownIP" )
-    query.filter( sensorID = sensorID )
-    query.order_by("-time") 
+    query = query.filter( sensorID = sensorID )
+    query = query.order_by("-time") 
     ips = query.all()
 
     ret = None
@@ -1539,10 +1542,10 @@ def thinMeasurements( sensorID, t ):
 
     query = Measurement2.objects.all() 
     logger.debug("# DB search for thinMeasurements" )
-    query.filter( sensorID = sensorID )
-    query.filter( time > t-3600 )
-    query.filter( time <= t )
-    query.order_by("-time") 
+    query = query.filter( sensorID = sensorID )
+    query = query.filter( time_gt = t-3600 )
+    query = query.filter( time__lte = t )
+    query = query.order_by("-time") 
     p=query.run( deadline=20, offset=1, batch_size=100, keys_only=True)
 
     #i=0
@@ -1631,8 +1634,8 @@ def getSensorValue( sensorID ):
 
     query = Measurement2.objects
     logger.debug("# DB search for getSensorValue for sensor %s"%( getSensorNamelByID(sensorID) ))
-    query.filter( sensorID = sensorID )
-    query.order_by("-time") 
+    query = query.filter( sensorID = sensorID )
+    query = query.order_by("-time") 
     p = None
     try:
         p = query.get() 
@@ -1673,8 +1676,8 @@ def getSensorLastTime( sensorID ):
 
     query = Measurement2.objects
     logger.debug("# DB search getSensorLastTime " )
-    query.filter( sensorID = sensorID )
-    query.order_by("-time") 
+    query = query.filter( sensorID = sensorID )
+    query = query.order_by("-time") 
     p = None
     try:
         p = query.get() 
@@ -1715,8 +1718,8 @@ def getSensorLastIntegral( sensorID ):
 
     query = Measurement2.objects
     logger.debug("# DB search for getSensorLastIntegral" )
-    query.filter( sensorID = sensorID )
-    query.order_by("-time") 
+    query = query.filter( sensorID = sensorID )
+    query = query.order_by("-time") 
     p = None
     try:
         p = query.get() 
@@ -1758,8 +1761,8 @@ def getSensorLastEnergy( sensorID ):
 
     query = Measurement2.objects
     logger.debug("# DB search for getSensorLastEnergy" )
-    query.filter( sensorID = sensorID )
-    query.order_by("-time") 
+    query = query.filter( sensorID = sensorID )
+    query = query.order_by("-time") 
     #p = query.get() 
     p = None
     try:
@@ -1818,10 +1821,10 @@ def getSensorPower( sensorID , value=None):
 def findMeasurementsBetween( sensorID, start, end ):
     query = Measurement2.objects.all() 
     logger.debug("# DB search for findMeasurementsBetween" )
-    query.filter( sensorID = sensorID )
-    query.filter( time >= start )
-    query.filter( time < end )
-    query.order_by("-time")
+    query = query.filter( sensorID = sensorID )
+    query = query.filter( time__gte =  start )
+    query = query.filter( time__lt = end )
+    query = query.order_by("-time")
 
     maxLimit = 13000
     p = query.all()[0:maxLimit]
@@ -1844,9 +1847,9 @@ def findRecentMeasurements( sensorID ):
 
     query = Measurement2.objects.all() 
     logger.debug("# DB search for findRecentMeasurements" )
-    query.filter( sensorID = sensorID )
-    query.filter( time > t )
-    query.order_by("-time") 
+    query = query.filter( sensorID = sensorID )
+    query = query.filter( time_gt = t )
+    query = query.order_by("-time") 
     maxLimit = 30
     p = query.all()[0:maxLimit]
     return p
@@ -1895,8 +1898,8 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , energy=N
     if sum is None:
         query = Measurement2.objects
         logger.debug("# DB search for prev value for storeMeasurement" )
-        query.filter( sensorID = sensorID )
-        query.order_by("-time") 
+        query = query.filter( sensorID = sensorID )
+        query = query.order_by("-time") 
         p = None
         try:
             p = query.get() 
@@ -1962,7 +1965,7 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , energy=N
 
     patchMeasurement( m )
     m.save()
-    logger.debug("# DB put for storeMeasurement" )
+    logger.debug("# DB put for storeMeasurement id=%d value=%f integral=%d "%(m.sensorID,m.value,m.integral) )
 
     global globalLastMeasurementTime
     global globalLastMeasurementValue
@@ -2071,9 +2074,9 @@ def getSensorIntegral(sensorID,utime,prev=None,next=None): # utime is unix integ
     if prev is None:
         query = Measurement2.objects
         logger.debug("# DB search for prev getSensorIntegral" )
-        query.filter( sensorID = sensorID )
-        query.filter( time <= utime )
-        query.order_by("-time") 
+        query = query.filter( sensorID = sensorID )
+        query = query.filter( time__lte = utime )
+        query = query.order_by("-time") 
         prev = None
         try:
             prev = query.get()
@@ -2083,9 +2086,9 @@ def getSensorIntegral(sensorID,utime,prev=None,next=None): # utime is unix integ
     if next is None:
         query = Measurement2.objects
         logger.debug("# DB search for next getSensorIntegral " )
-        query.filter( sensorID = sensorID )
-        query.filter( time >= utime )
-        query.order_by("time") 
+        query = query.filter( sensorID = sensorID )
+        query = query.filter( time__gte =  utime )
+        query = query.order_by("time") 
         next = None
         try:
             next = query.get()
@@ -2162,9 +2165,9 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
     if prev is None:
         query = Measurement2.objects
         logger.debug("# DB search for prev getSensorEnergy" )
-        query.filter( sensorID = sensorID )
-        query.filter( time <= utime )
-        query.order_by("-time") 
+        query = query.filter( sensorID = sensorID )
+        query = query.filter( time__lte = utime )
+        query = query.order_by("-time") 
         prev = None
         try:
             prev = query.get()
@@ -2174,9 +2177,9 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
     if next is None:
         query = Measurement2.objects
         logger.debug("# DB search for next getSensorEnergy" )
-        query.filter( sensorID = sensorID )
-        query.filter( time >= utime )
-        query.order_by("time") 
+        query = query.filter( sensorID = sensorID )
+        query = query.filter( time__gte = utime )
+        query = query.order_by("time") 
         next = None
         try:
             next = query.get()
@@ -2253,20 +2256,19 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
 
 class EnrollInfo(models.Model): #  TODO remove indexes on some of these 
     sensorName = models.CharField(max_length=80) 
-    user = models.CharField(max_length=80)
+    user = models.CharField(max_length=80,blank=True)
     ipAddr = models.CharField(max_length=80)
-    secret = models.CharField(max_length=80)
     time = models.DateTimeField(auto_now_add=True)
 
 
 def findEnroll( sensorName, ip ):
     query = EnrollInfo.objects
     logger.debug("# DB search for findEnroll" )
-    query.filter( ipAddr = ip )
-    query.filter( user = "" )
-    query.filter( sensorName = sensorName )
+    query = query.filter( ipAddr = ip )
+    query = query.filter( user = "" )
+    query = query.filter( sensorName = sensorName )
     #  TODO - should time limit to 5 minutes 
-    query.order_by("-time") 
+    query = query.order_by("-time") 
     info = None
     try:
         info = query.get()
@@ -2289,15 +2291,16 @@ def findEnroll( sensorName, ip ):
 
 def findSensorsToEnroll( ip ):
     query = EnrollInfo.objects.all()
-    logger.debug("# DB search for findSensorsToEnroll" )
-    query.filter( ipAddr = ip )
-    query.filter( user = "" )
+    logger.debug("# DB search for findSensorsToEnroll ip=%s "%ip )
+    query = query.filter( ipAddr = ip )
+    query = query.filter( user = "" )
     #  TODO - should time limit to 5 minutes 
-    query.order_by("-time") 
+    query = query.order_by("-time") 
     results = query.all()
 
     ret = []
     for result in results:
+        logger.debug("findSensorsToEnroll: found %s"%(  result.sensorName ) )
         ret.append( result.sensorName ) #  TODO - use a set and only insert once 
 
     return ret
@@ -2307,11 +2310,11 @@ def findSensorsToEnroll( ip ):
 def enrollSensor(ip,sensorName,user,secret):
     query = EnrollInfo.objects
     logger.debug("# DB search for enrollSensor" )
-    query.filter( ipAddr = ip )
-    query.filter( user = "" )
-    query.filter( sensorName = sensorName )
+    query = query.filter( ipAddr = ip )
+    query = query.filter( user = "" )
+    query = query.filter( sensorName = sensorName )
     #  TODO - should time limit to 5 minutes 
-    query.order_by("-time") 
+    query = query.order_by("-time") 
     info = None
     try:
         info = query.get()
@@ -2322,7 +2325,6 @@ def enrollSensor(ip,sensorName,user,secret):
         return # weird error
 
     info.user = user
-    info.secret = secret 
     info.save()
     logger.debug("# DB put for enrollSensor" )
 

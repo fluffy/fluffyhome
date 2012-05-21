@@ -27,6 +27,9 @@ from django.shortcuts import render_to_response
 #from django.newforms import form_for_model,form_for_instance
 
 from django import forms
+#from django.db import models
+
+
 from django import VERSION as DJANGO_VERSION
 from django.utils import simplejson as json  # fix when we can use Python 2.6 to just be import json 
 
@@ -272,10 +275,10 @@ def showLineGraphCSV(request,userName,sensorName):
     assert timeOffset != None
 
     # get most recent values
-    query = Measurement2.all()
-    query.filter( 'sensorID =', sensorID )
-    query.order("-time") #TODO - should have time based limits 
-    measurements = query.fetch(900) #TODO need to deal with more than 1000 meassurements
+    query = Measurement2.objects
+    query = query.filter( sensorID = sensorID )
+    query = query.order_by("-time") #TODO - should have time based limits 
+    measurements = query.all()[:1000] #TODO need to deal with more than 1000 meassurements
 
     measurements.reverse()
 
@@ -338,10 +341,10 @@ def showPlotJson_OLD_NO_USE(request,userName,sensorName):
     assert timeOffset != None
 
     # get most recent values
-    query = Measurement2.all()
-    query.filter( 'sensorID =', sensorID )
-    query.order("-time") #TODO - should have time based limits 
-    measurements = query.fetch(900) #TODO need to deal with more than 1000 meassurements
+    query = Measurement2.objects
+    query = query.filter( sensorID = sensorID )
+    query = query.order_by("-time") #TODO - should have time based limits 
+    measurements = query.all()[:1000] #TODO need to deal with more than 1000 meassurements
 
     measurements.reverse()
 
@@ -1482,7 +1485,7 @@ def usage(request,userName):
     return render_to_response('usage.html', vars )
 
 
-class AddGroupForm(forms.ModelForm):
+class AddGroupForm(forms.Form):
     name = forms.RegexField( "^\w[\-\w]{0,64}$" ) 
 
 #@digestProtect(realm='fluffyhome.com') 
@@ -1872,9 +1875,9 @@ def pipes(request,user):
     assert 0 
     pipeList = []
 
-    query = StreamIDInfo.all()
-    query.filter( 'user =', user )
-    results = query.fetch(1000)
+    query = StreamIDInfo.objects
+    query = query.filter( user = user )
+    results = query.all()[:1000] # deal with more than 1000 values 
 
     getAllStreamNames( user )
 
@@ -1892,11 +1895,15 @@ def pipes(request,user):
             continue
         
         # get most recent value 
-        query = Measurement.all()
-        query.filter( 'streamID =', key )
-        query.order("-time")
-        measurement = query.get()
-
+        query = Measurement.objects
+        query = query.filter( streamID = key )
+        query = query.order_by("-time")
+        measurement = None
+        try:
+            measurement = query.get()
+        except:
+            pass
+        
         if measurement == None:
             logger.debug( "No measurement record in DB for %s"%( str(pipe) )  )
         else:
@@ -2284,9 +2291,9 @@ def jsonFour(request,user):
     html += "               {id:'Value',label:'Value',type:'number'}], \n"
     html += "  rows:[ \n"
 
-    query = StreamIDInfo.all()
-    query.filter( 'user =', user )
-    results = query.fetch(1000)
+    query = StreamIDInfo.objects
+    query = query.filter( user = user )
+    results = query.all()[:1000] # TODO deal with more than 1000 
     
     for result in results:
         name = result.label
