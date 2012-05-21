@@ -13,6 +13,9 @@ Deploy the hero branch to the master branch of heroku remote
 
 git push heroku hero:master 
 
+heroku run python manage.py syncdb
+
+
 
 # Testing notes 
 
