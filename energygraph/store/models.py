@@ -451,8 +451,8 @@ def findSensor( sensorID , calledBy="" ):
     query = query.filter( sensorID = sensorID )
     sensor = None
     try:
-        sensor = query.get()
-    except:
+        sensor = query.all()[0]
+    except IndexError:
         pass
     return sensor
 
@@ -483,8 +483,8 @@ def getSensorIDByName( sensorName ):
     query = query.filter( sensorName = sensorName )
     sensor = None
     try:
-        sensor = query.get()
-    except:
+        sensor = query.all()[0]
+    except IndexError:
         pass
     
     ret = 0
@@ -520,8 +520,8 @@ def findSensorID( userName, sensorName, create=False , createGroup=False ):
     query = query.filter( sensorName=sensorName )
     sensor = None
     try:
-        sensor = query.get()
-    except:
+        sensor = query.all()[0]
+    except IndexError:
         pass
 
     if sensor is not None:
@@ -660,8 +660,8 @@ def getSystemData():
     query = SystemData.objects
     logger.debug("# DB search for getSystemData" )
     try:
-        sys = query.get()
-    except:
+        sys = query.all()[0]
+    except IndexError:
         sys = None
         
     if sys is None:
@@ -965,8 +965,8 @@ def findUserIDByName( userName ):
     query = query.filter( userName = userName )
     user = None
     try:
-        user = query.get()
-    except:
+        user = query.all()[0]
+    except IndexError:
         pass
     
     if user != None:
@@ -983,11 +983,11 @@ def findUserByName( userName ):
     #query = User.objects
     logger.debug("# DB search for findUserByName" )
     #query = query.filter( 'userName =', userName )
-    #user = query.get()
+    #user = query.all()[0]
     user = None
     try:
         user = User.objects.get( userName=userName )
-    except:
+    except IndexError:
         pass
     
     return user
@@ -997,11 +997,11 @@ def findUserByID( userID ):
     #query = User.objects
     logger.debug("# DB search for findUserByID" )
     #query = query.filter( 'userID =', userID )
-    #user = query.get()
+    #user = query.all()[0]
     user = None
     try:
         user = User.objects.get( userID=userID )
-    except:
+    except IndexError:
         pass
     
     assert user is not None
@@ -1285,8 +1285,8 @@ def getHourlyEnergyBySensorID( sensorID, utime ): # TODO - can we get rid of thi
     query = query.filter( time = utime)
     hourly = None
     try:
-        hourly = query.get()
-    except:
+        hourly = query.all()[0]
+    except IndexError:
         pass
     
     if hourly is None:
@@ -1319,8 +1319,8 @@ def getHourlyIntegralBySensorID( sensorID, utime ):
     query = query.filter( time = utime) 
     hourly = None
     try:
-        hourly = query.get()
-    except:
+        hourly = query.all()[0]
+    except IndexError:
         pass
     
     if hourly is None:
@@ -1351,8 +1351,8 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
         query = query.order_by("-time") 
         prev = None
         try:
-            prev = query.get()
-        except:
+            prev = query.all()[0]
+        except IndexError:
             pass
         
     if next is None:
@@ -1363,15 +1363,15 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
         query = query.order_by("time") 
         next = None
         try:
-            next = query.get()
-        except:
+            next = query.all()[0]
+        except IndexError:
             pass
 
     query = Hourly2.objects
     logger.debug("# DB search for computeHourlyBySensorID" )
     query = query.filter( sensorID = sensorID )
     query = query.filter( time = utime) 
-    #hourly = query.get()
+    #hourly = query.all()[0]
 
     
     #records = query.all()[0:1000]
@@ -1383,8 +1383,8 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
     
     hourly = None
     try:
-       hourly = query.get()
-    except:
+       hourly = query.all()[0]
+    except IndexError:
         pass
     
     if hourly is None:
@@ -1482,8 +1482,8 @@ def checkKnownIP( ip, sensorID=0, calledBy=""):
     query = query.order_by("-time") 
     knownIP = None
     try:
-        knownIP = query.get()
-    except:
+        knownIP = query.all()[0]
+    except IndexError:
         pass
     
     if knownIP == None:
@@ -1630,8 +1630,8 @@ def getSensorValue( sensorID ):
     query = query.order_by("-time") 
     p = None
     try:
-        p = query.get() 
-    except:
+        p = query.all()[0]
+    except IndexError:
         pass
     
     ret = 0.0
@@ -1672,8 +1672,8 @@ def getSensorLastTime( sensorID ):
     query = query.order_by("-time") 
     p = None
     try:
-        p = query.get() 
-    except:
+        p = query.all()[0] 
+    except IndexError:
         pass
     
     ret = 0
@@ -1714,8 +1714,8 @@ def getSensorLastIntegral( sensorID ):
     query = query.order_by("-time") 
     p = None
     try:
-        p = query.get() 
-    except:
+        p = query.all()[0] 
+    except IndexError:
         pass
 
     ret = 0.0
@@ -1755,11 +1755,11 @@ def getSensorLastEnergy( sensorID ):
     logger.debug("# DB search for getSensorLastEnergy" )
     query = query.filter( sensorID = sensorID )
     query = query.order_by("-time") 
-    #p = query.get() 
+    #p = query.all()[0] 
     p = None
     try:
-        p = query.get() 
-    except:
+        p = query.all()[0] 
+    except IndexError:
         pass
     
     ret = 0.0
@@ -1894,8 +1894,8 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , energy=N
         query = query.order_by("-time") 
         p = None
         try:
-            p = query.get() 
-        except:
+            p = query.all()[0] 
+        except IndexError:
             pass
     
         if p is not None:
@@ -2071,8 +2071,8 @@ def getSensorIntegral(sensorID,utime,prev=None,next=None): # utime is unix integ
         query = query.order_by("-time") 
         prev = None
         try:
-            prev = query.get()
-        except:
+            prev = query.all()[0]
+        except IndexError:
             pass
         
     if next is None:
@@ -2083,8 +2083,8 @@ def getSensorIntegral(sensorID,utime,prev=None,next=None): # utime is unix integ
         query = query.order_by("time") 
         next = None
         try:
-            next = query.get()
-        except:
+            next = query.all()[0]
+        except IndexError:
             pass
 
     if prev != None and prev.integral == None:
@@ -2162,8 +2162,8 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
         query = query.order_by("-time") 
         prev = None
         try:
-            prev = query.get()
-        except:
+            prev = query.all()[0]
+        except IndexError:
             pass
 
     if next is None:
@@ -2174,8 +2174,8 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
         query = query.order_by("time") 
         next = None
         try:
-            next = query.get()
-        except:
+            next = query.all()[0]
+        except IndexError:
             pass
 
     if prev != None and prev.energy == None:
@@ -2263,8 +2263,8 @@ def findEnroll( sensorName, ip ):
     query = query.order_by("-time") 
     info = None
     try:
-        info = query.get()
-    except:
+        info = query.all()[0]
+    except IndexError:
         pass
     
     if info is None:
@@ -2309,8 +2309,8 @@ def enrollSensor(ip,sensorName,user,secret):
     query = query.order_by("-time") 
     info = None
     try:
-        info = query.get()
-    except:
+        info = query.all()[0]
+    except IndexError:
         pass
     
     if info is None:

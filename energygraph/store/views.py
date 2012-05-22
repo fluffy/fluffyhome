@@ -1879,8 +1879,8 @@ def pipes(request,user):
         query = query.order_by("-time")
         measurement = None
         try:
-            measurement = query.get()
-        except:
+            measurement = query.all()[0]
+        except IndexError:
             pass
         
         if measurement == None:
