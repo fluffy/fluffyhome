@@ -29,16 +29,9 @@ from django.utils import simplejson as json  # fix when we can use Python 2.6 to
 
 from energygraph.store.models import *
 
+from energygraph.store.cache import *
 
 
-class Memcache:
-    def get( o, x ):
-        return None
-    def set( o, x , y , z):
-        return
-    def incr( o , t , initial_value ):
-        return 0
-memcache = Memcache()
 
 logger = logging.getLogger('energygraph')
 
@@ -621,7 +614,7 @@ def usageJson(request,userName,sensorName,type,period):
     ret += "  ] } \n" #close rows, then table
     ret += "} );\n" #close whole object 
 
-    memcache.set( cacheKey, ret , 4*3600 )
+    memcache.put( cacheKey, ret , 4*3600 )
 
     response = HttpResponse()
     response.write( head )
@@ -1963,7 +1956,7 @@ def postAlarmValues(request):
 
     minute = now - now % 60 # make window 1 minutes long 
     cacheKey = "key4-ipTokenBucketMinute:%s/%s"%(ip,minute)
-    token = memcache.incr( cacheKey , initial_value=0 )
+    token = memcache.incr( cacheKey )
 
     rateLimit = 100 # Max number of request per minute from each IP address
     if enableQuota and token >= rateLimit:
@@ -2016,10 +2009,10 @@ def postAlarmValues(request):
             
         day = now - now % (24*3600) # make window 24 hours long  
         cacheKey = "key4-alarmTokenBucketDay%s/%s"%(account,day)
-        token = memcache.incr( cacheKey , initial_value=0 )
+        token = memcache.incr( cacheKey )
         win = now - now % (60) # make window 1 min long  
         cacheKey = "key4-alarmTokenBucketWindow%s/%s"%(account,win)
-        token = memcache.incr( cacheKey , initial_value=0 )
+        token = memcache.incr( cacheKey )
         
         rateLimit = 20 # Max number of request per minute from each sensor
         if enableQuota and token >= rateLimit:
@@ -2131,7 +2124,7 @@ def postSensorValues(request):
 
         minute = now - now % 60 # make window 1 minutes long 
         cacheKey = "key4-ipTokenBucketMinute:%s/%s"%(ip,minute)
-        token = memcache.incr( cacheKey , initial_value=0 )
+        token = memcache.incr( cacheKey )
 
         rateLimit = 25 # Max number of request per minute from each IP address
         if enableQuota and token >= rateLimit:
@@ -2206,10 +2199,10 @@ def postSensorValues(request):
                 if enableQuota:
                     day = now - now % (24*3600) # make window 24 hours long  
                     cacheKey = "key4-sensorTokenBucketDay%s/%s"%(name,day)
-                    token = memcache.incr( cacheKey , initial_value=0 )
+                    token = memcache.incr( cacheKey )
                     win = now - now % (60) # make window 1 min long  
                     cacheKey = "key4-sensorTokenBucketWindow%s/%s"%(name,win)
-                    token = memcache.incr( cacheKey , initial_value=0 )
+                    token = memcache.incr( cacheKey )
 
                     rateLimit = 10 # Max number of request per minute from each sensor
                     if enableQuota and token >= rateLimit:
