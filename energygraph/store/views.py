@@ -230,7 +230,7 @@ def showLineGraph(request,userName,sensorName):
     return render_to_response('lineGraph.html', data )
 
 
-##@digestProtect(realm='fluffyhome.com')  # todo - fix this security nightmare 
+##@digestProtect(realm='fluffyhome.com')  # TODO - fix this security nightmare 
 def showLineGraphCSV(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == None:
@@ -287,7 +287,7 @@ def showLineGraphCSV(request,userName,sensorName):
     return response 
 
 
-##@digestProtect(realm='fluffyhome.com')  # todo - fix this security nightmare 
+##@digestProtect(realm='fluffyhome.com')  # TODO - fix this security nightmare 
 def showPlotJson_OLD_NO_USE(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == None:
@@ -365,7 +365,7 @@ def findValueByTimeSensorID( values, time, sid ):
     return None
 
 
-##@digestProtect(realm='fluffyhome.com') # todo fix 
+##@digestProtect(realm='fluffyhome.com') # TODO fix 
 def usageJson(request,userName,sensorName,type,period):
     tqxParams = request.GET.get('tqx','')
     
@@ -442,42 +442,42 @@ def usageJson(request,userName,sensorName,type,period):
         hour = None
 
     if period == "0day": 
-        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) # todo deal with  and 4 am is new midnight
+        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) # TODO deal with  and 4 am is new midnight
         start = mid 
         end = mid  + 24*3600
         step = 3600
         hour = None
 
     if period == "1day": 
-        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) # todo deal with  and 4 am is new midnight
+        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) # TODO deal with  and 4 am is new midnight
         start = mid - 24*3600
         end = mid 
         step = 3600
         hour = None
 
     if period == "2day" :
-        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) # todo deal with  and 4 am is new midnight
+        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) # TODO deal with  and 4 am is new midnight
         start = mid - 24*3600
         end = mid  + 24*3600
         step = 3600 
         hour = None
 
     if period == "7day":
-        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) # todo deal with  and 4 am is new midnight
+        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) # TODO deal with  and 4 am is new midnight
         start = mid - 7*24*3600
         end = mid
         step = 3600 * 24 
         hour = (start/3600) % 24
 
     if period == "30day":
-        mid = now - ( (now  + timeOffsetSeconds )%(24*3600) ) # todo deal with  and 4 am is new midnight
+        mid = now - ( (now  + timeOffsetSeconds )%(24*3600) ) # TODO deal with  and 4 am is new midnight
         start = mid - 30*24*3600
         end = mid
         step = 3600 * 24 
         hour = (start/3600) % 24
 
     if period == "6week":
-        mid = now - ( (now  + timeOffsetSeconds ) % (7*24*3600) ) # todo deal with  and 4 am is new midnight
+        mid = now - ( (now  + timeOffsetSeconds ) % (7*24*3600) ) # TODO deal with  and 4 am is new midnight
         start = mid - 6 * 7 *24*3600
         end = mid
         step = 3600 * 24 * 7
@@ -485,7 +485,7 @@ def usageJson(request,userName,sensorName,type,period):
         hour = None
 
     if period == "Aug": # august this year - TODO - should be last AUG  
-        mid = now - ( (now  + timeOffsetSeconds ) % (24*3600) ) # todo deal with  and 4 am is new midnight
+        mid = now - ( (now  + timeOffsetSeconds ) % (24*3600) ) # TODO deal with  and 4 am is new midnight
         mid   = time.mktime( ( time.localtime(mid)[0] , 9,1,1,0,0,0,0,0 ) )
         start = time.mktime( ( time.localtime(mid)[0] , 8,1,1,0,0,0,0,0 ) ) 
         end   = mid
@@ -669,7 +669,7 @@ def generateJson( tqxParams, vals , label, userName ):
     return html
 
 
-##@digestProtect(realm='fluffyhome.com') # todo fix 
+##@digestProtect(realm='fluffyhome.com') # TODO fix 
 def todayJson(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
@@ -688,7 +688,7 @@ def todayJson(request,userName,sensorName):
 
     #vals = getDayValues( userName,sensorName, datetime.utcnow() )
     sensorID = findSensorID( userName,sensorName )
-    assert sensorID > 0 # todo should html erro 
+    assert sensorID > 0 # TODO should html erro 
 
     utime = long( time.time() )
     utime = utime - utime % 3600 # get prev hour time 
@@ -714,9 +714,9 @@ def todayJson(request,userName,sensorName):
                 v = (end-start) / 3600.0
                 #v = (end-start) / (24 * 3600.0)
 #        if (  end < start ) :
-#            v = 3000 # todo ver bad
+#            v = 3000 # TODO ver bad
 #        if (  start < 0 ) :
-#            v = 5000 # todo ver bad
+#            v = 5000 # TODO ver bad
 #        if ( v > 5000 ):
 #            v = 10000 # TODO VERY BAD 
 #        if ( v < 0 ):
@@ -1407,7 +1407,7 @@ def showAllSensorsFunc(request,userName):
 
 #@digestProtect(realm='fluffyhome.com') 
 def usage(request,userName):
-    #todo erro bad user 
+    #TODO erro bad user 
 
     # check user exists 
     userID = findUserIdByName(userName)
@@ -1415,12 +1415,14 @@ def usage(request,userName):
         logger.debug( "Problem finding users %s"%userName )  
         return HttpResponseNotFound('<h1>Error: No user with name %s</h1>'%(userName) )  
 
-    # todo , add proper checks for user/sensor exists for all pages 
+    # TODO , add proper checks for user/sensor exists for all pages 
+
+    assert type( userID ) is long, "Wrong user of of type %s"%( type(userID) )
 
     #  get all costs from DB
     userMeta = getUserMetaByUserID( userID )
 
-    # todo - rounding for display is lame and sort of wrong 
+    # TODO - rounding for display is lame and sort of wrong 
 
     sensorID =  findSensorID( userName, "All")
     assert sensorID != 0, "Group 'All' does not exist for user %s"%userName
@@ -1433,15 +1435,15 @@ def usage(request,userName):
     vars['host'] = request.META["HTTP_HOST"]
     vars['user'] = userName
 
-    #todo move water to hydro 
+    #TODO move water to hydro 
 
     vars['waterCostPh'] = hydro*3600 * userMeta['waterCost'] 
 
-    vars['gaskW']  = int(gas)/1000.0 #todo fix round
+    vars['gaskW']  = int(gas)/1000.0 #TODO fix round
     vars['gasCostPh'] = gas/1000 * userMeta['gasCost'] 
     vars['gasC02kgph'] = gas/1000 * userMeta['gasCO2']
 
-    vars['eleckW'] = int(elec)/1000.0  #todo fix round
+    vars['eleckW'] = int(elec)/1000.0  #TODO fix round
     vars['elecCostPh'] = elec/1000 * userMeta['elecCost']
     vars['eleckC02kgph'] = elec/1000 * userMeta['elecCO2']
 
@@ -1511,7 +1513,7 @@ def addSensor(request,userName,sensorName):
     secret = "secretTODO"
 
     enrollSensor( ip, sensorName, userName, secret )
-    findSensorID( userName, sensorName, create=True ) # todo - rethink security of who gets to claim a sensor and when
+    findSensorID( userName, sensorName, create=True ) # TODO - rethink security of who gets to claim a sensor and when
 
     return HttpResponseRedirect( "/sensor/%s/%s/meta/"%(userName,sensorName) )
 
@@ -1558,7 +1560,7 @@ def enrollOld(request,streamName):
 def taskUpdateValues(userName,sensorName,t):
     logger.debug("In taskUpdateValues user=%s sensor=%s t=%s"%(userName,sensorName,t) )
     
-    sensorID = getSensorIDByName( sensorName ) # todo - should check userName too
+    sensorID = getSensorIDByName( sensorName ) # TODO - should check userName too
     assert sensorID > 0
 
     assert t is not None
@@ -1619,7 +1621,7 @@ def qTaskUpdate(userName,sensorName,t):
 def taskThinValues(userName,sensorName,t):
     logger.debug("In taskThinValues user=%s sensor=%s t=%s"%(userName,sensorName,t) )
     
-    sensorID = getSensorIDByName( sensorName ) # todo - should check userName too
+    sensorID = getSensorIDByName( sensorName ) # TODO - should check userName too
     assert sensorID > 0
 
     assert t is not None
@@ -1699,7 +1701,7 @@ def thinValues(request,userName,sensorName,pTime):
     logger.info("TASK: Running task thinValues %s/%s/%s"%(userName,sensorName,pTime) )
 
     #if userName != "*" and sensorName != "*":
-    #    if not streamExists(userName,sensorName) : # todo fix 
+    #    if not streamExists(userName,sensorName) : # TODO fix 
     #        return HttpResponseNotFound('<h1>user=%s sensor name=%s not found</h1>'%(userName,sensorName) )
      
     didIt = qTaskThin( userName, sensorName, pTime )
@@ -1716,7 +1718,7 @@ def updateValues(request,userName,sensorName,pTime):
     logger.info("TASK: Running task updateValues %s/%s/%s"%(userName,sensorName,pTime) )
 
     #if userName != "*" and sensorName != "*":
-    #    if not streamExists(userName,sensorName) : # todo fix 
+    #    if not streamExists(userName,sensorName) : # TODO fix 
     #        return HttpResponseNotFound('<h1>user=%s sensor name=%s not found</h1>'%(userName,sensorName) )
      
     qTaskUpdate( userName, sensorName, pTime )

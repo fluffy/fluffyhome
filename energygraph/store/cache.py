@@ -2,15 +2,20 @@
 import os
 import sys
 import urlparse
-
+import logging
 import redis
+
+logger = logging.getLogger('energygraph')
+
 
 class Memcache:
     """ Class to wrap some memory key value pair datastore """
     cache = None
+
     
     def __init__( self ):
         self.cache = None
+
 
     def connect( self ):
         try:
@@ -32,10 +37,14 @@ class Memcache:
         
     
     def get( self, key ):
+        logger.debug( "in cache get" )
         if self.cache is None:
             self.connect()
+        logger.debug( "about to cache get key=%s"%key )
         r = self.cache.get( key )
-        return r
+        logger.debug( "cache.get( %s )=%s"%(key,r) )
+        return r 
+    
     
     def put( self, key, value , time ):
         if self.cache is None:
@@ -45,16 +54,19 @@ class Memcache:
             value = "None"
             
         self.cache.set( key, value )
+
     
     def incr( self, key ):
         if self.cache is None:
             self.connect()
         # if key does not exist, start with inital value of 0 
         self.cache.incr( key )
+
     
     def delete( self, key  ):
         if self.cache is None:
             self.connect()
         self.cache.delete( key )
+
     
 memcache = Memcache()
