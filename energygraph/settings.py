@@ -5,8 +5,14 @@ import sys
 import urlparse
 
 
-DEBUG = True
-#DEBUG = False
+DEBUG = False
+
+try:
+    if os.environ['DJANGO_DEBUG'] == "TRUE" :
+        DEBUG = True
+except Exception:
+    print 'Unexpected error checking debug'
+
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -235,3 +241,6 @@ if DEBUG:
         LOGGING['loggers'][logger]['handlers'] = ['console','file']
         LOGGING['loggers'][logger]['propagate'] = False
     LOGGING['loggers']['django.db.backends']['handlers'] = ['file']
+
+
+LOGIN_URL = "/accounts/login/"

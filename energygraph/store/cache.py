@@ -34,7 +34,13 @@ class Memcache:
         self.cache = redis.StrictRedis(  host=url.hostname, port=url.port, password=url.password, db=0 )
 
         assert self.cache is not None, "Failed to connect to REDIS server"
-        
+
+        try:
+            r = self.cache.incr( "energygraph-memcache-connects" )
+        except redis.exceptions.ConnectionError:
+            logger.error( "Can not connect to redis server - fatal" )
+            self.cache = None
+            raise
     
     def get( self, key ):
         logger.debug( "in cache get" )

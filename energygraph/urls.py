@@ -65,6 +65,7 @@ urlpatterns = patterns('',
 
     (r'^$', about ), 
     (r'^about/$', about ), 
-    (r'^login/$', login ), 
+    #(r'^login/$', login ), 
 
+    (r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}), 
 )

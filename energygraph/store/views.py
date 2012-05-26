@@ -22,7 +22,10 @@ from django.shortcuts import render_to_response
 from django import forms
 
 from django import VERSION as DJANGO_VERSION
-from django.utils import simplejson as json  # fix when we can use Python 2.6 to just be import json 
+#from django.utils import simplejson as json  # fix when we can use Python 2.6 to just be import json 
+import json
+
+from django.contrib.auth.decorators import login_required
 
 
 #from djangohttpdigest.decorators import digestProtect,digestLogin
@@ -58,6 +61,7 @@ class EditUserForm( forms.ModelForm):
 
 
 #@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
+@login_required()
 def userPrefs( request, userName ):
     msg = "Edit any values you wish to change above then press Update"
 
@@ -111,6 +115,7 @@ def userPrefs( request, userName ):
 
 
 #@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
+@login_required()
 def showStats( request ):
     template = "showStats.html"
     
@@ -167,6 +172,7 @@ def showStats( request ):
 
 
 #@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
+@login_required()
 def showGraphs( request, userName ):
     template = "showGraphs.html"
     
@@ -180,17 +186,20 @@ def showGraphs( request, userName ):
 
 
 #@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
+@login_required()
 def patchHourly(request):
     val = hourlyPatch()
     return HttpResponse("<h1>Patched %d Hourly </h1>"%val)
 
 #@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
+@login_required()
 def patchHourlyCount(request):
     val = hourlyPatchCount()
     return HttpResponse("<h1>Counted %d hourly to patch</h1>"%val)
 
 
 #@digestProtect(realm='fluffyhome.com') 
+@login_required()
 def resetSensors(request,userName):
     # reset all values, integrals, and energy readings for all the users sensor
     
@@ -203,6 +212,7 @@ def resetSensors(request,userName):
 
 
 #@digestProtect(realm='fluffyhome.com') 
+@login_required()
 def showPlotOLD_NO_USE(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
@@ -217,6 +227,7 @@ def showPlotOLD_NO_USE(request,userName,sensorName):
 
 
 #@digestProtect(realm='fluffyhome.com') 
+@login_required()
 def showLineGraph(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
@@ -231,6 +242,7 @@ def showLineGraph(request,userName,sensorName):
 
 
 ##@digestProtect(realm='fluffyhome.com')  # TODO - fix this security nightmare 
+@login_required()
 def showLineGraphCSV(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == None:
@@ -288,6 +300,7 @@ def showLineGraphCSV(request,userName,sensorName):
 
 
 ##@digestProtect(realm='fluffyhome.com')  # TODO - fix this security nightmare 
+@login_required()
 def showPlotJson_OLD_NO_USE(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == None:
@@ -366,6 +379,7 @@ def findValueByTimeSensorID( values, time, sid ):
 
 
 ##@digestProtect(realm='fluffyhome.com') # TODO fix 
+@login_required()
 def usageJson(request,userName,sensorName,type,period):
     tqxParams = request.GET.get('tqx','')
     
@@ -670,6 +684,7 @@ def generateJson( tqxParams, vals , label, userName ):
 
 
 ##@digestProtect(realm='fluffyhome.com') # TODO fix 
+@login_required()
 def todayJson(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
@@ -753,6 +768,7 @@ def graphWindToday(request,sensorName):
 
 
 #@digestProtect(realm='fluffyhome.com') 
+@login_required()
 def graphToday(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
     if sensorID == 0 :
@@ -768,6 +784,7 @@ def graphToday(request,userName,sensorName):
 
 
 #@digestProtect(realm='fluffyhome.com') 
+@login_required()
 def dumpAlarm(request,userName,year,day):
     logger.debug( "dumping alarm for %s %s %s"%(userName,year,day ) )
 
@@ -801,6 +818,7 @@ def dumpAlarm(request,userName,year,day):
 
             
 #@digestProtect(realm='fluffyhome.com') 
+@login_required()
 def dumpSensor(request,userName,sensorName,year,day):
     logger.debug( "dumping sensor for %s %s %s %s"%(userName,sensorName,year,day ) )
 
@@ -861,6 +879,7 @@ def dumpMeta(request):
 
 
 #@digestProtect(realm='fluffyhome.com') 
+@login_required()
 def dumpUser(request,userName):
     response = HttpResponse(mimetype='application/xml')
     response['Content-Disposition'] = 'attachment; filename=%s-dump.xml'%userName
@@ -998,6 +1017,7 @@ class EditSensorForm(forms.ModelForm):
         
 
 #@digestProtect(realm='fluffyhome.com') 
+@login_required()
 def editSensor(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
     if sensorID == 0 :
@@ -1055,6 +1075,7 @@ def editSensor(request,userName,sensorName):
 
 
 #@digestProtect(realm='fluffyhome.com') 
+@login_required()
 def createSensor(request,userName,sensorName):
 
     userID = findUserIDByName( userName  )
@@ -1255,10 +1276,12 @@ def showAllWindSensors(request):
                                             'host':request.META["HTTP_HOST"] }) 
 
 #@digestProtect(realm='fluffyhome.com') 
+@login_required()
 def showAllSensors(request,userName):
     return showAllSensorsFunc(request,userName=userName)
 
 
+@login_required()
 def showAllSensorsFunc(request,userName):
     # check user exists 
     if findUserIdByName(userName) == 0 :
@@ -1406,6 +1429,7 @@ def showAllSensorsFunc(request,userName):
 
 
 #@digestProtect(realm='fluffyhome.com') 
+@login_required()
 def usage(request,userName):
     #TODO erro bad user 
 
@@ -1462,7 +1486,9 @@ def usage(request,userName):
 class AddGroupForm(forms.Form):
     name = forms.RegexField( "^\w[\-\w]{0,64}$" ) 
 
+
 #@digestProtect(realm='fluffyhome.com') 
+@login_required()
 def findSensorToEnroll(request,userName):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
@@ -1505,6 +1531,7 @@ def findSensorToEnroll(request,userName):
 
 
 #@digestProtect(realm='fluffyhome.com') 
+@login_required()
 def addSensor(request,userName,sensorName):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
@@ -1522,41 +1549,9 @@ def addSensor(request,userName,sensorName):
 
 #######OLD OLLD OLD OLD OLD #######################################################################
 
-def totalElec(request,user):
-    assert 0
-    usage = getCurrentUsage( user )
-
-    vars = {}
-    vars['host'] = request.META["HTTP_HOST"]
-    vars['user'] = user
-
-    vars['eleckW'] = usage['elecUsage']/1000
-
-    return render_to_response('totalElec.html', vars )
 
 
-def enrollOld(request,streamName):
-    assert 0
-    host = request.META["HTTP_HOST"]
-    ip = request.META.get('REMOTE_ADDR') # works on google app engine 
-    ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
-    if ( ip2 != None ):
-        ip = ip2
-
-    info = findEnroll( streamName, ip )
-
-    if info.user == "":
-        logger.debug( "Problem with enroll" )  
-        return HttpResponseNotFound('<p> Waiting for user to claim stream </p>' )
-
-    url = "http://%s/sensor/%s/%s/value/"%(host,info.user,info.sensorName)
-    data = "%s\n"%info.user # if we had DNS on sensors, might be better to return a URL 
-    data += "%s\n"%info.secret
-    data += "%s\n"%url
-
-    return HttpResponse( data )
-
-
+@login_required()
 def taskUpdateValues(userName,sensorName,t):
     logger.debug("In taskUpdateValues user=%s sensor=%s t=%s"%(userName,sensorName,t) )
     
@@ -1569,7 +1564,8 @@ def taskUpdateValues(userName,sensorName,t):
     t = t - t % 3600
     getHourlyEnergyBySensorID( sensorID , t )
 
-                  
+
+@login_required()
 def qTaskUpdate(userName,sensorName,t):
     logger.info("qTaskUpdate: user=%s sensor=%s time=%s"%(userName,sensorName,t) )
  
@@ -1618,6 +1614,7 @@ def qTaskUpdate(userName,sensorName,t):
     taskUpdateValues(userName,sensorName,t)
 
 
+@login_required()
 def taskThinValues(userName,sensorName,t):
     logger.debug("In taskThinValues user=%s sensor=%s t=%s"%(userName,sensorName,t) )
     
@@ -1642,6 +1639,7 @@ def taskThinValues(userName,sensorName,t):
     
 
 
+@login_required()
 def qTaskThin(userName,sensorName,t):
     logger.info("qTaskThin: user=%s sensor=%s time=%s"%(userName,sensorName,t) )
 
@@ -1697,6 +1695,7 @@ def qTaskThin(userName,sensorName,t):
     return True
 
 
+@login_required()
 def thinValues(request,userName,sensorName,pTime):
     logger.info("TASK: Running task thinValues %s/%s/%s"%(userName,sensorName,pTime) )
 
@@ -1714,6 +1713,7 @@ def thinValues(request,userName,sensorName,pTime):
     return HttpResponse('<h1>Queued tasks to thin Values</h1>'  )  
 
 
+@login_required()
 def updateValues(request,userName,sensorName,pTime):
     logger.info("TASK: Running task updateValues %s/%s/%s"%(userName,sensorName,pTime) )
 
@@ -1728,6 +1728,7 @@ def updateValues(request,userName,sensorName,pTime):
 
 
 
+@login_required()
 def updateNotify(request,userName,sensorName):
     logger.info("TASK: Running task updateNotify %s %s"%(userName,sensorName,) )
 
@@ -1751,6 +1752,7 @@ def updateNotify(request,userName,sensorName):
     return HttpResponse('<h1>Completed tasks to updated Value</h1>'  )  
 
 
+@login_required()
 def checkNotify(userName, sensorName):
     logger.debug( "CheckNotify %s %s "%(  userName, sensorName  ) )
 
@@ -1779,6 +1781,7 @@ def checkNotify(userName, sensorName):
                            )
 
 
+@login_required()
 def sendNotify(userName, sensorName, summary, note ):
     userID =  findUserIdByName( userName )
     assert userID > 0 
@@ -1798,6 +1801,7 @@ def sendNotify(userName, sensorName, summary, note ):
 
 
                 
+@login_required()
 def updateAllValues(request):
     users = findAllUserNames()
     for userName in users:
@@ -1821,6 +1825,7 @@ def updateAllValues(request):
     return HttpResponse('<h1>Completed update all hourly values</h1>'  )  
 
 
+@login_required()
 def updateAllValuesNow(request): # this is just like updateAllValues but it queses the tasks instead of doing them
     users = findAllUserNames()
     for userName in users:
@@ -1844,49 +1849,6 @@ def updateAllValuesNow(request): # this is just like updateAllValues but it ques
     return HttpResponse('<h1>Completed update all hourly values</h1>'  )  
 
 
-
-def pipes(request,user):
-    assert 0 
-    pipeList = []
-
-    query = StreamIDInfo.objects
-    query = query.filter( user = user )
-    results = query.all()[:1000] # deal with more than 1000 values 
-
-    getAllStreamNames( user )
-
-    for result in results:
-        pipe = {}
-        pipe['user'] = result.user
-        pipe['name'] = result.streamName
-        pipe['label'] = result.label
-        pipe['units'] = result.units
-       
-        try:
-            key = result.streamID.key()
-        except AttributeError:
-            logger.info( "found bad StreamID in database %s"%( str(pipe) )  )
-            continue
-        
-        # get most recent value 
-        query = Measurement.objects
-        query = query.filter( streamID = key )
-        query = query.order_by("-time")
-        measurement = None
-        try:
-            measurement = query.all()[0]
-        except IndexError:
-            pass
-        
-        if measurement == None:
-            logger.debug( "No measurement record in DB for %s"%( str(pipe) )  )
-        else:
-            pipe['time'] = measurement.time
-            pipe['value'] = measurement.value
-
-        pipeList.append( pipe )
-
-    return render_to_response('feeds.html', { 'user':user, 'pipeList': pipeList , 'host':request.META["HTTP_HOST"] })
 
 
 def about(request):
@@ -2240,6 +2202,7 @@ def postSensorValues(request):
 
 
 
+@login_required()
 def jsonFour(request,user):
     assert 0
     # stuff for daily pie chart 
@@ -2312,17 +2275,20 @@ def jsonFour(request,user):
 
 
 #@digestLogin(realm='fluffyhome.com')
+@login_required()
 def login(request,user=None):
     return HttpResponseRedirect("/user/%s/status/"%user)
 
 
 #@digestLogin(realm='fluffyhome.com')
+@login_required()
 def enrollSensor2(request,sensorName,secret,user=None):
     return HttpResponseRedirect( "/user/%s/enroll/add/%s/"%(user,sensorName) )
 
 
 
 ##@digestLogin(realm='fluffyhome.com')
+@login_required()
 def pollWindAB1(request,loc,user=None):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
@@ -2382,6 +2348,7 @@ def pollWindAB1(request,loc,user=None):
     return response 
 
 
+@login_required()
 def pollWindAB2(request,loc,user=None):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
@@ -2441,6 +2408,7 @@ def pollWindAB2(request,loc,user=None):
     return response 
 
 
+@login_required()
 def pollWindAB3(request,loc,user=None):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
@@ -2501,6 +2469,7 @@ def pollWindAB3(request,loc,user=None):
     return response 
 
 
+@login_required()
 def pollWindAB4(request,loc,user=None):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 

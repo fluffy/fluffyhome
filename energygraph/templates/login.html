@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block head %}
+{% endblock %}
+
+{% block nav %}
+{% endblock %}
+
+{% block content %}
+<form method="post" action="/accounts/login/">
+{% csrf_token %}
+
+<div class="section">
+  <h3 class="form-title" > Login </h3>
+</div>
+
+<div class="section-item">
+  {{ form.username.errors }}
+  <label for="id_gasCost">{{ form.username.label_tag }}</label>
+  {{ form.username }}
+</div>
+<div class="section-item">
+  {{ form.password.errors }}
+  <label for="id_elecCost">{{ form.password.label_tag }}</label>
+  {{ form.password }}
+</div>
+
+<div class="section">
+  <h3 class="form-title">{% trans "Update" %}</h3>
+</div>
+
+<div class="section-details">
+  {{msg}}
+{% if form.errors %}
+<p>Your username and password didn't match. Please try again.</p>
+{% endif %}
+</div>
+
+<div class="section-item">
+  <label for="submit"></label>
+  <input type="submit" value="login" />
+  <input type="hidden" name="next" value="{{ next }}"/>
+</div>
+    
+</form>
+{% endblock %}
