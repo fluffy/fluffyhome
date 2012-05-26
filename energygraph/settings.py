@@ -8,10 +8,11 @@ import urlparse
 DEBUG = False
 
 try:
-    if os.environ['DJANGO_DEBUG'] == "TRUE" :
-        DEBUG = True
+    if 'DJANGO_DEBUG' in  os.environ:
+        if os.environ['DJANGO_DEBUG'] == "TRUE" :
+            DEBUG = True
 except Exception:
-    print 'Unexpected error checking debug'
+    print "Unexpected error checking DJANGO_DEBUG environment variable"
 
 TEMPLATE_DEBUG = DEBUG
 
