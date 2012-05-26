@@ -69,16 +69,16 @@ def main():
 
     userName = user.attrib.get("userName")
 
-    # create the user 
-    u = url + "/admin/user/" + userName + "/"
-    post( None , u ,  "application/x-www-form-urlencoded" , "admin", "none" );
+    if False : # create the user 
+        u = url + "/admin/user/" + userName + "/"
+        post( None , u ,  "application/x-www-form-urlencoded" , "admin", "none" );
 
-    # update the user record 
-    email = user.attrib.get("email")
-    attributes = user.items()
-    data = urlencode( attributes )
-    u = url + "/user/" + userName + "/prefs/"
-    post( data , u ,  "application/x-www-form-urlencoded" , userName, options.password );
+    if True: # update the user record 
+        email = user.attrib.get("email")
+        attributes = user.items()
+        data = urlencode( attributes )
+        u = url + "/user/" + userName + "/prefs/"
+        post( data , u ,  "application/x-www-form-urlencoded" , userName, options.password );
 
     # create the sensors 
     sensors = tree.findall("sensor")
