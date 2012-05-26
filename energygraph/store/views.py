@@ -1958,7 +1958,7 @@ def postAlarmValues(request):
 
     minute = now - now % 60 # make window 1 minutes long 
     cacheKey = "key4-ipTokenBucketMinute:%s/%s"%(ip,minute)
-    token = memcache.incr( cacheKey )
+    token = memcache.incr( cacheKey, 60 )
 
     rateLimit = 100 # Max number of request per minute from each IP address
     if enableQuota and token >= rateLimit:
@@ -2011,10 +2011,10 @@ def postAlarmValues(request):
             
         day = now - now % (24*3600) # make window 24 hours long  
         cacheKey = "key4-alarmTokenBucketDay%s/%s"%(account,day)
-        token = memcache.incr( cacheKey )
+        token = memcache.incr( cacheKey , 24*3600 )
         win = now - now % (60) # make window 1 min long  
         cacheKey = "key4-alarmTokenBucketWindow%s/%s"%(account,win)
-        token = memcache.incr( cacheKey )
+        token = memcache.incr( cacheKey , 60 )
         
         rateLimit = 20 # Max number of request per minute from each sensor
         if enableQuota and token >= rateLimit:
@@ -2093,7 +2093,7 @@ def postAlarmValues(request):
 
 def postSensorValues(request):
     enableQuota = False
-    enableQuota = True 
+    #enableQuota = True 
 
     ver = "TBD"
     try:
@@ -2126,7 +2126,7 @@ def postSensorValues(request):
 
         minute = now - now % 60 # make window 1 minutes long 
         cacheKey = "key4-ipTokenBucketMinute:%s/%s"%(ip,minute)
-        token = memcache.incr( cacheKey )
+        token = memcache.incr( cacheKey, 60 )
 
         rateLimit = 25 # Max number of request per minute from each IP address
         if enableQuota and token >= rateLimit:
@@ -2201,10 +2201,10 @@ def postSensorValues(request):
                 if enableQuota:
                     day = now - now % (24*3600) # make window 24 hours long  
                     cacheKey = "key4-sensorTokenBucketDay%s/%s"%(name,day)
-                    token = memcache.incr( cacheKey )
+                    token = memcache.incr( cacheKey, 24*3600 )
                     win = now - now % (60) # make window 1 min long  
                     cacheKey = "key4-sensorTokenBucketWindow%s/%s"%(name,win)
-                    token = memcache.incr( cacheKey )
+                    token = memcache.incr( cacheKey, 60 )
 
                     rateLimit = 10 # Max number of request per minute from each sensor
                     if enableQuota and token >= rateLimit:

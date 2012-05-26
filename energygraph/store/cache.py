@@ -56,11 +56,16 @@ class Memcache:
         self.cache.set( key, value )
 
     
-    def incr( self, key ):
+    def incr( self, key, expire ):
         if self.cache is None:
             self.connect()
         # if key does not exist, start with inital value of 0 
-        self.cache.incr( key )
+        r = self.cache.incr( key )
+        r = int( r )
+        if ( r == 1 ) :
+            # key just got created, set the expire time
+            self.cache.expire( key, expire )
+        return r
 
     
     def delete( self, key  ):
