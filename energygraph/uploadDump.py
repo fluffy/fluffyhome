@@ -80,16 +80,16 @@ def main():
         u = url + "/user/" + userName + "/prefs/"
         post( data , u ,  "application/x-www-form-urlencoded" , userName, options.password );
 
-    # create the sensors 
-    sensors = tree.findall("sensor")
-    for sensor in sensors:
-        sensorName = sensor.attrib.get("sensorName")
+    if False :# create the sensors 
+        sensors = tree.findall("sensor")
+        for sensor in sensors:
+            sensorName = sensor.attrib.get("sensorName")
 
-        attributes = sensor.items()
-        data = urlencode( attributes )
-        u = url + "/sensor/" + userName + "/" + sensorName + "/create/"
+            attributes = sensor.items()
+            data = urlencode( attributes )
+            u = url + "/sensor/" + userName + "/" + sensorName + "/create/"
 
-        post( data , u ,  "application/x-www-form-urlencoded" , userName, options.password );
+            post( data , u ,  "application/x-www-form-urlencoded" , userName, options.password );
 
     #create the meassurement data 
     count = 0

@@ -37,7 +37,7 @@ heroku run python
 import os
 import redis
 url = os.getenv('REDISTOGO_URL', 'redis://localhost')
-r = redis.from_url(redis_url) 
+r = redis.from_url( url ) 
 r.flushdb()
 
 

@@ -467,14 +467,17 @@ def getSensorIDByName( sensorName ):
     global globalSensorIDBySensorName
 
     if sensorName in globalSensorIDBySensorName:
-        return globalSensorIDBySensorName[sensorName]
+        id = globalSensorIDBySensorName[sensorName]
+        logger.debug( 'getSensorIDByName: found %s in global with id=%d'%(sensorName,id) )
+        return id
     
     logger.debug( 'key4-getSensorIDByName:%s'%(sensorName) )
     id = memcache.get( 'key4-getSensorIDByName:%s'%(sensorName) )
     if id != None:
         id = long( id )
-        globalSensorIDBySensorName[sensorName] = id
-        return id
+        if id != 0:
+            globalSensorIDBySensorName[sensorName] = id
+            return id
 
     query = Sensor.objects
     logger.debug("# DB search for getSensorIDByName" )
@@ -489,8 +492,6 @@ def getSensorIDByName( sensorName ):
     if sensor != None:
         ret = sensor.sensorID
         memcache.put( 'key4-getSensorIDByName:%s'%(sensorName) , ret, 24*3600 )
-    else:
-        memcache.put( 'key4-getSensorIDByName:%s'%(sensorName) , ret, 5 ) # keep bad sensor from hammering DB
 
     if ret != 0:
         globalSensorIDBySensorName[sensorName] = ret
