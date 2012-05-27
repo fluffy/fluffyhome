@@ -60,15 +60,15 @@ urlpatterns = patterns('',
     (r'^tasks/pollWindAB3/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB3 ), 
     (r'^tasks/pollWindAB4/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB4 ), 
 
-    #(r'^admin/updateAll/$', updateAllValues ), 
-    #(r'^admin/stats/$', showStats ), 
-    #(r'^admin/dump/meta/$', dumpMeta ), 
-    #(r'^admin/updateAllNow/$', updateAllValuesNow ), 
+    (r'^admin/updateAll/$', updateAllValues ), 
+    (r'^admin/stats/$', showStats ), 
+    (r'^admin/dump/meta/$', dumpMeta ), 
+    (r'^admin/updateAllNow/$', updateAllValuesNow ), 
     #(r'^admin/patchHourly/$', patchHourly ), 
     #(r'^admin/patchHourlyCount/$', patchHourlyCount ), 
-    #(r'^admin/user/(?P<userName>[a-zA-Z]\w{0,64})/$', editUser ), 
+    (r'^admin/user/(?P<userName>[a-zA-Z]\w{0,64})/$', editUser ), 
 
-    (r'^admin/', include(admin.site.urls)),
+    (r'^admin-django/', include(admin.site.urls)),
 
     (r'^enroll/(?P<sensorName>[\w][\-\w]{0,64})/(?P<secret>[0-9a-fA-F]{1,32})/$', enrollSensor2 ), 
 
