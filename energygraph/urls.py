@@ -3,10 +3,11 @@
 from django.conf.urls.defaults import *
 from django.views.generic.simple import redirect_to
 from django.conf.urls import patterns, url, include
-#from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
 
 from store.views import *
+import settings
 
 admin.autodiscover()
 
@@ -78,6 +79,9 @@ urlpatterns = patterns('',
     (r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
 
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': "energygraph/static/", }),
+    (r'^favicon.ico$', 'django.views.static.serve', { 'document_root': "energygraph/static/", 'path':"favicon.ico", }),
+    (r'^robots.txt$', 'django.views.static.serve', { 'document_root': "energygraph/static/", 'path':"robots.txt", }),
         
 )
 
+    #urlpatterns += staticfiles_urlpatterns()

@@ -5,6 +5,8 @@ import sys
 import urlparse
 
 
+PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
+
 DEBUG = False
 
 try:
@@ -66,15 +68,18 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = '/tmp/django-static'
+STATIC_ROOT = os.path.join(PROJECT_PATH, 'staticfiles')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
+#STATIC_URL = 'http://s3.amazonaws.com/fluffyhome/'
 STATIC_URL = '/static/'
+
+ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    'energygraph/static/',
+    os.path.join(PROJECT_PATH, 'static'), #'energygraph/static/',
     #'static/',
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
@@ -86,9 +91,17 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
+#STATICFILES_STORAGE = 'myproject.storage.S3Storage'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+#STATICFILES_STORAGE  = 'storages.backends.s3boto.S3BotoStorage'
+#DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+
+#AWS_ACCESS_KEY_ID = ""
+#AWS_SECRET_ACCESS_KEY = ""
+AWS_STORAGE_BUCKET_NAME = "fluffyhome"
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'TODO-CHANGE-THIS-lskdjflljkjhykjh7ojk23467rkj8j'
@@ -101,6 +114,15 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.Loader',
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.contrib.auth.context_processors.auth',
+    'django.contrib.messages.context_processors.messages',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -146,6 +168,9 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
+
+    # for the S3 storage stuff
+    #'storages',
 
     # TODO - need to add back next line 
     'energygraph.store'
