@@ -54,7 +54,7 @@ def editUser( request, userName ):
 class EditUserForm( forms.ModelForm):
     class Meta:
         model = User
-        exclude = [ 'userName','passwd','active','userID','settingEpoch' ]
+        exclude = [ 'userName','passwd','active','userID','settingEpoch','newPwd','newPwdAgain' ]
     def __init__(self, *args, **kwargs):
         super( forms.ModelForm, self).__init__(*args, **kwargs)
 
@@ -82,14 +82,14 @@ def userPrefs( request, userName ):
             
             msg ="Data succesfully saved"
 
-            if ( record.newPwd is not None ) and ( record.newPwd is not "" ) :
-                if record.newPwd == record.newPwdAgain :
-                    record.passwd = record.newPwd
-                    msg ="Password succesfully changed"
-                    record.newPwd = ""
-                    record.newPwdAgain = ""
-                else:
-                    msg ="New passwords did not match and password was not changed"
+            #if ( record.newPwd is not None ) and ( record.newPwd is not "" ) :
+            #    if record.newPwd == record.newPwdAgain :
+            #        record.passwd = record.newPwd
+            #        msg ="Password succesfully changed"
+            #        record.newPwd = ""
+            #        record.newPwdAgain = ""
+            #    else:
+            #        msg ="New passwords did not match and password was not changed"
 
             record.save()
             updateUserSettingsEpoch(userName)
