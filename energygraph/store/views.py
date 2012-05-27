@@ -1075,7 +1075,7 @@ def editSensor(request,userName,sensorName):
 
 
 #@digestProtect(realm='fluffyhome.com') 
-@login_required()
+#@login_required()
 def createSensor(request,userName,sensorName):
 
     userID = findUserIDByName( userName  )
