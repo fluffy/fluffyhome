@@ -166,12 +166,12 @@ postValue( char* bufUrl , char* bufData )
    
    if ( (int)ret != 0 )
    {
-      fprintf(stderr,"Curl call return value was %d\n", (int)ret );
+      fprintf(stderr,"Curl post to %s return value was %d\n", bufUrl, (int)ret );
    }
 }
 
 
-void postMsg( char* url, Value* prev, Value* delta, Value* current )
+void postMsg( char* url1, char* url2, Value* prev, Value* delta, Value* current )
 {
    int i;
    int doPost = 0;
@@ -266,10 +266,12 @@ void postMsg( char* url, Value* prev, Value* delta, Value* current )
 
    if (verbose)
    {
-      fprintf(stderr,"Post Message len=%d to %s:\n%s\n",len,url,bufData);
+      fprintf(stderr,"Post Message len=%d to %s and %s:\n%s\n",len,url1,url2,bufData);
    }
    //fprintf(stderr,"Post Message len=%d to %s \n",len,url);
-   postValue( url, bufData );
+
+   postValue( url1, bufData );
+   postValue( url2, bufData );
 
    memcpy( prev, current, sizeof(Value) );
    memcpy( delta, current, sizeof(Value) );
@@ -359,14 +361,7 @@ processData( int sock , char* url1, char* url2 )
       if ( check == sum )
       {
          parseMsg( msgPos-2 , msgBuf , &current );
-         if ( url1 != NULL )
-         {
-            postMsg( url1, &prev, &delta, &current );
-         }
-         if ( url2 != NULL )
-         {
-            postMsg( url2, &prev, &delta, &current );
-         }
+         postMsg( url1, url2, &prev, &delta, &current );
       }
       else
       {
