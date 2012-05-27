@@ -319,7 +319,7 @@ void parseMsg( int len,  unsigned char msg[] , Value* current )
 
 
 void
-processData( int sock , char* url )
+processData( int sock , char* url1, char* url2 )
 {
    int c;
    
@@ -359,7 +359,14 @@ processData( int sock , char* url )
       if ( check == sum )
       {
          parseMsg( msgPos-2 , msgBuf , &current );
-         postMsg( url, &prev, &delta, &current );
+         if ( url1 != NULL )
+         {
+            postMsg( url1, &prev, &delta, &current );
+         }
+         if ( url2 != NULL )
+         {
+            postMsg( url2, &prev, &delta, &current );
+         }
       }
       else
       {
@@ -369,7 +376,7 @@ processData( int sock , char* url )
 }
 
 
-void runSerial( char* device, char* url )
+void runSerial( char* device, char* url1, char* url2 )
 {
    struct termios p;
 
@@ -411,12 +418,11 @@ void runSerial( char* device, char* url )
       exit(EXIT_FAILURE);
    }
    
-  
-   processData( fd , url );
+   processData( fd , url1, url2 );
 }
 
 
-void runIP( int port, char* url  )
+void runIP( int port, char* url1, char* url2  )
 {
    int listenPort = 8083;
    int lSock = 0;
@@ -454,7 +460,7 @@ void runIP( int port, char* url  )
           exit(EXIT_FAILURE);
        }
     
-       processData( dataSock, url  );
+       processData( dataSock, url1, url2  );
        
        if ( close(dataSock) < 0 )
        {
@@ -476,7 +482,8 @@ main(int argc, char* argv[] )
    
    int port = 0;
    char* dev = "/dev/cu.KeySerial1";
-   char* url = "http://www.fluffyhome.com/sensorValues/";
+   char* url1 = "http://www.fluffyhome.com/sensorValues/";
+   char* url2 = "http://fh2.herokuapp.com/sensorValues/";
    verbose = 0;
    
    if ( argc > 1 )
@@ -487,7 +494,7 @@ main(int argc, char* argv[] )
    
    if ( argc > 2  )
    {
-      url = argv[2];
+      url1 = argv[2];
    }
    
    if ( argc > 3 )
@@ -497,11 +504,11 @@ main(int argc, char* argv[] )
    
    if ( port )
    {
-      runIP( port , url );
+      runIP( port , url1, url2 );
    }
    else
    {
-      runSerial( dev, url  );
+      runSerial( dev, url1 , url2  );
    }
 
    return 0;
