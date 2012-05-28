@@ -3,6 +3,7 @@
 import os
 import sys
 import urlparse
+import djcelery
 
 
 PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -169,6 +170,10 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
 
+    # stuff for Celery
+    'kombu.transport.django',
+    'djcelery',
+
     # for the S3 storage stuff
     #'storages',
 
@@ -269,3 +274,11 @@ if DEBUG:
 
 
 LOGIN_URL = "/accounts/login/"
+
+
+# Stuff for Celery
+
+BROKER_BACKEND = 'django'
+
+#djcelery.setup_loader()
+

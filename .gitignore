@@ -21,3 +21,4 @@
 venv
 energygraph/old/
 
+celerybeat-schedule
