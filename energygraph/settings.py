@@ -289,7 +289,7 @@ from store.tasks import *
 CELERYBEAT_SCHEDULE = {
     "my-store-doTask-shedule": {
         "task": "energygraph.store.tasks.doTask",
-        "schedule": crontab(minute="*/1"), #execute every minute 
+        "schedule": crontab(minute="*/5"), #execute every minute 
         "args": ( 42, 66 ),
     },
 }
