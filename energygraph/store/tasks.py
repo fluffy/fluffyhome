@@ -16,7 +16,7 @@ def doTask( x , y ):
 @task()
 def updateHourly(): # /tasks/update/*/*/*/
     logger.info( "Running task updateHourly" )
-    doUpdateAllValues()
+    doUpdateAllValuesNow()
 
 
 def updateWindAB4(): #  /tasks/pollWindAB4/ab-52/

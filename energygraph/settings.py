@@ -295,4 +295,10 @@ CELERYBEAT_SCHEDULE = {
         "schedule": crontab(minute="*/5"), #execute every minute 
         "args": ( 42, 66 ),
     },
+
+      "my-store-update-hourly-shedule": {
+        "task": "energygraph.store.tasks.updateHourly",
+        "schedule": crontab(minute="*/2"), #execute every minute 
+                                           #"args": ( 42, 66 ),
+    },
 }
