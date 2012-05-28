@@ -1,5 +1,6 @@
 {% extends "baseSmall.html" %}
 {% load i18n %}
+{% load staticfiles %}
 
 {% block head %}
 {% endblock %}
@@ -18,7 +19,7 @@
   <div id="tools">
      {% ifnotequal pipe.category "Group" %}
       <a href="/wind/sensor/{{ pipe.name }}/history/today/">
-      <img src="/static/icons-emre-ozcelik/graph.png" width="32" height="32" border="0" alt="graph" />
+      <img src="{% static 'icons-emre-ozcelik/graph.png' %}" width="32" height="32" border="0" alt="graph" />
       </a>
      {% endifnotequal %}
  </div>

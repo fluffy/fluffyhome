@@ -71,12 +71,13 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = os.path.join(PROJECT_PATH, 'staticfiles')
+STATIC_ROOT = os.path.join(PROJECT_PATH, 'staticfiles/static')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-#STATIC_URL = 'http://s3.amazonaws.com/fluffyhome/'
-STATIC_URL = '/static/'
+#STATIC_URL = 'http://s3.amazonaws.com/fluffyhome'
+STATIC_URL = 'http://fluffyhome.s3-website-us-east-1.amazonaws.com/static/'
+#STATIC_URL = '/static/'
 
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
@@ -281,6 +282,8 @@ LOGIN_URL = "/accounts/login/"
 # Stuff for Celery
 
 BROKER_BACKEND = 'django'
+
+CELERYD_CONCURRENCY = 1
 
 #djcelery.setup_loader()
 

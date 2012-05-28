@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load staticfiles %}
 
 {% block head %}
 {% endblock %}
@@ -18,19 +19,19 @@
   <div id="tools">
       <!--
       <a href="/sensor/{{ pipe.user }}/{{ pipe.name }}/edit/">
-      <img src="/static/icons-emre-ozcelik/edit.png" width="32" height="32" border="0" alt="edit" />
+      <img src="{% static 'icons-emre-ozcelik/edit.png' %}" width="32" height="32" border="0" alt="edit" />
       </a>
       -->
       {% ifnotequal pipe.category "Group" %}
       <a href="/sensor/{{ pipe.user }}/{{ pipe.name }}/history/today/">
-      <img src="/static/icons-emre-ozcelik/graph.png" width="32" height="32" border="0" alt="graph" />
+      <img src="{% static 'icons-emre-ozcelik/graph.png' %}" width="32" height="32" border="0" alt="graph" />
       </a>
       <a href="/sensor/{{ pipe.user }}/{{ pipe.name }}/history/">
-      <img src="/static/icons-emre-ozcelik/search.png" width="32" height="32" border="0" alt="search" />
+      <img src="{% static 'icons-emre-ozcelik/search.png' %}" width="32" height="32" border="0" alt="search" />
       </a>
       {% endifnotequal %}
       <a href="/sensor/{{ pipe.user }}/{{ pipe.name }}/meta/">
-      <img src="/static/icons-emre-ozcelik/prop.png" width="32" height="32" border="0" alt="properties" />
+      <img src="{% static 'icons-emre-ozcelik/prop.png' %}" width="32" height="32" border="0" alt="properties" />
       </a>
   </div>
   <div class="section-data"> <label>{{ pipe.label }}:</labeL>
