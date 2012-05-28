@@ -4,6 +4,8 @@ import os
 import sys
 import urlparse
 import djcelery
+from datetime import timedelta
+from celery.schedules import crontab
 
 
 PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -282,3 +284,12 @@ BROKER_BACKEND = 'django'
 
 #djcelery.setup_loader()
 
+from store.tasks import *
+
+CELERYBEAT_SCHEDULE = {
+    "my-store-doTask-shedule": {
+        "task": "energygraph.store.tasks.doTask",
+        "schedule": crontab(minute="*/1"), #execute every minute 
+        "args": ( 42, 66 ),
+    },
+}
