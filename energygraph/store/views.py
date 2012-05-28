@@ -1551,7 +1551,6 @@ def addSensor(request,userName,sensorName):
 
 
 
-@login_required()
 def taskUpdateValues(userName,sensorName,t):
     logger.debug("In taskUpdateValues user=%s sensor=%s t=%s"%(userName,sensorName,t) )
     
@@ -1567,6 +1566,7 @@ def taskUpdateValues(userName,sensorName,t):
 
 @login_required()
 def qTaskUpdate(userName,sensorName,t):
+    assert False, "depeerate as uses q task "
     logger.info("qTaskUpdate: user=%s sensor=%s time=%s"%(userName,sensorName,t) )
  
     if userName == "*":
@@ -1641,6 +1641,7 @@ def taskThinValues(userName,sensorName,t):
 
 @login_required()
 def qTaskThin(userName,sensorName,t):
+    assert False, "depricatea as uses q Task "
     logger.info("qTaskThin: user=%s sensor=%s time=%s"%(userName,sensorName,t) )
 
     #thinqueue = taskqueue.Queue( "thin" );
@@ -1697,6 +1698,7 @@ def qTaskThin(userName,sensorName,t):
 
 @login_required()
 def thinValues(request,userName,sensorName,pTime):
+    assert Flase," depricate as uses q task "
     logger.info("TASK: Running task thinValues %s/%s/%s"%(userName,sensorName,pTime) )
 
     #if userName != "*" and sensorName != "*":
@@ -1715,6 +1717,7 @@ def thinValues(request,userName,sensorName,pTime):
 
 @login_required()
 def updateValues(request,userName,sensorName,pTime):
+    assert Flase, "depricate as uses q task "
     logger.info("TASK: Running task updateValues %s/%s/%s"%(userName,sensorName,pTime) )
 
     #if userName != "*" and sensorName != "*":
@@ -1802,7 +1805,12 @@ def sendNotify(userName, sensorName, summary, note ):
 
                 
 @login_required()
-def updateAllValues(request):
+def updateAllValuesNow(request):
+    doUpdateAllValuesNow()
+    return HttpResponse('<h1>Completed update all hourly values</h1>'  )  
+
+
+def doUpdateAllValuesNow():
     users = findAllUserNames()
     for userName in users:
         now = long( time.time() )
@@ -1822,11 +1830,12 @@ def updateAllValues(request):
                         taskUpdateValues( userName, sensor.sensorName , t )
                         logger.debug( "Updated %s/%s/%d"%(  userName, sensor.sensorName , (t-now)/3600 ) )
 
-    return HttpResponse('<h1>Completed update all hourly values</h1>'  )  
+
 
 
 @login_required()
-def updateAllValuesNow(request): # this is just like updateAllValues but it queses the tasks instead of doing them
+def updateAllValues(request): # this is just like updateAllValues but it queues the tasks instead of doing them
+    assert False, "depricated as uses qTask "
     users = findAllUserNames()
     for userName in users:
         now = long( time.time() )

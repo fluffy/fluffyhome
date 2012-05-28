@@ -44,23 +44,23 @@ urlpatterns = patterns('',
     (r'^sensorValues/$', postSensorValues ), 
     (r'^alarmValues/$', postAlarmValues ), 
  
-    (r'^tasks/update/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[0-9]{8}T[0-9]{6}Z)/$', updateValues ), 
-    (r'^tasks/update/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[\*])/$', updateValues ), 
+    #(r'^tasks/update/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[0-9]{8}T[0-9]{6}Z)/$', updateValues ), 
+    #(r'^tasks/update/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[\*])/$', updateValues ), 
 
-    (r'^tasks/notify/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/$', updateNotify ), 
+    #(r'^tasks/notify/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/$', updateNotify ), 
 
-    (r'^tasks/refresh/(?P<userName>[a-zA-Z]\w{0,64})/$', loadAllSensors ), 
+    #(r'^tasks/refresh/(?P<userName>[a-zA-Z]\w{0,64})/$', loadAllSensors ), 
 
-    (r'^tasks/thin/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[\*])/$', thinValues ), 
-    (r'^tasks/thin/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[\-])/$', thinValues ), 
-    (r'^tasks/thin/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[0-9]{10})/$', thinValues ), 
+    #(r'^tasks/thin/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[\*])/$', thinValues ), 
+    #(r'^tasks/thin/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[\-])/$', thinValues ), 
+    #(r'^tasks/thin/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[0-9]{10})/$', thinValues ), 
  
-    (r'^tasks/pollWindAB1/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB1 ), 
-    (r'^tasks/pollWindAB2/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB2 ), 
-    (r'^tasks/pollWindAB3/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB3 ), 
-    (r'^tasks/pollWindAB4/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB4 ), 
+    #(r'^tasks/pollWindAB1/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB1 ), 
+    #(r'^tasks/pollWindAB2/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB2 ), 
+    #(r'^tasks/pollWindAB3/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB3 ), 
+    #(r'^tasks/pollWindAB4/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB4 ), 
 
-    (r'^admin/updateAll/$', updateAllValues ), 
+    #(r'^admin/updateAll/$', updateAllValues ), 
     (r'^admin/stats/$', showStats ), 
     (r'^admin/dump/meta/$', dumpMeta ), 
     (r'^admin/updateAllNow/$', updateAllValuesNow ), 
@@ -78,7 +78,8 @@ urlpatterns = patterns('',
 
     (r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
 
-    (r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': "energygraph/static/", }),
+    #(r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': "energygraph/static/", }),
+    
     (r'^favicon.ico$', 'django.views.static.serve', { 'document_root': settings.STATIC_ROOT, 'path':"favicon.ico", }),
     (r'^robots.txt$', 'django.views.static.serve', { 'document_root': settings.STATIC_ROOT, 'path':"robots.txt", }),
         
