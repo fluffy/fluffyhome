@@ -1,0 +1,16 @@
+
+
+
+Set up following environment variables
+
+setenv DATABASE_URL postgres://fluffy:pwd@localhost/hero
+setenv DJANGO_SECRET_KEY junkhere
+
+setenv REDISTOGO_URL redis://localhost:6379
+
+setenv DJANGO_DEBUG TRUE
+
+setenv AWS_ACCESS_KEY_ID "foobar"
+setenv AWS_SECRET_ACCESS_KEY "barfoo"
+
+
