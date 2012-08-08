@@ -3,9 +3,10 @@
 import os
 import sys
 import urlparse
-import djcelery
+
+#import djcelery
 from datetime import timedelta
-from celery.schedules import crontab
+#from celery.schedules import crontab
 
 
 PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -289,16 +290,16 @@ CELERYD_CONCURRENCY = 1
 
 from store.tasks import *
 
-CELERYBEAT_SCHEDULE = {
-    "my-store-doTask-shedule": {
-        "task": "energygraph.store.tasks.doTask",
-        "schedule": crontab(minute="*/5"), #execute every minute 
-        "args": ( 42, 66 ),
-    },
-
-      "my-store-update-hourly-shedule": {
-        "task": "energygraph.store.tasks.updateHourly",
-        "schedule": crontab(minute="*/2"), #execute every minute 
-                                           #"args": ( 42, 66 ),
-    },
-}
+#CELERYBEAT_SCHEDULE = {
+#    "my-store-doTask-shedule": {
+#        "task": "energygraph.store.tasks.doTask",
+#        "schedule": crontab(minute="*/5"), #execute every minute 
+#        "args": ( 42, 66 ),
+#    },
+#
+#      "my-store-update-hourly-shedule": {
+#        "task": "energygraph.store.tasks.updateHourly",
+#        "schedule": crontab(minute="*/2"), #execute every minute 
+#                                           #"args": ( 42, 66 ),
+#    },
+#}
