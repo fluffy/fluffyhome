@@ -175,8 +175,8 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
 
     # stuff for Celery
-    'kombu.transport.django',
-    'djcelery',
+    #'kombu.transport.django',
+    #'djcelery',
 
     # for the S3 storage stuff
     #'storages',

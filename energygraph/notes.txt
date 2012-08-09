@@ -1,5 +1,26 @@
 
 
+sudo apt-get install python-dev
+sudo apt-get install build-essential
+
+
+apt-get install rabbitmq-server
+sudo pip install django-celery
+
+
+install postgres, create user, create DB 
+
+
+
+
+sudo apt-get redis-server
+sudo pip install redis
+
+
+
+sudo apache2ctl restart
+
+
 
 Set up following environment variables
 
