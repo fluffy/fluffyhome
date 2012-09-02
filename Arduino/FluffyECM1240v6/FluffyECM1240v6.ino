@@ -7,7 +7,8 @@
 
 
 // This runs with Arduino version 1.0.1 software 
-// you need to install PString ver 3 first 
+// you need to install PString ver 3 and OneWire libraries
+
 
 
 // note the serial port is running at 19.2 Kbps for this one 
