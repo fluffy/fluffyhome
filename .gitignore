@@ -10,3 +10,7 @@
 *.lai
 *.la
 *.a
+
+*~
+venv
+celerybeat-schedule
