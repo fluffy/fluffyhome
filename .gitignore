@@ -10,3 +10,10 @@
 *.lai
 *.la
 *.a
+
+*.pyc
+*~
+
+celerybeat-schedule
+venv
+
