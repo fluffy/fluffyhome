@@ -7,7 +7,7 @@ endif
 
 set user=$1
 set pwd=$2
-set years = 2012
+set years = 2013
 
 switch ( $user )
   case fluffy:
@@ -33,7 +33,7 @@ foreach year ( $years )
 
 set maxDay = 365
 set maxDay = 366
-if ( $year != 2011 ) then
+if ( $year == 2013 ) then
   set maxDay = ` date "+%j" `
   @ maxDay = $maxDay - 2
 endif

@@ -389,7 +389,7 @@ float getTemp( OneWire& bus, DeviceAddr& addr )
   bus.select(addr);
   bus.write(0x44,1);  // do conversion 
 
-  delay(750);    
+  delay(750);  // 750 ms for conversion time   
 
   bus.reset();
   bus.select(addr);    
