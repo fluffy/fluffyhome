@@ -17,7 +17,7 @@ def on():
 
     # now turn it on 
     GPIO.output(25, GPIO.HIGH)
-    time.sleep( 3.0 ) # delay for 3 seconds 
+    time.sleep( 4.5 ) # delay for 4.5 seconds 
     GPIO.output(25, GPIO.LOW)
 
 
