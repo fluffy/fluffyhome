@@ -34,8 +34,8 @@ foreach year ( $years )
 set maxDay = 365
 set maxDay = 366
 if ( $year == 2013 ) then
-  set maxDay = ` date "+%j" `
-  @ maxDay = $maxDay - 2
+    set maxDay = ` date "+%j" | awk '{print $1 + 0}' `
+    @ maxDay = $maxDay - 2
 endif
 
 set n = 1
