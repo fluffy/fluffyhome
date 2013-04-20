@@ -1067,7 +1067,7 @@ def dumpUserData( userName, response ):
     response.write( "   email3='%s' "%( user.email3 ) )
     response.write( "   sms1='%s' "%( user.sms1 ) )
     response.write( "   timeZoneOffset='%f' "%( user.timeZoneOffset ) )
-    response.write( "   midnightIs4Am='%d' "%( user.midnightIs4Am ) )
+    #response.write( "   midnightIs4Am='%d' "%( user.midnightIs4Am ) )
     response.write( "   gasCost='%f' "%( user.gasCost ) )
     response.write( "   elecCost='%f' "%( user.elecCost ) )
     response.write( "   waterCost='%f' "%( user.waterCost ) )
@@ -1130,8 +1130,8 @@ def dumpSensorData( sensor, response ):
             attr += " maxUpdateTime='%d'"%sensor.maxUpdateTime 
 
         response.write( "<sensor %s >\n"%attr )
-        d = sensor.to_xml()
-        response.write( d )
+        #d = sensor.to_xml()
+        #response.write( d )
         response.write( "</sensor>\n" )
 
         
