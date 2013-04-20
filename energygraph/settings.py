@@ -8,11 +8,7 @@ import urlparse
 from datetime import timedelta
 #from celery.schedules import crontab
 
-
-PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
-
 DEBUG = False
-
 try:
     if 'DJANGO_DEBUG' in  os.environ:
         if os.environ['DJANGO_DEBUG'] == "TRUE" :
@@ -30,7 +26,7 @@ MANAGERS = ADMINS
 
 #DATABASES = {
 #    'default': {
-#        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+#        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
 #        'NAME': 'hero',                      # Or path to database file if using sqlite3.
 #        'USER': 'fluffy',                      # Not used with sqlite3.
 #        'PASSWORD': '',                  # Not used with sqlite3.
@@ -38,6 +34,8 @@ MANAGERS = ADMINS
 #        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
 #    }
 #}
+
+PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -156,7 +154,7 @@ TEMPLATE_DIRS = (
     #'templates',
     'energygraph/templates',
     #'templates',
-    #"/Users/fluffy/src/fluffyhome/energygraph/templates"
+    "/Users/fluffy/src/fluffyhome/energygraph/templates",
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
