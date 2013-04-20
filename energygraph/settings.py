@@ -9,7 +9,7 @@ from datetime import timedelta
 #from celery.schedules import crontab
 
 DEBUG = False
-DEBUG = True
+#DEBUG = True
 
 try:
     if 'DJANGO_DEBUG' in  os.environ:
