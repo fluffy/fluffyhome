@@ -18,11 +18,13 @@ class Memcache:
 
 
     def connect( self ):
+        url = "redis://localhost:6379"
         try:
             url = os.environ['REDISTOGO_URL'] 
         except KeyError:
-            print "Must set the'REDISTOGO_URL environment variable"
-            raise
+            #print "Must set the'REDISTOGO_URL environment variable"
+            #raise
+            pass
 
         print "OS VAR: ", url
 
