@@ -59,6 +59,10 @@ USE_I18N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
+# Hosts/domain names that are valid for this site; required if DEBUG is False
+# See https://docs.djangoproject.com/en/{{ docs_version }}/ref/settings/#allowed-hosts
+ALLOWED_HOSTS = [ '.fluffyhome.com', '127.0.0.1' ]
+
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
 MEDIA_ROOT = ''
