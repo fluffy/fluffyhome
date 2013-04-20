@@ -417,7 +417,7 @@ float getTemp( OneWire& bus, DeviceAddr& addr )
   }
 
   int temp2x = (data[1]<<8) + data[0];
-  int temp16x = (temp2x>>1)*16 - 4 + 16 - data[6] ;
+  int temp16x = (temp2x>>1)*16 - 4 + 16 - data[6] ; // this formula does not match datasheet - something wrong here 
   float temp= temp16x/16.0;
 
   return temp;

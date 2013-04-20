@@ -20,5 +20,5 @@
 # junk
 venv
 energygraph/old/
-
+*~
 celerybeat-schedule

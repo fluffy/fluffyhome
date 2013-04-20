@@ -7,7 +7,8 @@
 
 
 // This runs with Arduino version 1.0.1 software 
-// you need to install PString ver 3 first 
+// you need to install PString ver 3 and OneWire libraries
+
 
 
 // note the serial port is running at 19.2 Kbps for this one 
@@ -83,6 +84,10 @@ restart:
       {
         if (debug) Serial.print("Found DS2502-E48 MAC address ");
         getMacAddr( busA, addr );
+      }
+      if ( addr[0] == 0x1A ) 
+      {
+        if (debug) Serial.print("Found DS1820 Temp ");      
       }
     }
   }
@@ -308,11 +313,6 @@ void processMsg( byte msg[] , int len )
 
 void loop()
 {
-  sendData( 22 , 55 );
-}
-
-void loopReel()
-{
   if (Serial.available() > 0) 
   {
     static byte curr=0;
@@ -379,19 +379,6 @@ void loopReel()
     processMsg( buf , len );
   }
 }
-
-//
-//void printIP(const byte* ip)
-//{
-//  char buf[6];
-//  if (debug) Serial.print(itoa(ip[0],buf,10));
-//  if (debug) Serial.print(".");
-//  if (debug) Serial.print(itoa(ip[1],buf,10));
-//  if (debug) Serial.print(".");
-//  if (debug) Serial.print(itoa(ip[2],buf,10));
-//  if (debug) Serial.print(".");
-//  if (debug) Serial.print(itoa(ip[3],buf,10));
-//}
 
 
 void getMacAddr( OneWire& bus, byte addr[8] )
