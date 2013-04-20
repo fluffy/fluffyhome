@@ -1,7 +1,9 @@
-# Copyright (c) 2010, Cullen Jennings. All rights reserved.
+# Copyright (c) 2010,2011,2012,2013 Cullen Jennings. All rights reserved.
 
 from django.conf.urls.defaults import *
-from django.views.generic.simple import redirect_to
+#from django.shortcuts import redirect
+from django.views.generic.base import RedirectView
+
 from django.conf.urls import patterns, url, include
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
@@ -14,7 +16,9 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
  
-    (r'^wind/$', redirect_to, { 'url':'/wind/ab-south/'} ), 
+    #(r'^wind/$', redirect_to, { 'url':'/wind/ab-south/'} ),
+    url(r'^wind/$', RedirectView.as_view(url='/wind/ab-south/'), name='ab-south-wind'),
+
     (r'^wind/ab-south/$', showAllWindSensors ), 
     (r'^wind/sensor/(?P<sensorName>[\w][\-\w]{0,64})/history/today/$', graphWindToday ), 
 
