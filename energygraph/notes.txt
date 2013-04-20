@@ -11,7 +11,9 @@ sudo pip install django-celery
 
 
 install postgres, create user, create DB 
-
+su postgres
+createuser -S -D -R fluffy
+createdb hero 
 
 
 
@@ -36,4 +38,8 @@ setenv DJANGO_DEBUG TRUE
 setenv AWS_ACCESS_KEY_ID "foobar"
 setenv AWS_SECRET_ACCESS_KEY "barfoo"
 
+
+
+
+../manage.py syncdb
 

@@ -151,10 +151,11 @@ ROOT_URLCONF = 'energygraph.urls'
 # WSGI_APPLICATION = 'energygraph.wsgi.application'
 
 TEMPLATE_DIRS = (
-    #'templates',
+    'templates',
     'energygraph/templates',
     #'templates',
     "/Users/fluffy/src/fluffyhome/energygraph/templates",
+    "/home/fluffy/src/fluffyhome/energygraph/templates",
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
