@@ -9,6 +9,8 @@ from datetime import timedelta
 #from celery.schedules import crontab
 
 DEBUG = False
+DEBUG = True
+
 try:
     if 'DJANGO_DEBUG' in  os.environ:
         if os.environ['DJANGO_DEBUG'] == "TRUE" :
@@ -24,16 +26,16 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-#        'NAME': 'hero',                      # Or path to database file if using sqlite3.
-#        'USER': 'fluffy',                      # Not used with sqlite3.
-#        'PASSWORD': '',                  # Not used with sqlite3.
-#        'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
-#        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-#    }
-#}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'hero',                      # Or path to database file if using sqlite3.
+        'USER': 'fluffy',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
+        'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    }
+}
 
 PROJECT_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -107,8 +109,8 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 AWS_STORAGE_BUCKET_NAME = "fluffyhome"
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'TODO-CHANGE-THIS-lskdjflljkjhykjh7ojk23467rkj8j'
-if 'DATABASE_URL' in os.environ:
+SECRET_KEY = 'TODO-CHANGE-THIS-lsk232djflljkjhykjh7ojk23467rkj8j'
+if 'DJANGO_SECRET_KEY' in os.environ:
     SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 
