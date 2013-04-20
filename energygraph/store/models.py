@@ -621,7 +621,7 @@ def findRecentAlarmData( alarmID ):
     query = query.filter( alarmID = alarmID )
     #query = query.exclude( code = 602 ) # can't do this in GAE 
     #query = query.filter( notCrit = 0 ) # filter out stuff where crit = 5 
-    query = query.filter( time_gt = t )
+    query = query.filter( time__gt = t )
     query = query.order_by("-time") 
     p = query.all()[0:100]
 
@@ -1554,7 +1554,7 @@ def thinMeasurements( sensorID, t ):
     query = Measurement2.objects 
     logger.debug("# DB search for thinMeasurements" )
     query = query.filter( sensorID = sensorID )
-    query = query.filter( time_gt = t-3600 )
+    query = query.filter( time__gt = t-3600 )
     query = query.filter( time__lte = t )
     query = query.order_by("-time") 
     p=query.run( deadline=20, offset=1, batch_size=100, keys_only=True)
@@ -1859,7 +1859,7 @@ def findRecentMeasurements( sensorID ):
     query = Measurement2.objects 
     logger.debug("# DB search for findRecentMeasurements" )
     query = query.filter( sensorID = sensorID )
-    query = query.filter( time_gt = t )
+    query = query.filter( time__gt = t )
     query = query.order_by("-time") 
     maxLimit = 30
     p = query.all()[0:maxLimit]
