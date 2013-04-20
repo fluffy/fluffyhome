@@ -5,6 +5,7 @@
 sudo apt-get install python-dev
 sudo apt-get install build-essential tcsh
 
+apt-get install postgresql python-psycopg2
 
 apt-get install rabbitmq-server
 sudo pip install django-celery
@@ -16,11 +17,19 @@ createuser -S -D -R fluffy
 createdb hero 
 
 
+manage.py syncdb
+
+set up the database password in settings
+
 
 sudo apt-get redis-server
 sudo pip install redis
 
 
+cd  /etc/apache2/sites-availab
+sudo ln -s /home/fluffy/src/fluffyhome/energygraph/apache.conf fluffyhome
+cd ../sites-enabled
+sudo ln -s ../sites-available/fluffyhome
 
 sudo apache2ctl restart
 
