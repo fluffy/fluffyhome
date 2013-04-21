@@ -18,5 +18,5 @@ def deploy():
 @task
 def build():
     local( "pip freeze > requirements.txt ");
-    local( "git commit -a -m 'update from build' " );
+    local( "git commit --allow-empty -a -m 'update from build' " );
     local( "git push" );
