@@ -14,3 +14,7 @@ def deploy():
 
 
 
+@task
+def build():
+    # build the requirements.txt
+    # push it 
