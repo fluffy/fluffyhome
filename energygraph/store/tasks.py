@@ -1,19 +1,19 @@
 import logging
 import time
 
-#from celery.task import task
+from celery.task import task
 
 from energygraph.store.views import *
 
 logger = logging.getLogger('energygraph')
 
 
-#@task() 
+@task() 
 def doTask( x , y ):
     logger.debug( "Running doTask in ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" )
 
 
-#@task()
+@task()
 def updateHourly(): # /tasks/update/*/*/*/
     logger.info( "Running task updateHourly" )
     doUpdateAllValuesNow()

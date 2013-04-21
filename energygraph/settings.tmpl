@@ -4,9 +4,9 @@ import os
 import sys
 import urlparse
 
-#import djcelery
+import djcelery
 from datetime import timedelta
-#from celery.schedules import crontab
+from celery.schedules import crontab
 
 DEBUG = False
 #DEBUG = True
@@ -181,7 +181,7 @@ INSTALLED_APPS = (
 
     # stuff for Celery
     #'kombu.transport.django',
-    #'djcelery',
+   'djcelery',
 
     # for the S3 storage stuff
     #'storages',
@@ -286,14 +286,12 @@ LOGIN_URL = "/accounts/login/"
 
 
 # Stuff for Celery
-
-BROKER_BACKEND = 'django'
-
-CELERYD_CONCURRENCY = 1
-
+BROKER_URL = 'redis://localhost:6379/0'
+#BROKER_BACKEND = 'django'
+#CELERYD_CONCURRENCY = 1
 #djcelery.setup_loader()
 
-from store.tasks import *
+#from store.tasks import *
 
 #CELERYBEAT_SCHEDULE = {
 #    "my-store-doTask-shedule": {
@@ -308,3 +306,4 @@ from store.tasks import *
 #                                           #"args": ( 42, 66 ),
 #    },
 #}
+

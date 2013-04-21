@@ -30,6 +30,10 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "energygraph.settings")
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 
+import djcelery
+djcelery.setup_loader()
+
+
 import django.core.handlers.wsgi
 application = django.core.handlers.wsgi.WSGIHandler()
 

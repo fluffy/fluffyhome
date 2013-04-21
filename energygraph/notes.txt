@@ -34,6 +34,9 @@ sudo ln -s ../sites-available/fluffyhome
 sudo apache2ctl restart
 
 
+can monitors task in celery with a web server started with 
+celery flower --broker=redis://localhost:6379/0
+
 
 Set up following environment variables
 
