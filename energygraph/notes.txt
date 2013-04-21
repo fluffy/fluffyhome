@@ -59,3 +59,13 @@ On my local devel mac, for the celry cron jobs use
 and run main program with 
 ../manage.py runserver
 
+
+ sudo pip install celery celery-with-redis flower pytz django-celery
+
+
+sudo apt-get install supervisor
+cd /etc/supervisor/conf.d
+sudo ln -s /home/fluffy/src/fluffyhome/energygraph/supervisor-celery.conf 
+
+
+
