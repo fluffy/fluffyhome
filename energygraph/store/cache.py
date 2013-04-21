@@ -51,6 +51,8 @@ class Memcache:
         logger.debug( "about to cache get key=%s"%key )
         r = self.cache.get( key )
         logger.debug( "cache.get( %s )=%s"%(key,r) )
+        #if True:
+        #    return None
         return r 
     
     

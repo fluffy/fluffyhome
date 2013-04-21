@@ -296,16 +296,10 @@ from store.tasks import *
 djcelery.setup_loader()
 
 CELERYBEAT_SCHEDULE = {
-    "my-store-doTask-shedule": {
-        "task": "energygraph.store.tasks.doTask",
-        "schedule": crontab(minute="*/5"), #execute every 5 minute 
-        "args": ( 42, 66 ),
-    },
 
       "my-store-update-hourly-shedule": {
         "task": "energygraph.store.tasks.updateHourly",
         "schedule": crontab(minute="*/2"), #execute every 2 minute 
-                                           #"args": ( 42, 66 ),
     },
 }
 

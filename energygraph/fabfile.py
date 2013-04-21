@@ -14,7 +14,6 @@ def deploy():
     run( "sudo apache2ctl restart" )
 
 
-
 @task
 def build():
     """ Make all the local stuff and push to github for deployment """
@@ -29,9 +28,20 @@ def cron():
     """ Run local celery working to run cron jobs """
     local( "../manage.py celery worker --loglevel=info -E -B" );
 
+
 @task
 def web():
     """ Run local webserver """
     local( "../manage.py runserver" );
+
+
+@task
+def loaddata():
+    """ Load some test data in local server """
+    local( "./uploadDump.py ~/Documents/FluffyHomeData/all-dump.xml" )
+    local( "./uploadDump.py ~/Documents/FluffyHomeData/fluffy-dump.xml" )
+    local( "./uploadDump.py ~/Documents/FluffyHomeData/dump_wind_alberta-highasakite-time_2013_108.xml" )
+
+
 
     

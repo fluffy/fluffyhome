@@ -1487,7 +1487,7 @@ def checkKnownIP( ip, sensorID=0, calledBy=""):
     if ip in globalKnownIP:
         return True
      
-    cachekey = "key4-checkKnownIP:%s/%d"%(ip,sensorID)
+    cachekey = "key5-checkKnownIP:%s/%d"%(ip,sensorID)
     logger.debug( cachekey) 
     id = memcache.get( cachekey ) 
     if id != None:
@@ -1636,8 +1636,8 @@ def getSensorValue( sensorID ):
     if sensorID in globalLastMeasurementValue:
         return globalLastMeasurementValue[sensorID]
 
-    logger.debug( 'key4-lastMeasurementValue:%d'%sensorID )
-    val = memcache.get( 'key4-lastMeasurementValue:%d'%sensorID )
+    logger.debug( 'key5-lastMeasurementValue:%d'%sensorID )
+    val = memcache.get( 'key5-lastMeasurementValue:%d'%sensorID )
     if val != None:
         ret = float(val)
         globalLastMeasurementValue[sensorID] = ret
@@ -1657,7 +1657,7 @@ def getSensorValue( sensorID ):
     if p is not None:
         ret = float( p.value )
 
-    memcache.put(  'key4-lastMeasurementValue:%d'%sensorID, ret , 24*3600 )
+    memcache.put(  'key5-lastMeasurementValue:%d'%sensorID, ret , 24*3600 )
     return ret
 
 
@@ -1678,8 +1678,8 @@ def getSensorLastTime( sensorID ):
     if sensorID in globalLastMeasurementTime:
         return globalLastMeasurementTime[sensorID]
 
-    logger.debug( 'key4-lastMeasurementTime:%d'%sensorID )
-    val = memcache.get( 'key4-lastMeasurementTime:%d'%sensorID )
+    logger.debug( 'key5-lastMeasurementTime:%d'%sensorID )
+    val = memcache.get( 'key5-lastMeasurementTime:%d'%sensorID )
     if val != None:
         ret = long( val )
         globalLastMeasurementTime[sensorID] = ret
@@ -1699,7 +1699,7 @@ def getSensorLastTime( sensorID ):
     if p is not None:
         ret = long( p.time )
 
-    memcache.put(  'key4-lastMeasurementTime:%d'%sensorID, ret, 24*3600 )
+    memcache.put(  'key5-lastMeasurementTime:%d'%sensorID, ret, 24*3600 )
     return ret
 
 
@@ -1720,8 +1720,8 @@ def getSensorLastIntegral( sensorID ):
     if sensorID in globalLastMeasurementIntegral:
         return globalLastMeasurementIntegral[sensorID]
 
-    logger.debug( 'key4-lastMeasurementIntegral:%d'%sensorID )
-    val = memcache.get( 'key4-lastMeasurementIntegral:%d'%sensorID )
+    logger.debug( 'key5-lastMeasurementIntegral:%d'%sensorID )
+    val = memcache.get( 'key5-lastMeasurementIntegral:%d'%sensorID )
     if val != None:
         ret = float(val)
         globalLastMeasurementIntegral[sensorID] = ret
@@ -1742,7 +1742,7 @@ def getSensorLastIntegral( sensorID ):
         if p.integral is not None:
             ret = p.integral
 
-    memcache.put(  'key4-lastMeasurementIntegral:%d'%sensorID, ret, 24*3600 )
+    memcache.put(  'key5-lastMeasurementIntegral:%d'%sensorID, ret, 24*3600 )
     return ret
 
 
@@ -1763,8 +1763,8 @@ def getSensorLastEnergy( sensorID ):
     if sensorID in globalLastMeasurementEnergy:
        return globalLastMeasurementEnergy[sensorID]
 
-    logger.debug( 'key4-lastMeasurementEnergy:%d'%sensorID )
-    val = memcache.get( 'key4-lastMeasurementEnergy:%d'%sensorID )
+    logger.debug( 'key5-lastMeasurementEnergy:%d'%sensorID )
+    val = memcache.get( 'key5-lastMeasurementEnergy:%d'%sensorID )
     if val != None:
         ret = float(val)
         globalLastMeasurementEnergy[sensorID] = ret
@@ -1786,7 +1786,7 @@ def getSensorLastEnergy( sensorID ):
         if p.energy is not None:
             ret = p.energy
 
-    memcache.put(  'key4-lastMeasurementEnergy:%d'%sensorID, ret, 24*3600 )
+    memcache.put(  'key5-lastMeasurementEnergy:%d'%sensorID, ret, 24*3600 )
     return ret
 
 
@@ -1997,16 +1997,16 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , energy=N
 
     if mTime != 0 :
         logger.debug( "invalidating memcache values for sensor" )
-        memcache.delete( 'key4-lastMeasurementTime:%d'%sensorID )
-        memcache.delete( 'key4-lastMeasurementValue:%d'%sensorID )
-        memcache.delete( 'key4-lastMeasurementEnergy:%d'%sensorID )
-        memcache.delete( 'key4-lastMeasurementIntegral:%d'%sensorID )
+        memcache.delete( 'key5-lastMeasurementTime:%d'%sensorID )
+        memcache.delete( 'key5-lastMeasurementValue:%d'%sensorID )
+        memcache.delete( 'key5-lastMeasurementEnergy:%d'%sensorID )
+        memcache.delete( 'key5-lastMeasurementIntegral:%d'%sensorID )
     else:
         logger.debug( "update memcache values for sensor" )
-        memcache.put(  'key4-lastMeasurementEnergy:%d'%sensorID, m.energy, 24*3600 )
-        memcache.put(  'key4-lastMeasurementIntegral:%d'%sensorID, m.integral, 24*3600 )
-        memcache.put(  'key4-lastMeasurementTime:%d'%sensorID, m.time, 24*3600 )
-        memcache.put(  'key4-lastMeasurementValue:%d'%sensorID, m.value , 24*3600 )
+        memcache.put(  'key5-lastMeasurementEnergy:%d'%sensorID, m.energy, 24*3600 )
+        memcache.put(  'key5-lastMeasurementIntegral:%d'%sensorID, m.integral, 24*3600 )
+        memcache.put(  'key5-lastMeasurementTime:%d'%sensorID, m.time, 24*3600 )
+        memcache.put(  'key5-lastMeasurementValue:%d'%sensorID, m.value , 24*3600 )
      
     # update the hourly values 
     #hourTime = long(sTime)
@@ -2063,8 +2063,8 @@ def getHourlyDeltaSumHoursOld(userName,streamName,ptime):
 def getSensorIntegral(sensorID,utime,prev=None,next=None): # utime is unix integer time
     assert sensorID > 0
 
-    logger.debug( 'key4-integral:%d/%d'%(sensorID,utime) )
-    val = memcache.get( 'key4-integral:%d/%d'%(sensorID,utime) )
+    logger.debug( 'key5-integral:%d/%d'%(sensorID,utime) )
+    val = memcache.get( 'key5-integral:%d/%d'%(sensorID,utime) )
     if val != None:
         val = float( val )
         return val
@@ -2148,15 +2148,15 @@ def getSensorIntegral(sensorID,utime,prev=None,next=None): # utime is unix integ
         logger.debug("interpolated sec before=%d sec after=%d "%( utime-prev.time , next.time-utime ) )
         logger.debug("interpolated bv=%f av=%f ret=%f "%( prev.integral , next.integral, ret ) )
 
-    memcache.put( 'key4-integral:%d/%d'%(sensorID,utime), ret , 24*3600 )
+    memcache.put( 'key5-integral:%d/%d'%(sensorID,utime), ret , 24*3600 )
     return ret
 
 
 def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix integer time
     assert sensorID > 0
 
-    logger.debug( 'key4-getSensorEnergy:%d/%d'%(sensorID,utime) )
-    val = memcache.get( 'key4-getSensorEnergy:%d/%d'%(sensorID,utime) )
+    logger.debug( 'key5-getSensorEnergy:%d/%d'%(sensorID,utime) )
+    val = memcache.get( 'key5-getSensorEnergy:%d/%d'%(sensorID,utime) )
     if val != None:
         val = float( val )
         return val
@@ -2259,7 +2259,7 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
         logger.debug("interpolated bv=%f av=%f ret=%f "%( prev.energy , next.energy, ret ) )
 
     assert ret >= 0.0
-    memcache.put( 'key4-getSensorEnergy:%d/%d'%(sensorID,utime), ret , 24*3600 )
+    memcache.put( 'key5-getSensorEnergy:%d/%d'%(sensorID,utime), ret , 24*3600 )
     return ret
 
 

@@ -64,30 +64,30 @@ def main():
     root = tree.getroot()
     assert root is not None
 
-    user = root.find("user")
-    assert user is not None
+    #user = root.find("user")
+    #assert user is not None
 
-    userName = user.attrib.get("userName")
+    if True : # create the user 
+        users = tree.findall("user")
+        for user in users:
+            userName = user.attrib.get("userName")
+            u = url + "/admin/user/" + userName + "/"
+            post( None , u ,  "application/x-www-form-urlencoded" , "admin", "none" );
 
-    if False : # create the user 
-        u = url + "/admin/user/" + userName + "/"
-        post( None , u ,  "application/x-www-form-urlencoded" , "admin", "none" );
+            attributes = user.items()
+            data = urlencode( attributes )
+            u = url + "/user/" + userName + "/prefs/"
+            post( data , u ,  "application/x-www-form-urlencoded" , userName, options.password );
 
-    if True: # update the user record 
-        email = user.attrib.get("email")
-        attributes = user.items()
-        data = urlencode( attributes )
-        u = url + "/user/" + userName + "/prefs/"
-        post( data , u ,  "application/x-www-form-urlencoded" , userName, options.password );
-
-    if False :# create the sensors 
+    if True :# create the sensors 
         sensors = tree.findall("sensor")
         for sensor in sensors:
             sensorName = sensor.attrib.get("sensorName")
-
+            sensorUser = sensor.attrib.get("userName")
+            
             attributes = sensor.items()
             data = urlencode( attributes )
-            u = url + "/sensor/" + userName + "/" + sensorName + "/create/"
+            u = url + "/sensor/" + sensorUser + "/" + sensorName + "/create/"
 
             post( data , u ,  "application/x-www-form-urlencoded" , userName, options.password );
 
@@ -98,7 +98,8 @@ def main():
     for measurement in measurements:
         sensorName = str( measurement.attrib.get("sensor") )
         time = int( measurement.attrib.get("time") )
-
+        userName = measurement.attrib.get("user")
+        
         #print sensorName,time,value,integral
         
         if count == 0:
