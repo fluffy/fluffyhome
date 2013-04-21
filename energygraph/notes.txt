@@ -73,6 +73,11 @@ sudo supervisorctl reload ; sudo supervisorctl restart celery
 
 
 
-
 pip install fabric 
+set up sudoeers file with visudo 
+fluffy ALL = NOPASSWD: ALL
 
+
+
+You can now deploy with 
+fab deploy

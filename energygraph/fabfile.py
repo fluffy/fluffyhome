@@ -1,28 +1,16 @@
 
 from fabric.api import *
 
-
-def production():
-    """Production server settings"""
-    #env.settings = 'production'
-    #env.user = 'fluffy'
-    #env.path = '/home/%(user)s/sites/myproject' % env
-    env.hosts = ['fh3.fluffyhome.com']
-    #config.fab_hosts = ['fh3.fluffyhome.com']
-    #config.repo = "fluffyhome"
-    #config.parent = "origin"
-    #config.brnach = "master"
-
-
+@task
+@hosts('fh3.fluffyhome.com')
 def deploy():
     """ Get the code on report host """
-    # pull git
     run( "cd src/fluffyhome; git pull" );
-    # install requiremtns
-    # migrate DB
-    # resttar Supervisor
-    # restart celery
-    # restart appache 
+    run( "cd src/fluffyhome/energygraph; sudo pip install -q -r requirements.txt ");
+    run( "cd src/fluffyhome/; ./manage.py syncdb ");
+    run( "sudo supervisorctl reload" )
+    run( "sudo supervisorctl restart celery" )
+    run( "sudo apache2ctl restart" )
 
 
 
