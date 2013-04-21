@@ -17,6 +17,6 @@ def deploy():
 
 @task
 def build():
-    # build the requirements.txt
-    # push it
-    pass
+    local( "pip freeze > requirements.txt ");
+    local( "git commit -a -m 'update from build' " );
+    local( "git push" );
