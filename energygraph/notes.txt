@@ -50,8 +50,12 @@ setenv DJANGO_DEBUG TRUE
 setenv AWS_ACCESS_KEY_ID "foobar"
 setenv AWS_SECRET_ACCESS_KEY "barfoo"
 
-
-
-
 ../manage.py syncdb
+
+
+On my local devel mac, for the celry cron jobs use 
+../manage.py celery worker --loglevel=info -E -B
+
+and run main program with 
+../manage.py runserver
 

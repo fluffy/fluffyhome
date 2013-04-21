@@ -182,6 +182,7 @@ INSTALLED_APPS = (
     # stuff for Celery
     #'kombu.transport.django',
    'djcelery',
+   'djcelery.transport',
 
     # for the S3 storage stuff
     #'storages',
@@ -289,21 +290,21 @@ LOGIN_URL = "/accounts/login/"
 BROKER_URL = 'redis://localhost:6379/0'
 #BROKER_BACKEND = 'django'
 #CELERYD_CONCURRENCY = 1
-#djcelery.setup_loader()
+from store.tasks import *
 
-#from store.tasks import *
+djcelery.setup_loader()
 
-#CELERYBEAT_SCHEDULE = {
-#    "my-store-doTask-shedule": {
-#        "task": "energygraph.store.tasks.doTask",
-#        "schedule": crontab(minute="*/5"), #execute every minute 
-#        "args": ( 42, 66 ),
-#    },
-#
-#      "my-store-update-hourly-shedule": {
-#        "task": "energygraph.store.tasks.updateHourly",
-#        "schedule": crontab(minute="*/2"), #execute every minute 
-#                                           #"args": ( 42, 66 ),
-#    },
-#}
+CELERYBEAT_SCHEDULE = {
+    "my-store-doTask-shedule": {
+        "task": "energygraph.store.tasks.doTask",
+        "schedule": crontab(minute="*/5"), #execute every minute 
+        "args": ( 42, 66 ),
+    },
+
+      "my-store-update-hourly-shedule": {
+        "task": "energygraph.store.tasks.updateHourly",
+        "schedule": crontab(minute="*/2"), #execute every minute 
+                                           #"args": ( 42, 66 ),
+    },
+}
 
