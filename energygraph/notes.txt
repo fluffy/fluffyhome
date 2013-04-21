@@ -66,6 +66,13 @@ and run main program with
 sudo apt-get install supervisor
 cd /etc/supervisor/conf.d
 sudo ln -s /home/fluffy/src/fluffyhome/energygraph/supervisor-celery.conf 
+sudo mkdir /var/lib/celery
+sudo chmod a+rw /var/lib/celery
+
+sudo supervisorctl reload ; sudo supervisorctl restart celery
 
 
+
+
+pip install fabric 
 
