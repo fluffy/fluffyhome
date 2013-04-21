@@ -17,7 +17,7 @@ def deploy():
 
 @task
 def build():
-    """Make all the local stuff and push to github for deployment"
+    """ Make all the local stuff and push to github for deployment """
     local( "../manage.py syncdb" );
     local( "pip freeze > requirements.txt ");
     local( "git commit --allow-empty -a -m 'update from build' " );
@@ -26,12 +26,12 @@ def build():
 
 @task
 def cron():
-    """Run local celery working to run cron jobs"""
+    """ Run local celery working to run cron jobs """
     local( "../manage.py celery worker --loglevel=info -E -B" );
 
 @task
 def web():
-    """Run local webserver"""
+    """ Run local webserver """
     local( "../manage.py runserver" );
 
     
