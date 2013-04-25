@@ -82,7 +82,7 @@ urlpatterns = patterns('',
 
     (r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
 
-    #(r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': "energygraph/static/", }),
+    (r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': settings.STATIC_ROOT, }),
     
     (r'^favicon.ico$', 'django.views.static.serve', { 'document_root': settings.STATIC_ROOT, 'path':"favicon.ico", }),
     (r'^robots.txt$', 'django.views.static.serve', { 'document_root': settings.STATIC_ROOT, 'path':"robots.txt", }),
