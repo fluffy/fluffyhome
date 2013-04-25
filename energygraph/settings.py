@@ -195,6 +195,14 @@ INSTALLED_APPS = (
 
 # APPEND_SLASH=False
 
+import secrets
+
+if secrets.key != None :
+    SECRET_KEY = secrets.key
+
+if secrets.dbPasswd != None :
+    DATABASES[ 'default' ][ 'PASSWORD' ] = dbPasswd
+    
 #Register database schemes in URLs.
 urlparse.uses_netloc.append('postgres')
 urlparse.uses_netloc.append('mysql')
@@ -296,10 +304,16 @@ from store.tasks import *
 djcelery.setup_loader()
 
 CELERYBEAT_SCHEDULE = {
+    "my-store-doTask-shedule": {
+        "task": "energygraph.store.tasks.doTask",
+        "schedule": crontab(minute="*/5"), #execute every 5 minute 
+        "args": ( 42, 66 ),
+    },
 
       "my-store-update-hourly-shedule": {
         "task": "energygraph.store.tasks.updateHourly",
         "schedule": crontab(minute="*/2"), #execute every 2 minute 
+                                           #"args": ( 42, 66 ),
     },
 }
 

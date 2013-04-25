@@ -4,5 +4,6 @@ old
 bin
 include
 lib
-settings.py
 settings.old
+secrets.py
+foo.dump.Z
