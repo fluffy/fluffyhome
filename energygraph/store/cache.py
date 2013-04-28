@@ -7,7 +7,7 @@ import redis
 
 logger = logging.getLogger('energygraph')
 
-keyEpochPrefix = "key7-"
+keyEpochPrefix = "key9-"
 
 class Memcache:
     """ Class to wrap some memory key value pair datastore """

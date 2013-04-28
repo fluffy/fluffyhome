@@ -50,6 +50,8 @@ class Sensor(models.Model):
 
     maxUpdateTime = models.FloatField() # max time for update before sensor is considered "broken"
 
+    def __unicode__(self):
+        return u'%s: %s' % (self.sensorName,self.label)
 
     
 globalSensorMetaStore = {}
@@ -730,6 +732,8 @@ class User(models.Model):
     twitterTempToken = models.CharField(max_length=256,blank=True)
     twitterTempSecret = models.CharField(max_length=256,blank=True)
 
+    def __unicode__( self ):
+        return u'%s'%( self.userName )
 
 
 def getUserPasswordHash( userName ):
