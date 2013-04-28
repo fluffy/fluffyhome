@@ -9,7 +9,8 @@ from datetime import timedelta
 from celery.schedules import crontab
 
 DEBUG = False
-#DEBUG = True
+# TODO turn off debug
+DEBUG = True
 
 try:
     if 'DJANGO_DEBUG' in  os.environ:
@@ -77,6 +78,8 @@ MEDIA_URL = ''
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = os.path.join(PROJECT_PATH, 'staticfiles/static')
+
+STATIC_DIR =  os.path.join(PROJECT_PATH, 'staticfiles')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
