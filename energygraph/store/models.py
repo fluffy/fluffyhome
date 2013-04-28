@@ -51,7 +51,8 @@ class Sensor(models.Model):
     maxUpdateTime = models.FloatField() # max time for update before sensor is considered "broken"
 
     def __unicode__(self):
-        return u'%s: %s' % (self.sensorName,self.label)
+        user = findUserNameByID( self.userID )
+        return u'%s %s: %s' % (user,self.sensorName,self.label)
 
     
 globalSensorMetaStore = {}

@@ -60,7 +60,7 @@ class EditUserForm( forms.ModelForm):
 
 
 
-@login_required()
+        #  @login_required()   # need to remove this for upload to work  #TODO add back in 
 def userPrefs( request, userName ):
     msg = "Edit any values you wish to change above then press Update"
 
@@ -1060,7 +1060,7 @@ def editSensor(request,userName,sensorName):
 
 
 
-@login_required()
+        # @login_required() # need to remove this for upload to work TODO add back in 
 def createSensor(request,userName,sensorName):
 
     userID = findUserIDByName( userName  )
@@ -1102,7 +1102,7 @@ def createSensor(request,userName,sensorName):
                 
         if "maxUpdateTime" in data:
             if data.get("maxUpdateTime") != "None":
-                record.maxUpdateTime = int( data.get("maxUpdateTime") );
+                record.maxUpdateTime = float( data.get("maxUpdateTime") );
                 
         if "unitsWhenOn" in data:
             if data.get("unitsWhenOn") != "None":

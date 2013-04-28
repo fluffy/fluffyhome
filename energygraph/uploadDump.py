@@ -24,7 +24,7 @@ def post( data, url, type, user, password ):
     try:
         r = urllib2.urlopen(req)
     except urllib2.HTTPError, err:
-        print "Post to %s failed with error code %s"%(url,err.code)
+        print "FAIL:Post to %s failed with error code %s"%(url,err.code)
         print str(err)
         contents = err.read()
         fileName = "/tmp/err.html"
@@ -34,7 +34,22 @@ def post( data, url, type, user, password ):
         print "Wrote error to " + fileName
         exit( -1) 
 
-    #print r.info()
+    if  False:
+        print "Return Info ======================="
+        print r.info()
+        print "RETURN CODE = " , r.getcode()
+        print "RETURN URL = " , r.geturl()
+        print "RETURN ORIG URL = " ,url
+        print "-----------------------------"
+    
+    if r.getcode() != 200:
+        print "FAIL: Post to %s returned code %s"%(url,r.getcode())
+        exit( -2 )
+
+    if r.geturl() != url:
+        print "FAIL: Post to %s redirected %s"%(url,r.geturl())
+        exit( -3 )
+  
     print "Post to %s was OK"%url
  
 
