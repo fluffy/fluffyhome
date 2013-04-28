@@ -113,7 +113,7 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 AWS_STORAGE_BUCKET_NAME = "fluffyhome"
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'TODO-CHANGE-THIS-lsk232djflljkjhykjh7ojk23467rkj8j'
+SECRET_KEY = 'CHANGE-THIS-lsk232djflljkjhykjh7ojk23467rkj8j'
 if 'DJANGO_SECRET_KEY' in os.environ:
     SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
@@ -187,7 +187,6 @@ INSTALLED_APPS = (
     # for the S3 storage stuff
     #'storages',
 
-    # TODO - need to add back next line 
     'energygraph.store',
 
     'south'
