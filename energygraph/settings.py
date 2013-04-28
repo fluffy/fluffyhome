@@ -201,7 +201,7 @@ if secrets.key != None :
     SECRET_KEY = secrets.key
 
 if secrets.dbPasswd != None :
-    DATABASES[ 'default' ][ 'PASSWORD' ] = dbPasswd
+    DATABASES[ 'default' ][ 'PASSWORD' ] = secrets.dbPasswd
     
 #Register database schemes in URLs.
 urlparse.uses_netloc.append('postgres')
