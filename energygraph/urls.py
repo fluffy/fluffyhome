@@ -65,10 +65,12 @@ urlpatterns = patterns('',
     #(r'^tasks/pollWindAB3/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB3 ), 
     #(r'^tasks/pollWindAB4/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB4 ), 
 
-    #(r'^admin/updateAll/$', updateAllValues ), 
+    #(r'^admin/updateAll/$', updateAllValues ),
+    
     (r'^admin/stats/$', showStats ), 
     (r'^admin/dump/meta/$', dumpMeta ), 
     (r'^admin/updateAllNow/$', updateAllValuesNow ), 
+
     #(r'^admin/patchHourly/$', patchHourly ), 
     #(r'^admin/patchHourlyCount/$', patchHourlyCount ), 
     (r'^admin/user/(?P<userName>[a-zA-Z]\w{0,64})/$', editUser ), 
@@ -84,7 +86,6 @@ urlpatterns = patterns('',
     (r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
     (r'^accounts/profile/$', redirectHome ),
 
-    #(r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': settings.STATIC_ROOT, }),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': settings.STATIC_ROOT, }),
     
     (r'^favicon.ico$', 'django.views.static.serve', { 'document_root': settings.STATIC_ROOT, 'path':"favicon.ico", }),
