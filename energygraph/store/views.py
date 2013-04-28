@@ -8,6 +8,8 @@ import time
 import re
 import string
 
+import urllib2
+
 from datetime import timedelta
 from datetime import datetime
 from datetime import tzinfo
@@ -1162,6 +1164,15 @@ def loadAllSensors(request,userName):
 
 
 def showAllWindSensors(request):
+    sensorDataList = doShowAllWindSensors()
+
+    template = "feedsWindCompact.html"
+    return render_to_response( template , { 'user':None,
+                                            'pipeList': sensorDataList ,
+                                            'host':request.META["HTTP_HOST"] }) 
+
+
+def doShowAllWindSensors():
     # check user exists
     userName = 'wind'
     if findUserIdByName(userName) == 0 :
@@ -1274,10 +1285,8 @@ def showAllWindSensors(request):
 
                 sensorDataList.append( sensorData )
 
-    template = "feedsWindCompact.html"
-    return render_to_response( template , { 'user':None,
-                                            'pipeList': sensorDataList ,
-                                            'host':request.META["HTTP_HOST"] }) 
+    return sensorDataList
+
 
 #@digestProtect(realm='fluffyhome.com') 
 @login_required()
@@ -2367,13 +2376,28 @@ def pollWindAB2(request,loc,user=None):
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
     if ( ip2 != None ):
         ip = ip2
-   
-    url = "http://www.ama.ab.ca/road_reports/cameras/%s"%loc
-    result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
 
+    return doPollWindAB2( loc, ip )
+
+   
+def doPollWindAB2( loc, ip ):
+    url = "http://www.ama.ab.ca/road_reports/cameras/%s"%loc
+    #result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
+
+    try:
+        response = urllib2.urlopen( url , timeout=30 )
+    except urllib2.URLError as e:
+        print e.reason
+        raise e
+    sensorHtml =  response.read()
+    sensorCode =  response.getcode()
+    
     html = "" 
-    if result.status_code == 200:
-        m = re.search('Air Temperature:\D*(?P<data>[\d.]*)',result.content)
+    if sensorCode == 200:
+
+        print sensorHtml
+        
+        m = re.search('Air Temperature:\D*(?P<data>[\d.]*)', sensorHtml )
         if m == None:
             logger.warning("Problem parsing out air temp from %s"%url )
         else:
@@ -2386,7 +2410,7 @@ def pollWindAB2(request,loc,user=None):
             else:
                 findEnroll( name, ip )
 
-        m = re.search('Wind Speed:\D*(?P<data>[\d.]*)',result.content)
+        m = re.search('Wind Speed:\D*(?P<data>[\d.]*)',sensorHtml)
         if m == None:
             logger.warning("Problem parsing out wind speed from %s"%url )
         else:
@@ -2399,7 +2423,7 @@ def pollWindAB2(request,loc,user=None):
             else:
                 findEnroll( name, ip )
 
-        m = re.search('at (?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
+        m = re.search('at (?P<hour>\d{1,2}):(?P<min>\d\d)',sensorHtml)
         if m == None:
             logger.warning("Problem parsing out update from %s"%url )
         else:
@@ -2414,7 +2438,7 @@ def pollWindAB2(request,loc,user=None):
 
     else:
         html += "<p> Problem in fetch </p>"
-        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
+        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,sensorCode) )
         
     response = HttpResponse()
     response.write( html );
@@ -2427,13 +2451,25 @@ def pollWindAB3(request,loc,user=None):
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
     if ( ip2 != None ):
         ip = ip2
-   
-    url = "http://www.weatherlink.com/user/%s/index.php?view=summary&headers=0"%loc
-    result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
 
+    return doPollWindAB3( loc, ip )
+
+
+def doPollWindAB3( loc, ip ):
+    url = "http://www.weatherlink.com/user/%s/index.php?view=summary&headers=0"%loc
+    #result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
+
+    try:
+        response = urllib2.urlopen( url , timeout=30 )
+    except urllib2.URLError as e:
+        print e.reason
+        raise e
+    sensorHtml =  response.read()
+    sensorCode =  response.getcode()
+    
     html = "" 
-    if result.status_code == 200:
-        m = re.search('Outside Temp</td>\s*.*>(?P<data>[\d.]{3,7}) C',result.content)
+    if sensorCode == 200:
+        m = re.search('Outside Temp</td>\s*.*>(?P<data>[\d.]{3,7}) C',sensorHtml)
         if m == None:
             logger.warning("Problem parsing out air temp from %s"%url )
         else:
@@ -2446,7 +2482,7 @@ def pollWindAB3(request,loc,user=None):
             else:
                 findEnroll( name, ip )
 
-        m = re.search('Wind Speed</td>\s*.*>(?P<data>[\d.]{1,3}) km/h',result.content)
+        m = re.search('Wind Speed</td>\s*.*>(?P<data>[\d.]{1,3}) km/h',sensorHtml)
         if m == None:
             logger.warning("Problem parsing out wind speed from %s"%url )
         else:
@@ -2460,7 +2496,7 @@ def pollWindAB3(request,loc,user=None):
                 findEnroll( name, ip )
 
 
-        m = re.search('as of (?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
+        m = re.search('as of (?P<hour>\d{1,2}):(?P<min>\d\d)',sensorHtml)
         if m == None:
             logger.warning("Problem parsing out update from %s"%url )
         else:
@@ -2475,7 +2511,7 @@ def pollWindAB3(request,loc,user=None):
 
     else:
         html += "<p> Problem in fetch </p>"
-        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
+        logger.warning( "Problem fetching content for %s - reponse code = %s "%( url, sensorCode ) )
         
     response = HttpResponse()
     response.write( html );
