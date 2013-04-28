@@ -60,6 +60,8 @@ def main():
                       action="store_true", dest="verbose")
     parser.add_option("-p", "--password", dest="password",
                       help="HTTP Digest password" , default="123456" )
+    parser.add_option("-u", "--user", dest="userName",
+                      help="HTTP Digest username" , default="fluffy" )
     url = "http://www.fluffyhome.com"
     url = "http://localhost:8000"
 
@@ -79,20 +81,18 @@ def main():
     root = tree.getroot()
     assert root is not None
 
-    #user = root.find("user")
-    #assert user is not None
 
-    if True : # create the user 
+    if False : # create the user 
         users = tree.findall("user")
         for user in users:
             userName = user.attrib.get("userName")
             u = url + "/admin/user/" + userName + "/"
-            post( None , u ,  "application/x-www-form-urlencoded" , "admin", "none" );
+            post( None , u ,  "application/x-www-form-urlencoded" ,  options.userName, options.password  );
 
             attributes = user.items()
             data = urlencode( attributes )
             u = url + "/user/" + userName + "/prefs/"
-            post( data , u ,  "application/x-www-form-urlencoded" , userName, options.password );
+            post( data , u ,  "application/x-www-form-urlencoded" , options.userName, options.password );
 
     if True :# create the sensors 
         sensors = tree.findall("sensor")
@@ -104,7 +104,7 @@ def main():
             data = urlencode( attributes )
             u = url + "/sensor/" + sensorUser + "/" + sensorName + "/create/"
 
-            post( data , u ,  "application/x-www-form-urlencoded" , userName, options.password );
+            post( data , u ,  "application/x-www-form-urlencoded" ,  options.userName, options.password  );
 
     #create the meassurement data 
     count = 0
@@ -148,13 +148,13 @@ def main():
         if count > 20 :
             data += "\n]\n"
             u = url + "/sensorValues/" 
-            post( data , u , "application/json" , userName, options.password );
+            post( data , u , "application/json" ,  options.userName, options.password  );
             count = 0
             data = ""
     if count > 0:
         data += "\n]\n"
         u = url + "/sensorValues/" 
-        post( data , u , "application/json", userName, options.password );
+        post( data , u , "application/json",  options.userName, options.password  );
         count = 0
         data = ""
 
