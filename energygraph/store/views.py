@@ -1445,7 +1445,7 @@ def usage(request,userName):
 
     # TODO , add proper checks for user/sensor exists for all pages
     # note used ot be a assert of long not int here - not sure what it should be 
-    assert type( userID ) is int, "Wrong user of of type %s"%( type(userID) )
+    assert (type( userID ) is int) or (type( userID ) is long), "Wrong user of of type %s"%( type(userID) )
 
     #  get all costs from DB
     userMeta = getUserMetaByUserID( userID )
