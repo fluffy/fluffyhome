@@ -24,18 +24,12 @@ from django.shortcuts import render_to_response
 from django import forms
 
 from django import VERSION as DJANGO_VERSION
-#from django.utils import simplejson as json  # fix when we can use Python 2.6 to just be import json 
 import json
 
 from django.contrib.auth.decorators import login_required
 
-
-#from djangohttpdigest.decorators import digestProtect,digestLogin
-
 from energygraph.store.models import *
-
 from energygraph.store.cache import *
-
 
 
 logger = logging.getLogger('energygraph')
@@ -66,7 +60,6 @@ class EditUserForm( forms.ModelForm):
 
 
 
-#@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
 @login_required()
 def userPrefs( request, userName ):
     msg = "Edit any values you wish to change above then press Update"
@@ -120,7 +113,6 @@ def userPrefs( request, userName ):
 
 
 
-#@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
 @login_required()
 def showStats( request ):
     template = "showStats.html"
@@ -177,7 +169,6 @@ def showStats( request ):
 
 
 
-#@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
 @login_required()
 def showGraphs( request, userName ):
     template = "showGraphs.html"
@@ -191,20 +182,19 @@ def showGraphs( request, userName ):
                                             'host':request.META["HTTP_HOST"] }) 
 
 
-#@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
 @login_required()
 def patchHourly(request):
     val = hourlyPatch()
     return HttpResponse("<h1>Patched %d Hourly </h1>"%val)
 
-#@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
+
 @login_required()
 def patchHourlyCount(request):
     val = hourlyPatchCount()
     return HttpResponse("<h1>Counted %d hourly to patch</h1>"%val)
 
 
-#@digestProtect(realm='fluffyhome.com') 
+
 @login_required()
 def resetSensors(request,userName):
     # reset all values, integrals, and energy readings for all the users sensor
@@ -217,7 +207,6 @@ def resetSensors(request,userName):
     return HttpResponse("<h1>Reset all sensors</h1>")
 
 
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def showPlotOLD_NO_USE(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
@@ -232,7 +221,7 @@ def showPlotOLD_NO_USE(request,userName,sensorName):
     return render_to_response('showPlot.html', data )
 
 
-#@digestProtect(realm='fluffyhome.com') 
+
 @login_required()
 def showLineGraph(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
@@ -247,7 +236,6 @@ def showLineGraph(request,userName,sensorName):
     return render_to_response('lineGraph.html', data )
 
 
-##@digestProtect(realm='fluffyhome.com')  # TODO - fix this security nightmare 
 @login_required()
 def showLineGraphCSV(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
@@ -305,7 +293,6 @@ def showLineGraphCSV(request,userName,sensorName):
     return response 
 
 
-##@digestProtect(realm='fluffyhome.com')  # TODO - fix this security nightmare 
 @login_required()
 def showPlotJson_OLD_NO_USE(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
@@ -384,7 +371,6 @@ def findValueByTimeSensorID( values, time, sid ):
     return None
 
 
-##@digestProtect(realm='fluffyhome.com') # TODO fix 
 @login_required()
 def usageJson(request,userName,sensorName,type,period):
     tqxParams = request.GET.get('tqx','')
@@ -411,7 +397,6 @@ def usageJson(request,userName,sensorName,type,period):
 
     cacheKey = "key5-usageJson:%d/%s/%s/%s/%s/%d"%(epoch,userName,sensorName,type,period,now)
     id = memcache.get( cacheKey )
-    #id = None # TODO - remove
     if id != None:
         response = HttpResponse()
         response.write( head )
@@ -689,7 +674,6 @@ def generateJson( tqxParams, vals , label, userName ):
     return html
 
 
-##@digestProtect(realm='fluffyhome.com') # TODO fix 
 @login_required()
 def todayJson(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
@@ -735,9 +719,9 @@ def todayJson(request,userName,sensorName):
                 v = (end-start) / 3600.0
                 #v = (end-start) / (24 * 3600.0)
 #        if (  end < start ) :
-#            v = 3000 # TODO ver bad
+#            v = 3000 # TODO very bad
 #        if (  start < 0 ) :
-#            v = 5000 # TODO ver bad
+#            v = 5000 # TODO very bad
 #        if ( v > 5000 ):
 #            v = 10000 # TODO VERY BAD 
 #        if ( v < 0 ):
@@ -773,7 +757,6 @@ def graphWindToday(request,sensorName):
     return render_to_response('graphTodaySmall.html', data )
 
 
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def graphToday(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
@@ -789,7 +772,7 @@ def graphToday(request,userName,sensorName):
     return render_to_response('graphToday.html', data )
 
 
-#@digestProtect(realm='fluffyhome.com') 
+
 @login_required()
 def dumpAlarm(request,userName,year,day):
     logger.debug( "dumping alarm for %s %s %s"%(userName,year,day ) )
@@ -823,7 +806,6 @@ def dumpAlarm(request,userName,year,day):
     return response
 
             
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def dumpSensor(request,userName,sensorName,year,day):
     logger.debug( "dumping sensor for %s %s %s %s"%(userName,sensorName,year,day ) )
@@ -885,7 +867,6 @@ def dumpMeta(request):
     return response
 
 
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def dumpUser(request,userName):
     response = HttpResponse(mimetype='application/xml')
@@ -1020,9 +1001,7 @@ class EditSensorForm(forms.ModelForm):
         self.fields['inGroup2'].choices = findAllGroupsIdNamePairs( kwargs['instance'].userID )
 
 
-        
 
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def editSensor(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
@@ -1080,8 +1059,8 @@ def editSensor(request,userName,sensorName):
                                              'host' : request.META["HTTP_HOST"] } )
 
 
-#@digestProtect(realm='fluffyhome.com') 
-#@login_required()
+
+@login_required()
 def createSensor(request,userName,sensorName):
 
     userID = findUserIDByName( userName  )
@@ -1246,6 +1225,10 @@ def doShowAllWindSensors():
         if meta['killed']:
             continue
 
+        if meta['hidden']:
+            continue
+
+
         sensorData = {}
         sensorData['user'] = userName
         sensorData['name'] = meta['sensorName']
@@ -1288,7 +1271,7 @@ def doShowAllWindSensors():
     return sensorDataList
 
 
-#@digestProtect(realm='fluffyhome.com') 
+
 @login_required()
 def showAllSensors(request,userName):
     return showAllSensorsFunc(request,userName=userName)
@@ -1441,7 +1424,6 @@ def showAllSensorsFunc(request,userName):
 
 
 
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def usage(request,userName):
     #TODO erro bad user 
@@ -1500,7 +1482,6 @@ class AddGroupForm(forms.Form):
     name = forms.RegexField( "^\w[\-\w]{0,64}$" ) 
 
 
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def findSensorToEnroll(request,userName):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
@@ -1543,7 +1524,6 @@ def findSensorToEnroll(request,userName):
     
 
 
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def addSensor(request,userName,sensorName):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
@@ -1896,7 +1876,6 @@ def about(request):
         'host':request.META["HTTP_HOST"] } )
 
 
-#@digestProtect(realm='fluffyhome.com')  # old - should depricate 
 def store(request,userName,sensorName):
     return storeNoAuth(request,userName,sensorName) 
 
@@ -2296,20 +2275,19 @@ def jsonFour(request,user):
     return response 
 
 
-#@digestLogin(realm='fluffyhome.com')
+
 @login_required()
 def login(request,user=None):
     return HttpResponseRedirect("/user/%s/status/"%user)
 
 
-#@digestLogin(realm='fluffyhome.com')
+
 @login_required()
 def enrollSensor2(request,sensorName,secret,user=None):
     return HttpResponseRedirect( "/user/%s/enroll/add/%s/"%(user,sensorName) )
 
 
 
-##@digestLogin(realm='fluffyhome.com')
 @login_required()
 def pollWindAB1(request,loc,user=None):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
