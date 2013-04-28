@@ -176,11 +176,10 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
-    'django.contrib.admindocs',
+    #'django.contrib.admindocs',
 
     # stuff for Celery
     #'kombu.transport.django',
@@ -189,6 +188,7 @@ INSTALLED_APPS = (
 
     # for the S3 storage stuff
     #'storages',
+    'django.contrib.staticfiles',
 
     'energygraph.store',
 
