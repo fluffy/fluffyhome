@@ -81,8 +81,8 @@ STATIC_ROOT = os.path.join(PROJECT_PATH, 'staticfiles/static')
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 #STATIC_URL = 'http://s3.amazonaws.com/fluffyhome'
-STATIC_URL = 'http://fluffyhome.s3-website-us-east-1.amazonaws.com/static/'
-#STATIC_URL = '/static/'
+#STATIC_URL = 'http://fluffyhome.s3-website-us-east-1.amazonaws.com/static/'
+STATIC_URL = '/static/'
 
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
@@ -113,7 +113,7 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 AWS_STORAGE_BUCKET_NAME = "fluffyhome"
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'TODO-CHANGE-THIS-lsk232djflljkjhykjh7ojk23467rkj8j'
+SECRET_KEY = 'CHANGE-THIS-lsk232djflljkjhykjh7ojk23467rkj8j'
 if 'DJANGO_SECRET_KEY' in os.environ:
     SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
@@ -187,7 +187,6 @@ INSTALLED_APPS = (
     # for the S3 storage stuff
     #'storages',
 
-    # TODO - need to add back next line 
     'energygraph.store',
 
     'south'
@@ -304,16 +303,16 @@ from store.tasks import *
 djcelery.setup_loader()
 
 CELERYBEAT_SCHEDULE = {
-    "my-store-doTask-shedule": {
-        "task": "energygraph.store.tasks.doTask",
-        "schedule": crontab(minute="*/5"), #execute every 5 minute 
-        "args": ( 42, 66 ),
-    },
+    #    "my-store-doTask-shedule": {
+    #    "task": "energygraph.store.tasks.doTask",
+    #    "schedule": crontab(minute="*/5"), #execute every 5 minute 
+    #    "args": ( 42, 66 ),
+    #},
 
-      "my-store-update-hourly-shedule": {
-        "task": "energygraph.store.tasks.updateHourly",
-        "schedule": crontab(minute="*/2"), #execute every 2 minute 
-                                           #"args": ( 42, 66 ),
-    },
+    # "my-store-update-hourly-shedule": {
+    #    "task": "energygraph.store.tasks.updateHourly",
+    #    "schedule": crontab(minute="*/2"), #execute every 2 minute 
+    #                                       #"args": ( 42, 66 ),
+    #},
 }
 

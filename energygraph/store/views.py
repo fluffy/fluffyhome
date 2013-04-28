@@ -8,6 +8,8 @@ import time
 import re
 import string
 
+import urllib2
+
 from datetime import timedelta
 from datetime import datetime
 from datetime import tzinfo
@@ -22,23 +24,21 @@ from django.shortcuts import render_to_response
 from django import forms
 
 from django import VERSION as DJANGO_VERSION
-#from django.utils import simplejson as json  # fix when we can use Python 2.6 to just be import json 
 import json
 
 from django.contrib.auth.decorators import login_required
 
-
-#from djangohttpdigest.decorators import digestProtect,digestLogin
-
 from energygraph.store.models import *
-
 from energygraph.store.cache import *
-
 
 
 logger = logging.getLogger('energygraph')
 
-    
+
+@login_required()
+def redirectHome(request):
+    return HttpResponseRedirect( "/user/%s/status/" % request.user.username )
+
     
 def editUser( request, userName ):
     record = findUserByName( userName )
@@ -60,7 +60,6 @@ class EditUserForm( forms.ModelForm):
 
 
 
-#@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
 @login_required()
 def userPrefs( request, userName ):
     msg = "Edit any values you wish to change above then press Update"
@@ -114,7 +113,6 @@ def userPrefs( request, userName ):
 
 
 
-#@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
 @login_required()
 def showStats( request ):
     template = "showStats.html"
@@ -128,14 +126,14 @@ def showStats( request ):
 
     sensors = findAllNonGroupSensors( )
     for s in sensors:
-        cacheKey = "key5-sensorTokenBucketDay%s/%s"%( s['name'], day )
+        cacheKey = "sensorTokenBucketDay%s/%s"%( s['name'], day )
         updates = memcache.get( cacheKey )
         if updates != None:
             s['updatesDay'] = int(updates)
         else:
             s['updatesDay'] = int(0)
 
-        cacheKey = "key5-sensorTokenBucketWindow%s/%s"%(s['name'],minute1)
+        cacheKey = "sensorTokenBucketWindow%s/%s"%(s['name'],minute1)
         updates = memcache.get( cacheKey )
         if updates != None:
             s['updatesMin'] = int(updates)
@@ -152,13 +150,13 @@ def showStats( request ):
     ipAddrs = findAllKnownIP()
     ips = []
     for ip in ipAddrs:
-        cacheKey = "key5-ipTokenBucketMinute:%s/%s"%(ip,minute0)
+        cacheKey = "ipTokenBucketMinute:%s/%s"%(ip,minute0)
         updates0 = memcache.get( cacheKey )
         if updates0 == None:
             updates0 = 0
         updates0 = int( updates0 )
 
-        cacheKey = "key5-ipTokenBucketMinute:%s/%s"%(ip,minute1)
+        cacheKey = "ipTokenBucketMinute:%s/%s"%(ip,minute1)
         updates1 = memcache.get( cacheKey )
         if updates1 == None:
             updates1 = 0
@@ -171,7 +169,6 @@ def showStats( request ):
 
 
 
-#@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
 @login_required()
 def showGraphs( request, userName ):
     template = "showGraphs.html"
@@ -185,20 +182,19 @@ def showGraphs( request, userName ):
                                             'host':request.META["HTTP_HOST"] }) 
 
 
-#@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
 @login_required()
 def patchHourly(request):
     val = hourlyPatch()
     return HttpResponse("<h1>Patched %d Hourly </h1>"%val)
 
-#@digestProtect(realm='fluffyhome.com') # TODO get from settings file 
+
 @login_required()
 def patchHourlyCount(request):
     val = hourlyPatchCount()
     return HttpResponse("<h1>Counted %d hourly to patch</h1>"%val)
 
 
-#@digestProtect(realm='fluffyhome.com') 
+
 @login_required()
 def resetSensors(request,userName):
     # reset all values, integrals, and energy readings for all the users sensor
@@ -211,7 +207,6 @@ def resetSensors(request,userName):
     return HttpResponse("<h1>Reset all sensors</h1>")
 
 
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def showPlotOLD_NO_USE(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
@@ -226,7 +221,7 @@ def showPlotOLD_NO_USE(request,userName,sensorName):
     return render_to_response('showPlot.html', data )
 
 
-#@digestProtect(realm='fluffyhome.com') 
+
 @login_required()
 def showLineGraph(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
@@ -241,7 +236,6 @@ def showLineGraph(request,userName,sensorName):
     return render_to_response('lineGraph.html', data )
 
 
-##@digestProtect(realm='fluffyhome.com')  # TODO - fix this security nightmare 
 @login_required()
 def showLineGraphCSV(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
@@ -299,7 +293,6 @@ def showLineGraphCSV(request,userName,sensorName):
     return response 
 
 
-##@digestProtect(realm='fluffyhome.com')  # TODO - fix this security nightmare 
 @login_required()
 def showPlotJson_OLD_NO_USE(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
@@ -378,7 +371,6 @@ def findValueByTimeSensorID( values, time, sid ):
     return None
 
 
-##@digestProtect(realm='fluffyhome.com') # TODO fix 
 @login_required()
 def usageJson(request,userName,sensorName,type,period):
     tqxParams = request.GET.get('tqx','')
@@ -403,9 +395,8 @@ def usageJson(request,userName,sensorName,type,period):
     head += "status:'ok', \n"
     head += "reqId:'%s', \n"%reqId
 
-    cacheKey = "key5-usageJson:%d/%s/%s/%s/%s/%d"%(epoch,userName,sensorName,type,period,now)
+    cacheKey = "usageJson:%d/%s/%s/%s/%s/%d"%(epoch,userName,sensorName,type,period,now)
     id = memcache.get( cacheKey )
-    #id = None # TODO - remove
     if id != None:
         response = HttpResponse()
         response.write( head )
@@ -456,42 +447,42 @@ def usageJson(request,userName,sensorName,type,period):
         hour = None
 
     if period == "0day": 
-        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) # TODO deal with  and 4 am is new midnight
+        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) 
         start = mid 
         end = mid  + 24*3600
         step = 3600
         hour = None
 
     if period == "1day": 
-        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) # TODO deal with  and 4 am is new midnight
+        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) 
         start = mid - 24*3600
         end = mid 
         step = 3600
         hour = None
 
     if period == "2day" :
-        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) # TODO deal with  and 4 am is new midnight
+        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) 
         start = mid - 24*3600
         end = mid  + 24*3600
         step = 3600 
         hour = None
 
     if period == "7day":
-        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) # TODO deal with  and 4 am is new midnight
+        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) 
         start = mid - 7*24*3600
         end = mid
         step = 3600 * 24 
         hour = (start/3600) % 24
 
     if period == "30day":
-        mid = now - ( (now  + timeOffsetSeconds )%(24*3600) ) # TODO deal with  and 4 am is new midnight
+        mid = now - ( (now  + timeOffsetSeconds )%(24*3600) )
         start = mid - 30*24*3600
         end = mid
         step = 3600 * 24 
         hour = (start/3600) % 24
 
     if period == "6week":
-        mid = now - ( (now  + timeOffsetSeconds ) % (7*24*3600) ) # TODO deal with  and 4 am is new midnight
+        mid = now - ( (now  + timeOffsetSeconds ) % (7*24*3600) ) 
         start = mid - 6 * 7 *24*3600
         end = mid
         step = 3600 * 24 * 7
@@ -499,7 +490,7 @@ def usageJson(request,userName,sensorName,type,period):
         hour = None
 
     if period == "Aug": # august this year - TODO - should be last AUG  
-        mid = now - ( (now  + timeOffsetSeconds ) % (24*3600) ) # TODO deal with  and 4 am is new midnight
+        mid = now - ( (now  + timeOffsetSeconds ) % (24*3600) ) 
         mid   = time.mktime( ( time.localtime(mid)[0] , 9,1,1,0,0,0,0,0 ) )
         start = time.mktime( ( time.localtime(mid)[0] , 8,1,1,0,0,0,0,0 ) ) 
         end   = mid
@@ -683,7 +674,6 @@ def generateJson( tqxParams, vals , label, userName ):
     return html
 
 
-##@digestProtect(realm='fluffyhome.com') # TODO fix 
 @login_required()
 def todayJson(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
@@ -729,9 +719,9 @@ def todayJson(request,userName,sensorName):
                 v = (end-start) / 3600.0
                 #v = (end-start) / (24 * 3600.0)
 #        if (  end < start ) :
-#            v = 3000 # TODO ver bad
+#            v = 3000 # TODO very bad
 #        if (  start < 0 ) :
-#            v = 5000 # TODO ver bad
+#            v = 5000 # TODO very bad
 #        if ( v > 5000 ):
 #            v = 10000 # TODO VERY BAD 
 #        if ( v < 0 ):
@@ -767,7 +757,6 @@ def graphWindToday(request,sensorName):
     return render_to_response('graphTodaySmall.html', data )
 
 
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def graphToday(request,userName,sensorName):
     sensorID = findSensorID( userName, sensorName )
@@ -783,7 +772,7 @@ def graphToday(request,userName,sensorName):
     return render_to_response('graphToday.html', data )
 
 
-#@digestProtect(realm='fluffyhome.com') 
+
 @login_required()
 def dumpAlarm(request,userName,year,day):
     logger.debug( "dumping alarm for %s %s %s"%(userName,year,day ) )
@@ -817,7 +806,6 @@ def dumpAlarm(request,userName,year,day):
     return response
 
             
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def dumpSensor(request,userName,sensorName,year,day):
     logger.debug( "dumping sensor for %s %s %s %s"%(userName,sensorName,year,day ) )
@@ -879,7 +867,6 @@ def dumpMeta(request):
     return response
 
 
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def dumpUser(request,userName):
     response = HttpResponse(mimetype='application/xml')
@@ -1014,9 +1001,7 @@ class EditSensorForm(forms.ModelForm):
         self.fields['inGroup2'].choices = findAllGroupsIdNamePairs( kwargs['instance'].userID )
 
 
-        
 
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def editSensor(request,userName,sensorName):
     sensorID = findSensorID(userName,sensorName)
@@ -1074,8 +1059,8 @@ def editSensor(request,userName,sensorName):
                                              'host' : request.META["HTTP_HOST"] } )
 
 
-#@digestProtect(realm='fluffyhome.com') 
-#@login_required()
+
+@login_required()
 def createSensor(request,userName,sensorName):
 
     userID = findUserIDByName( userName  )
@@ -1158,6 +1143,15 @@ def loadAllSensors(request,userName):
 
 
 def showAllWindSensors(request):
+    sensorDataList = doShowAllWindSensors()
+
+    template = "feedsWindCompact.html"
+    return render_to_response( template , { 'user':None,
+                                            'pipeList': sensorDataList ,
+                                            'host':request.META["HTTP_HOST"] }) 
+
+
+def doShowAllWindSensors():
     # check user exists
     userName = 'wind'
     if findUserIdByName(userName) == 0 :
@@ -1231,6 +1225,10 @@ def showAllWindSensors(request):
         if meta['killed']:
             continue
 
+        if meta['hidden']:
+            continue
+
+
         sensorData = {}
         sensorData['user'] = userName
         sensorData['name'] = meta['sensorName']
@@ -1270,12 +1268,10 @@ def showAllWindSensors(request):
 
                 sensorDataList.append( sensorData )
 
-    template = "feedsWindCompact.html"
-    return render_to_response( template , { 'user':None,
-                                            'pipeList': sensorDataList ,
-                                            'host':request.META["HTTP_HOST"] }) 
+    return sensorDataList
 
-#@digestProtect(realm='fluffyhome.com') 
+
+
 @login_required()
 def showAllSensors(request,userName):
     return showAllSensorsFunc(request,userName=userName)
@@ -1428,7 +1424,6 @@ def showAllSensorsFunc(request,userName):
 
 
 
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def usage(request,userName):
     #TODO erro bad user 
@@ -1441,7 +1436,7 @@ def usage(request,userName):
 
     # TODO , add proper checks for user/sensor exists for all pages
     # note used ot be a assert of long not int here - not sure what it should be 
-    assert type( userID ) is int, "Wrong user of of type %s"%( type(userID) )
+    assert (type( userID ) is int) or (type( userID ) is long), "Wrong user of of type %s"%( type(userID) )
 
     #  get all costs from DB
     userMeta = getUserMetaByUserID( userID )
@@ -1487,7 +1482,6 @@ class AddGroupForm(forms.Form):
     name = forms.RegexField( "^\w[\-\w]{0,64}$" ) 
 
 
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def findSensorToEnroll(request,userName):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
@@ -1530,7 +1524,6 @@ def findSensorToEnroll(request,userName):
     
 
 
-#@digestProtect(realm='fluffyhome.com') 
 @login_required()
 def addSensor(request,userName,sensorName):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
@@ -1883,7 +1876,6 @@ def about(request):
         'host':request.META["HTTP_HOST"] } )
 
 
-#@digestProtect(realm='fluffyhome.com')  # old - should depricate 
 def store(request,userName,sensorName):
     return storeNoAuth(request,userName,sensorName) 
 
@@ -1928,7 +1920,7 @@ def postAlarmValues(request):
     now = long( time.time() )
 
     minute = now - now % 60 # make window 1 minutes long 
-    cacheKey = "key5-ipTokenBucketMinute:%s/%s"%(ip,minute)
+    cacheKey = "ipTokenBucketMinute:%s/%s"%(ip,minute)
     token = memcache.incr( cacheKey, 60 )
 
     rateLimit = 100 # Max number of request per minute from each IP address
@@ -1981,10 +1973,10 @@ def postAlarmValues(request):
             note = str( jData['n'] )
             
         day = now - now % (24*3600) # make window 24 hours long  
-        cacheKey = "key5-alarmTokenBucketDay%s/%s"%(account,day)
+        cacheKey = "alarmTokenBucketDay%s/%s"%(account,day)
         token = memcache.incr( cacheKey , 24*3600 )
         win = now - now % (60) # make window 1 min long  
-        cacheKey = "key5-alarmTokenBucketWindow%s/%s"%(account,win)
+        cacheKey = "alarmTokenBucketWindow%s/%s"%(account,win)
         token = memcache.incr( cacheKey , 60 )
         
         rateLimit = 20 # Max number of request per minute from each sensor
@@ -2096,7 +2088,7 @@ def postSensorValues(request):
         now = long( time.time() )
 
         minute = now - now % 60 # make window 1 minutes long 
-        cacheKey = "key5-ipTokenBucketMinute:%s/%s"%(ip,minute)
+        cacheKey = "ipTokenBucketMinute:%s/%s"%(ip,minute)
         token = memcache.incr( cacheKey, 60 )
 
         rateLimit = 25 # Max number of request per minute from each IP address
@@ -2171,10 +2163,10 @@ def postSensorValues(request):
             if sensorExistsByName( name ):
                 if enableQuota:
                     day = now - now % (24*3600) # make window 24 hours long  
-                    cacheKey = "key5-sensorTokenBucketDay%s/%s"%(name,day)
+                    cacheKey = "sensorTokenBucketDay%s/%s"%(name,day)
                     token = memcache.incr( cacheKey, 24*3600 )
                     win = now - now % (60) # make window 1 min long  
-                    cacheKey = "key5-sensorTokenBucketWindow%s/%s"%(name,win)
+                    cacheKey = "sensorTokenBucketWindow%s/%s"%(name,win)
                     token = memcache.incr( cacheKey, 60 )
 
                     rateLimit = 10 # Max number of request per minute from each sensor
@@ -2283,20 +2275,19 @@ def jsonFour(request,user):
     return response 
 
 
-#@digestLogin(realm='fluffyhome.com')
+
 @login_required()
 def login(request,user=None):
     return HttpResponseRedirect("/user/%s/status/"%user)
 
 
-#@digestLogin(realm='fluffyhome.com')
+
 @login_required()
 def enrollSensor2(request,sensorName,secret,user=None):
     return HttpResponseRedirect( "/user/%s/enroll/add/%s/"%(user,sensorName) )
 
 
 
-##@digestLogin(realm='fluffyhome.com')
 @login_required()
 def pollWindAB1(request,loc,user=None):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
@@ -2363,13 +2354,28 @@ def pollWindAB2(request,loc,user=None):
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
     if ( ip2 != None ):
         ip = ip2
-   
-    url = "http://www.ama.ab.ca/road_reports/cameras/%s"%loc
-    result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
 
+    return doPollWindAB2( loc, ip )
+
+   
+def doPollWindAB2( loc, ip ):
+    url = "http://www.ama.ab.ca/road_reports/cameras/%s"%loc
+    #result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
+
+    try:
+        response = urllib2.urlopen( url , timeout=30 )
+    except urllib2.URLError as e:
+        print e.reason
+        raise e
+    sensorHtml =  response.read()
+    sensorCode =  response.getcode()
+    
     html = "" 
-    if result.status_code == 200:
-        m = re.search('Air Temperature:\D*(?P<data>[\d.]*)',result.content)
+    if sensorCode == 200:
+
+        print sensorHtml
+        
+        m = re.search('Air Temperature:\D*(?P<data>[\d.]*)', sensorHtml )
         if m == None:
             logger.warning("Problem parsing out air temp from %s"%url )
         else:
@@ -2382,7 +2388,7 @@ def pollWindAB2(request,loc,user=None):
             else:
                 findEnroll( name, ip )
 
-        m = re.search('Wind Speed:\D*(?P<data>[\d.]*)',result.content)
+        m = re.search('Wind Speed:\D*(?P<data>[\d.]*)',sensorHtml)
         if m == None:
             logger.warning("Problem parsing out wind speed from %s"%url )
         else:
@@ -2395,7 +2401,7 @@ def pollWindAB2(request,loc,user=None):
             else:
                 findEnroll( name, ip )
 
-        m = re.search('at (?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
+        m = re.search('at (?P<hour>\d{1,2}):(?P<min>\d\d)',sensorHtml)
         if m == None:
             logger.warning("Problem parsing out update from %s"%url )
         else:
@@ -2410,7 +2416,7 @@ def pollWindAB2(request,loc,user=None):
 
     else:
         html += "<p> Problem in fetch </p>"
-        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
+        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,sensorCode) )
         
     response = HttpResponse()
     response.write( html );
@@ -2423,13 +2429,25 @@ def pollWindAB3(request,loc,user=None):
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
     if ( ip2 != None ):
         ip = ip2
-   
-    url = "http://www.weatherlink.com/user/%s/index.php?view=summary&headers=0"%loc
-    result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
 
+    return doPollWindAB3( loc, ip )
+
+
+def doPollWindAB3( loc, ip ):
+    url = "http://www.weatherlink.com/user/%s/index.php?view=summary&headers=0"%loc
+    #result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
+
+    try:
+        response = urllib2.urlopen( url , timeout=30 )
+    except urllib2.URLError as e:
+        print e.reason
+        raise e
+    sensorHtml =  response.read()
+    sensorCode =  response.getcode()
+    
     html = "" 
-    if result.status_code == 200:
-        m = re.search('Outside Temp</td>\s*.*>(?P<data>[\d.]{3,7}) C',result.content)
+    if sensorCode == 200:
+        m = re.search('Outside Temp</td>\s*.*>(?P<data>[\d.]{3,7}) C',sensorHtml)
         if m == None:
             logger.warning("Problem parsing out air temp from %s"%url )
         else:
@@ -2442,7 +2460,7 @@ def pollWindAB3(request,loc,user=None):
             else:
                 findEnroll( name, ip )
 
-        m = re.search('Wind Speed</td>\s*.*>(?P<data>[\d.]{1,3}) km/h',result.content)
+        m = re.search('Wind Speed</td>\s*.*>(?P<data>[\d.]{1,3}) km/h',sensorHtml)
         if m == None:
             logger.warning("Problem parsing out wind speed from %s"%url )
         else:
@@ -2456,7 +2474,7 @@ def pollWindAB3(request,loc,user=None):
                 findEnroll( name, ip )
 
 
-        m = re.search('as of (?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
+        m = re.search('as of (?P<hour>\d{1,2}):(?P<min>\d\d)',sensorHtml)
         if m == None:
             logger.warning("Problem parsing out update from %s"%url )
         else:
@@ -2471,7 +2489,7 @@ def pollWindAB3(request,loc,user=None):
 
     else:
         html += "<p> Problem in fetch </p>"
-        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
+        logger.warning( "Problem fetching content for %s - reponse code = %s "%( url, sensorCode ) )
         
     response = HttpResponse()
     response.write( html );
@@ -2484,13 +2502,32 @@ def pollWindAB4(request,loc,user=None):
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
     if ( ip2 != None ):
         ip = ip2
-   
-    url = "http://text.www.weatheroffice.gc.ca/forecast/city_e.html?%s&unit=m"%loc
-    result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
+    return doPollWindAB4( loc, ip )
 
+
+def doPollWindAB4( loc, ip ):
+    #url = "http://text.www.weatheroffice.gc.ca/forecast/city_e.html?%s&unit=m"%loc
+    url = "http://weather.gc.ca/city/pages/%s_metric_e.html"%loc
+    #result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
+
+    try:
+        response = urllib2.urlopen( url , timeout=30 )
+    except urllib2.URLError as e:
+        print e.reason
+        raise e
+    sensorHtml =  response.read()
+    sensorCode =  response.getcode()
+
+    #print "======================"
+    #m = re.search('Date: </dt>[\W]*<dd>(?P<data>[\W\w]{1,500})',sensorHtml,re.MULTILINE)
+    #temp = m.group('data')
+    #print temp
+    #if m == None:
+    #        logger.warning("yuck" )
+            
     html = "" 
-    if result.status_code == 200:
-        m = re.search('Temperature:</dt><dd>(?P<data>[\d.]{1,5})&deg;C',result.content)
+    if sensorCode == 200:
+        m = re.search('Temperature:</dt>[\W]*<dd>(?P<data>[\d.]{1,5})&deg',sensorHtml,re.MULTILINE)
         if m == None:
             logger.warning("Problem parsing out air temp from %s"%url )
         else:
@@ -2503,7 +2540,7 @@ def pollWindAB4(request,loc,user=None):
             else:
                 findEnroll( name, ip )
 
-        m = re.search('Wind Speed:</dt><dd>[NSWE]* (?P<data>[\d.]{1,5}) km/h',result.content)
+        m = re.search('Wind:</dt>[\W\<\>\"a-zA-Z ]*(?P<data>[\d.]{1,5})',sensorHtml,re.MULTILINE)
         if m == None:
             logger.warning("Problem parsing out wind speed from %s"%url )
         else:
@@ -2517,11 +2554,11 @@ def pollWindAB4(request,loc,user=None):
                 findEnroll( name, ip )
 
 
-        m = re.search('Observed at:[a-zA-Z'+"'"+' ]*(?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
+        m = re.search('Date: </dt>[\W]*<dd>(?P<hour>\d{1,2}):(?P<min>\d\d)',sensorHtml,re.MULTILINE)
         if m == None:
             logger.warning("Problem parsing out update from %s"%url )
         else:
-            time = int( m.group('hour') )%12  * 100 +  int( m.group('min') )
+            time = int( m.group('hour') )%12  * 100 +  int( m.group('min') ) # TODO this seems bogus 
             html += "<p> time = %s </p>"%time
 
             name = 'alberta-%s-time'%loc
@@ -2532,7 +2569,7 @@ def pollWindAB4(request,loc,user=None):
 
     else:
         html += "<p> Problem in fetch </p>"
-        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
+        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,sensorCode) )
         
     response = HttpResponse()
     response.write( html );

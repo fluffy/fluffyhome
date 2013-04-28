@@ -58,7 +58,8 @@ urlpatterns = patterns('',
     #(r'^tasks/thin/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[\*])/$', thinValues ), 
     #(r'^tasks/thin/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[\-])/$', thinValues ), 
     #(r'^tasks/thin/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[0-9]{10})/$', thinValues ), 
- 
+
+
     #(r'^tasks/pollWindAB1/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB1 ), 
     #(r'^tasks/pollWindAB2/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB2 ), 
     #(r'^tasks/pollWindAB3/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB3 ), 
@@ -81,8 +82,9 @@ urlpatterns = patterns('',
     #(r'^login/$', login ), 
 
     (r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
+    (r'^accounts/profile/$', redirectHome ),
 
-    #(r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': "energygraph/static/", }),
+    (r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': settings.STATIC_ROOT, }),
     
     (r'^favicon.ico$', 'django.views.static.serve', { 'document_root': settings.STATIC_ROOT, 'path':"favicon.ico", }),
     (r'^robots.txt$', 'django.views.static.serve', { 'document_root': settings.STATIC_ROOT, 'path':"robots.txt", }),
