@@ -7,6 +7,7 @@ import redis
 
 logger = logging.getLogger('energygraph')
 
+keyEpochPrefix = "key7-"
 
 class Memcache:
     """ Class to wrap some memory key value pair datastore """
@@ -44,7 +45,8 @@ class Memcache:
             self.cache = None
             raise
     
-    def get( self, key ):
+    def get( self, keyName ):
+        key = keyEpochPrefix + keyName
         logger.debug( "in cache get" )
         if self.cache is None:
             self.connect()
@@ -56,7 +58,8 @@ class Memcache:
         return r 
     
     
-    def put( self, key, value , time ):
+    def put( self, keyName, value , time ):
+        key = keyEpochPrefix + keyName
         if self.cache is None:
             self.connect()
 
@@ -66,7 +69,8 @@ class Memcache:
         self.cache.set( key, value )
 
     
-    def incr( self, key, expire ):
+    def incr( self, keyName, expire ):
+        key = keyEpochPrefix + keyName
         if self.cache is None:
             self.connect()
         # if key does not exist, start with inital value of 0 
@@ -78,7 +82,8 @@ class Memcache:
         return r
 
     
-    def delete( self, key  ):
+    def delete( self, keyName  ):
+        key = keyEpochPrefix + keyName
         if self.cache is None:
             self.connect()
         self.cache.delete( key )
