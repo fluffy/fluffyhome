@@ -81,6 +81,7 @@ urlpatterns = patterns('',
     #(r'^login/$', login ), 
 
     (r'^accounts/login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
+    (r'^accounts/profile/$', redirectHome ),
 
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', { 'document_root': settings.STATIC_ROOT, }),
     

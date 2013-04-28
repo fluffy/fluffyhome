@@ -38,7 +38,11 @@ from energygraph.store.cache import *
 
 logger = logging.getLogger('energygraph')
 
-    
+
+@login_required()
+def redirectHome(request):
+    return HttpResponseRedirect( "/user/%s/status/" % request.user.username )
+
     
 def editUser( request, userName ):
     record = findUserByName( userName )
