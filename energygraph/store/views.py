@@ -2524,13 +2524,32 @@ def pollWindAB4(request,loc,user=None):
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
     if ( ip2 != None ):
         ip = ip2
-   
-    url = "http://text.www.weatheroffice.gc.ca/forecast/city_e.html?%s&unit=m"%loc
-    result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
+    return doPollWindAB4( loc, ip )
 
+
+def doPollWindAB4( loc, ip ):
+    #url = "http://text.www.weatheroffice.gc.ca/forecast/city_e.html?%s&unit=m"%loc
+    url = "http://weather.gc.ca/city/pages/%s_metric_e.html"%loc
+    #result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
+
+    try:
+        response = urllib2.urlopen( url , timeout=30 )
+    except urllib2.URLError as e:
+        print e.reason
+        raise e
+    sensorHtml =  response.read()
+    sensorCode =  response.getcode()
+
+    #print "======================"
+    #m = re.search('Date: </dt>[\W]*<dd>(?P<data>[\W\w]{1,500})',sensorHtml,re.MULTILINE)
+    #temp = m.group('data')
+    #print temp
+    #if m == None:
+    #        logger.warning("yuck" )
+            
     html = "" 
-    if result.status_code == 200:
-        m = re.search('Temperature:</dt><dd>(?P<data>[\d.]{1,5})&deg;C',result.content)
+    if sensorCode == 200:
+        m = re.search('Temperature:</dt>[\W]*<dd>(?P<data>[\d.]{1,5})&deg',sensorHtml,re.MULTILINE)
         if m == None:
             logger.warning("Problem parsing out air temp from %s"%url )
         else:
@@ -2543,7 +2562,7 @@ def pollWindAB4(request,loc,user=None):
             else:
                 findEnroll( name, ip )
 
-        m = re.search('Wind Speed:</dt><dd>[NSWE]* (?P<data>[\d.]{1,5}) km/h',result.content)
+        m = re.search('Wind:</dt>[\W\<\>\"a-zA-Z ]*(?P<data>[\d.]{1,5})',sensorHtml,re.MULTILINE)
         if m == None:
             logger.warning("Problem parsing out wind speed from %s"%url )
         else:
@@ -2557,11 +2576,11 @@ def pollWindAB4(request,loc,user=None):
                 findEnroll( name, ip )
 
 
-        m = re.search('Observed at:[a-zA-Z'+"'"+' ]*(?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
+        m = re.search('Date: </dt>[\W]*<dd>(?P<hour>\d{1,2}):(?P<min>\d\d)',sensorHtml,re.MULTILINE)
         if m == None:
             logger.warning("Problem parsing out update from %s"%url )
         else:
-            time = int( m.group('hour') )%12  * 100 +  int( m.group('min') )
+            time = int( m.group('hour') )%12  * 100 +  int( m.group('min') ) # TODO this seems bogus 
             html += "<p> time = %s </p>"%time
 
             name = 'alberta-%s-time'%loc
@@ -2572,7 +2591,7 @@ def pollWindAB4(request,loc,user=None):
 
     else:
         html += "<p> Problem in fetch </p>"
-        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
+        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,sensorCode) )
         
     response = HttpResponse()
     response.write( html );
