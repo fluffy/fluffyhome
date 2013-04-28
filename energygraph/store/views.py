@@ -1195,6 +1195,7 @@ def doShowAllWindSensors():
 
     # for each group, output it's tab then all the sensors/groups in it in sorted order 
     outList = []
+    logger.debug( "consider groutplist %s"%groupList )
     for group in groupList:
         grpID = group[1]
 
@@ -1212,6 +1213,9 @@ def doShowAllWindSensors():
         slist = sorted( sList )
         for pair in sList:
             outList.append( (pair[1],0) )
+
+
+    logger.debug( "outlist is %s"%outList )
 
     sensorData = {}
     sensorData['user'] = userName
@@ -1307,6 +1311,7 @@ def showAllSensorsFunc(request,userName):
         if meta['category'] == "Group":
                 groupList.append( (meta['label'],s) )
     groupList = sorted( groupList )
+    #logger.debug( "sorted grouplist is %s"%groupList )  
 
     # if any sensor is not in any group, put it in the All group
     for s in sensorsIDs:
@@ -1324,6 +1329,7 @@ def showAllSensorsFunc(request,userName):
             meta['inGroup'] = allGroupSensorID
             logger.warning( "Moved sensor %s to All group"%meta['sensorName'] )
 
+    #logger.debug( "loop over grouplist of %s"%groupList )  
     # for each group, output it's tab then all the sensors/groups in it in sorted order 
     outList = []
     for group in groupList:
@@ -1343,6 +1349,7 @@ def showAllSensorsFunc(request,userName):
         for pair in sList:
             outList.append( (pair[1],0) )
 
+    #logger.debug( "outlist is %s"%outList )  
     # output all the stuff in the outlist paying attention to tags 
     for sensorPair in outList:
         sensorID = sensorPair[0]
@@ -1360,6 +1367,8 @@ def showAllSensorsFunc(request,userName):
         sensorData['type'] = meta['type']
         sensorData['units'] = meta['units']
         sensorData['category'] = meta['category']
+
+        #logger.debug( "counsidering %s"%sensorData )  
        
         if sensorPair[1] == 1:
             sensorData['category'] = "Tab"
