@@ -1164,6 +1164,8 @@ def doShowAllWindSensors():
     assert allGroupSensorID > 0, "There is no group named 'All' for user %s"%userName
 
     sensorsIDs = findAllSensorsIDsByUserID( findUserIdByName( userName ) )
+
+    logger.debug( "All wind sensor ID are %s"%sensorsIDs )
     
     # find all the groups in sorted order 
     groupList = []
@@ -1228,7 +1230,6 @@ def doShowAllWindSensors():
         if meta['hidden']:
             continue
 
-
         sensorData = {}
         sensorData['user'] = userName
         sensorData['name'] = meta['sensorName']
@@ -1236,7 +1237,9 @@ def doShowAllWindSensors():
         sensorData['type'] = meta['type']
         sensorData['units'] = meta['units']
         sensorData['category'] = meta['category']
-       
+
+        logger.debug( "Outputting data for wind sensor %s"%sensorData )
+         
         if sensorPair[1] == 1:
             sensorData['category'] = "Tab"
         else:
@@ -1267,6 +1270,7 @@ def doShowAllWindSensors():
                     sensorData['temp'] = int( round( v2 , 0 ) )
 
                 sensorDataList.append( sensorData )
+                logger.debug( "Appended data %s"%sensorData )
 
     return sensorDataList
 

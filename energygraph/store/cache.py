@@ -47,12 +47,12 @@ class Memcache:
     
     def get( self, keyName ):
         key = keyEpochPrefix + keyName
-        logger.debug( "in cache get" )
+        #logger.debug( "in cache get" )
         if self.cache is None:
             self.connect()
-        logger.debug( "about to cache get key=%s"%key )
+            #logger.debug( "about to cache get key=%s"%key )
         r = self.cache.get( key )
-        logger.debug( "cache.get( %s )=%s"%(key,r) )
+        #logger.debug( "cache.get( %s )=%s"%(key,r) )
         #if True:
         #    return None
         return r 
