@@ -1049,6 +1049,11 @@ def editSensor(request,userName,sensorName):
                      'threshold':record.threshold,
                      'maxUpdateTime':record.maxUpdateTime
                       }
+
+        logger.debug( "Inital units when on is <%s>"%record.unitsWhenOn )
+        if initVals['unitsWhenOn'] == '':
+            initVals['unitsWhenOn'] = 'None'
+            
         form = EditSensorForm( initVals, instance=record, auto_id=False  )
 
     #logger.debug( "debug for form=%s"%form )
