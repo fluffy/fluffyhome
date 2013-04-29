@@ -1034,7 +1034,7 @@ def editSensor(request,userName,sensorName):
             msg ="Data succesfully saved"
         else:
             logger.error( "Error in form data to edit sensor form=%s"%( str( form )) )
-            msg = "Some problem processing form"
+            msg = "Some problem processing form: %s"%( form.errors() )
     else:
         initVals =  { 'category':record.category,
                       'inGroup2': record.inGroup,
