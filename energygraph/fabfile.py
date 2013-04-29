@@ -6,11 +6,14 @@ from fabric.api import *
 def deploy():
     """ Get the code on report host """
     build()
+    run( "sudo apache2ctl stop" )
+    run( "sudo supervisorctl stop celery" )
     run( "cd src/fluffyhome; git pull" );
     run( "cd src/fluffyhome/energygraph; sudo pip install -q -r requirements.txt ");
     run( "cd src/fluffyhome/; ./manage.py syncdb ");
     run( "cd src/fluffyhome/; ./manage.py migrate store ");
     run( "cd src/fluffyhome/; ./manage.py collectstatic -v 1 --noinput");
+    run( "sudo redis-cli -n 0 flushdb" )
     run( "sudo supervisorctl reload" )
     run( "sudo supervisorctl restart celery" )
     run( "sudo apache2ctl restart" )

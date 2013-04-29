@@ -21,6 +21,7 @@ def getPatchLevel():
 class Sensor(models.Model):
     sensorID = models.IntegerField(primary_key=True) # unique interger ID for this sensor 
     sensorName = models.CharField(max_length=64) # For a given user, this is a unique name used in URIs
+
     label = models.CharField(max_length=128) # human readable, changable, display name
     userID = models.IntegerField() # user that owns this sensor 
 
