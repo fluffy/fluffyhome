@@ -645,31 +645,36 @@ def generateJson( tqxParams, vals , label, userName ):
 
     html = ""
     html += "google.visualization.Query.setResponse({ \n"
-    html += "version:'0.6',\n"
+    html += '"version":"0.6",\n'
     # reqId:'0',status:'ok',sig:'6099996038638149313',
-    html += "status:'ok', \n"
+    html += '"status":"ok", \n'
 
-    html += "reqId:'%s', \n"%reqId
+    html += '"reqId":"%s", \n'%reqId
 
-    html += "table:{ cols:[ {id:'Time',label:'Time',type:'string'}, \n"
-    html += "               {id:'Value',label:'%s',type:'number'}], \n"%label
-    html += "  rows:[ \n"
- 
+    html += '"table":{ "cols":[ {"id":"Time","label":"Time","type":"string"}, \n'
+    html += '               {"id":"Value","label":"%s","type":"number"}], \n'%label
+    html += '  "rows":[ \n'
+
+    first = True
     for val in vals:
         time = val['time']
         avg = val['average']
-        
+
+        if first:
+            first = False
+        else:
+            html += ' , '
         try:
             number = float( avg )
             # convert to local time 
             time = time + timedelta( hours=timeOffset )
             hour = time.hour
-            sample = "   {c:[  {v:'%s:00'} , {v:%f}  ]}, \n"%( str(hour) , number )
+            sample = '   { "c":[  {"v":"%s:00"} , {"v":%f}  ]} \n'%( str(hour) , number )
             html += sample
         except ValueError:
             logger.debug( "Non numberic value in measurement value=%s"%( str(value) ) )
 
-    html += "  ] } \n" #close rows, then table
+    html += '  ] } \n' #close rows, then table
     html += "} );\n" #close whole object 
     return html
 
@@ -733,12 +738,12 @@ def todayJson(request,userName,sensorName):
         dict = { 'time': dTime, 'average': v } 
         vals.append( dict )
 
-    html = generateJson( tqxParams, vals  , 
+    data = generateJson( tqxParams, vals  , 
                          "Avg %s (%s)"%( getSensorLabelByID(sensorID), getSensorUnitsByID(sensorID) ), 
                          userName )
 
     response = HttpResponse()
-    response.write( html );
+    response.write( data );
     return response 
 
 
@@ -754,7 +759,7 @@ def graphWindToday(request,sensorName):
              'graphUser':userName,
              'label': getSensorLabelByID(sensorID),
              'host' : request.META["HTTP_HOST"] }
-    return render_to_response('graphTodaySmall.html', data )
+    return render_to_response('graphTodaySmall.html', json.dumps( data ) )
 
 
 @login_required()
@@ -766,10 +771,11 @@ def graphToday(request,userName,sensorName):
 
     data = { 'sensorName': sensorName ,
              'user': userName,
-             'graphUser':userName,
+             'graphUser': userName,
              'label': getSensorLabelByID(sensorID),
              'host' : request.META["HTTP_HOST"] }
-    return render_to_response('graphToday.html', data )
+    
+    return render_to_response('graphToday.html', data ) 
 
 
 
