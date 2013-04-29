@@ -759,7 +759,7 @@ def graphWindToday(request,sensorName):
              'graphUser':userName,
              'label': getSensorLabelByID(sensorID),
              'host' : request.META["HTTP_HOST"] }
-    return render_to_response('graphTodaySmall.html', json.dumps( data ) )
+    return render_to_response('graphTodaySmall.html', data  )
 
 
 @login_required()
