@@ -1076,7 +1076,14 @@ class Hourly2(models.Model):
     groupOtherValue = models.FloatField() # for groups, value of groupTotal - sum of group values (units)
     groupOtherEnergy = models.FloatField() # for groups, value of groupTotal - sum of group energy (units)
 
+    def __unicode__(self):
+        user = findUserNameByID( self.userID )
+        meta = findSensorMetaByID( self.sensorID )
+        label = meta[ 'label' ]
+        time = datetime.fromtimestamp( self.time )
+        return u'%s/%s: %s at time %s' % (user,label,self.value, time.strftime('%D %H:%M') )
 
+    
 
 def hourlyPatchCount(): 
     level = getPatchLevel()
