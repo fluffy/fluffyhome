@@ -5,6 +5,7 @@ from fabric.api import *
 @hosts('fh3.fluffyhome.com')
 def deploy():
     """ Get the code on report host """
+    build()
     run( "cd src/fluffyhome; git pull" );
     run( "cd src/fluffyhome/energygraph; sudo pip install -q -r requirements.txt ");
     run( "cd src/fluffyhome/; ./manage.py syncdb ");

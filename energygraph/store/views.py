@@ -1206,9 +1206,12 @@ def doShowAllWindSensors():
         sList = []
         for s in sensorsIDs:
             meta = findSensorMetaByID( s ,"showAllWindSensors 2" )
+            logger.debug( "consider thing %s"%meta )
             if meta['inGroup'] == grpID:
                 if meta['units'] == 'km/h':
-                    sList.append( (meta['label'],s) )
+                    if meta['killed'] == False:
+                        sList.append( (meta['label'],s) )
+                        logger.debug( "ADDED" )
 
         slist = sorted( sList )
         for pair in sList:
