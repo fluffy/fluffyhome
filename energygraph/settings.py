@@ -10,7 +10,7 @@ from celery.schedules import crontab
 
 DEBUG = False
 # TODO
-DEBUG = True
+# DEBUG = True
 
 try:
     if 'DJANGO_DEBUG' in  os.environ:

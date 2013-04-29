@@ -1835,11 +1835,11 @@ def doUpdateAllValuesNow():
     for userName in users:
         now = long( time.time() )
         now = now - now % 3600
-        for t in range( now - 12*3600, now+1, 3600 ):
+        for t in range( now - 24*3600, now+1, 3600 ):
             userID = findUserIDByName( userName )
             assert userID is not None
             sensors = findAllSensorsByUserID(userID)
-            for sensor in sensors: # do ones that a NOT a group
+            for sensor in sensors: # do ones that are NOT a group
                 if sensor.killed != True:
                     if sensor.category != "Group":
                         taskUpdateValues( userName, sensor.sensorName , t )
