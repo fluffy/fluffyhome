@@ -447,42 +447,42 @@ def usageJson(request,userName,sensorName,type,period):
         hour = None
 
     if period == "0day": 
-        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) 
+        mid = now - ( (now - time.timezone )%(24*3600) ) # todo move to time.timezone
         start = mid 
         end = mid  + 24*3600
         step = 3600
         hour = None
 
     if period == "1day": 
-        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) 
+        mid = now - ( (now - time.timezone )%(24*3600) ) 
         start = mid - 24*3600
         end = mid 
         step = 3600
         hour = None
 
     if period == "2day" :
-        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) 
+        mid = now - ( (now - time.timezone )%(24*3600) ) 
         start = mid - 24*3600
         end = mid  + 24*3600
         step = 3600 
         hour = None
 
     if period == "7day":
-        mid = now - ( (now + timeOffsetSeconds )%(24*3600) ) 
+        mid = now - ( (now - time.timezone )%(24*3600) ) 
         start = mid - 7*24*3600
         end = mid
         step = 3600 * 24 
         hour = (start/3600) % 24
 
     if period == "30day":
-        mid = now - ( (now  + timeOffsetSeconds )%(24*3600) )
+        mid = now - ( (now  - time.timezone )%(24*3600) )
         start = mid - 30*24*3600
         end = mid
         step = 3600 * 24 
         hour = (start/3600) % 24
 
     if period == "6week":
-        mid = now - ( (now  + timeOffsetSeconds ) % (7*24*3600) ) 
+        mid = now - ( (now  - time.timezone ) % (7*24*3600) ) 
         start = mid - 6 * 7 *24*3600
         end = mid
         step = 3600 * 24 * 7
@@ -490,7 +490,7 @@ def usageJson(request,userName,sensorName,type,period):
         hour = None
 
     if period == "Aug": # august this year - TODO - should be last AUG  
-        mid = now - ( (now  + timeOffsetSeconds ) % (24*3600) ) 
+        mid = now - ( (now  - time.timezone ) % (24*3600) ) 
         mid   = time.mktime( ( time.localtime(mid)[0] , 9,1,1,0,0,0,0,0 ) )
         start = time.mktime( ( time.localtime(mid)[0] , 8,1,1,0,0,0,0,0 ) ) 
         end   = mid
@@ -516,7 +516,7 @@ def usageJson(request,userName,sensorName,type,period):
     for t in range( start , end, step ):
         ret += "   {c:[  \n"
 
-        localTime = datetime.fromtimestamp( t ) + timedelta( hours=timeOffset ) 
+        localTime = datetime.fromtimestamp( t ) # + timedelta( hours=timeOffset ) 
         if ( step == 3600 ): # hour
             ret += "        {v:'%02d:00'}, \n"%( localTime.hour ) 
         elif ( step == 24*3600 ): # day 
@@ -667,8 +667,9 @@ def generateJson( tqxParams, vals , label, userName ):
         try:
             number = float( avg )
             # convert to local time 
-            time = time + timedelta( hours=timeOffset )
-            hour = time.hour
+            # time = time + timedelta( hours=timeOffset )
+            dt = datetime.fromtimestamp( time )
+            hour = dt.hour
             sample = '   { "c":[  {"v":"%s:00"} , {"v":%f}  ]} \n'%( str(hour) , number )
             html += sample
         except ValueError:
@@ -713,7 +714,7 @@ def todayJson(request,userName,sensorName):
 
         t = utime + i*3600 # is is negative so add it 
         #t = utime + 24*i*3600 # is is negative so add it 
-        dTime = datetime.fromtimestamp( t )
+        #dTime = datetime.fromtimestamp( t )
 
         v = 7000
         start = getHourlyIntegralBySensorID( sensorID, t)
@@ -735,7 +736,7 @@ def todayJson(request,userName,sensorName):
                                                                       (t/3600) % 24 ,
                                                                       start,end,i,v ) )
 
-        dict = { 'time': dTime, 'average': v } 
+        dict = { 'time': t, 'average': v } 
         vals.append( dict )
 
     data = generateJson( tqxParams, vals  , 

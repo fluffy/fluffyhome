@@ -797,7 +797,7 @@ def createUser( userName , password ):
     user.twitter = ""
     user.purlKey = ""
 
-    user.timeZoneOffset = -8.0
+    user.timeZoneOffset = 0
     user.gasCost = 0.0288
     user.elecCost = 0.06889
     user.waterCost = 0.001307
