@@ -171,15 +171,14 @@ def showStats( request ):
 
 @login_required()
 def showGraphs( request, userName ):
-    template = "showGraphs.html"
-    
     sensors = findAllResourceSensors( findUserIDByName( userName ) )
-
     sensors = sorted( sensors , cmp=lambda x,y: cmp( x['label'], y['label'] ) )
 
-    return render_to_response( template , { 'user':userName,
-                                            'sensors':sensors,
-                                            'host':request.META["HTTP_HOST"] }) 
+    return render_to_response( "showGraphs.html" ,
+                               {
+                                   'user':userName,
+                                   'sensors':sensors,
+                                   'host':request.META["HTTP_HOST"] }) 
 
 
 @login_required()
@@ -447,7 +446,7 @@ def usageJson(request,userName,sensorName,type,period):
         hour = None
 
     if period == "0day": 
-        mid = now - ( (now - time.timezone )%(24*3600) ) # todo move to time.timezone
+        mid = now - ( (now - time.timezone )%(24*3600) ) 
         start = mid 
         end = mid  + 24*3600
         step = 3600
@@ -1836,7 +1835,7 @@ def doUpdateAllValuesNow():
     for userName in users:
         now = long( time.time() )
         now = now - now % 3600
-        for t in range( now - 24*3600, now+1, 3600 ):
+        for t in range( now - 8*3600, now+1, 3600 ):  # TODO - how far in past should this go 
             userID = findUserIDByName( userName )
             assert userID is not None
             sensors = findAllSensorsByUserID(userID)
