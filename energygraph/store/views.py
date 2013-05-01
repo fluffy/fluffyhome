@@ -389,18 +389,19 @@ def usageJson(request,userName,sensorName,type,period):
     epoch = getUserSettingEpoch( userName )
 
     head = ""
-    head += "google.visualization.Query.setResponse({ \n"
-    head += "version:'0.6',\n"
-    head += "status:'ok', \n"
-    head += "reqId:'%s', \n"%reqId
+    head += 'google.visualization.Query.setResponse({ \n'
+    head += ' "version":"0.6",\n'
+    head += ' "status":"ok", \n'
+    head += ' "reqId":"%s", \n'%reqId
 
-    cacheKey = "usageJson:%d/%s/%s/%s/%s/%d"%(epoch,userName,sensorName,type,period,now)
-    id = memcache.get( cacheKey )
-    if id != None:
-        response = HttpResponse()
-        response.write( head )
-        response.write( id )
-        return response 
+    cacheKey = 'usageJson:%d/%s/%s/%s/%s/%d'%(epoch,userName,sensorName,type,period,now)
+    if False: # do not try and cache the graphs
+        id = memcache.get( cacheKey )
+        if id != None:
+            response = HttpResponse()
+            response.write( head )
+            response.write( id )
+            return response 
 
     #  get users time zone from DB
     userID =  findUserIdByName( userName )
@@ -413,7 +414,7 @@ def usageJson(request,userName,sensorName,type,period):
     timeOffsetSeconds = int( 3600.0 * timeOffset ) 
 
     ret = ""
-    ret += "table:{ cols:[ {id:'Time',label:'Time',type:'string'}, \n"
+    ret += ' "table":{ "cols":[ {"id":"Time","label":"Time","type":"string"}, \n'
 
     sID =  findSensorID(userName,sensorName) 
     assert sID != 0 , "bad sensor ID for user=%s,sensor=%s"%(userName,sensorName)
@@ -422,11 +423,11 @@ def usageJson(request,userName,sensorName,type,period):
 
     for sensor in sensors:
         if sensor['group']:
-            ret += "               {id:'%s',label:'Other %s',type:'number'}, \n"%(sensor['name'],sensor['label'])
+            ret += '               {"id":"%s","label":"Other %s","type":"number"}, \n'%(sensor['name'],sensor['label'])
         else:
-            ret += "               {id:'%s',label:'%s',type:'number'}, \n"%(sensor['name'],sensor['label'])
-    ret += "             ], \n" # close up cols array 
-    ret += "  rows:[ \n"
+            ret += '               {"id":"%s","label":"%s","type":"number"}, \n'%(sensor['name'],sensor['label'])
+    ret += '             ], \n' # close up cols array 
+    ret += '  "rows":[ \n'
 
     now = long( time.time() )
     now = now - now % 3600
@@ -513,15 +514,15 @@ def usageJson(request,userName,sensorName,type,period):
     step = long( step )
     
     for t in range( start , end, step ):
-        ret += "   {c:[  \n"
+        ret += '   {"c":[  \n'
 
         localTime = datetime.fromtimestamp( t ) # + timedelta( hours=timeOffset ) 
         if ( step == 3600 ): # hour
-            ret += "        {v:'%02d:00'}, \n"%( localTime.hour ) 
+            ret += '        {"v":"%02d:00"}, \n'%( localTime.hour ) 
         elif ( step == 24*3600 ): # day 
-            ret += "        {v:'%s'}, \n"%(  localTime.strftime("%a") )
+            ret += '        {"v":"%s"}, \n'%(  localTime.strftime("%a") )
         elif ( step == 7*24*3600 ): # week 
-            ret += "        {v:'W-%s'}, \n"%(  localTime.strftime("%U") )
+            ret += '        {"v":"W-%s"}, \n'%(  localTime.strftime("%U") )
         else:
             assert 0
 
@@ -605,18 +606,18 @@ def usageJson(request,userName,sensorName,type,period):
                 co2  = 0
 
             if   type == "cost" :
-                ret += "        {v:%f}, \n"%( cost )
+                ret += '        {"v":%f}, \n'%( cost )
             elif type == "water" :
-                ret += "        {v:%f}, \n"%( water )
+                ret += '        {"v":%f}, \n'%( water )
             elif type == "co2" :
-                ret += "        {v:%f}, \n"%( co2 )
+                ret += '        {"v":%f}, \n'%( co2 )
             else: # this case for electircity and energy 
-                ret += "        {v:%f}, \n"%( kWh )
+                ret += '        {"v":%f}, \n'%( kWh )
 
-        ret += "   ]}, \n" # close column arrary 
+        ret += '   ]}, \n' # close column arrary 
 
-    ret += "  ] } \n" #close rows, then table
-    ret += "} );\n" #close whole object 
+    ret += '  ] } \n' #close rows, then table
+    ret += '} );\n' #close whole object 
 
     memcache.put( cacheKey, ret , 4*3600 )
 
