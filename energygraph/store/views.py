@@ -2415,7 +2415,7 @@ def doPollWindAB2( loc, ip ):
 
         print sensorHtml
         
-        m = re.search('Air Temperature:\D*(?P<data>[\d.]*)', sensorHtml )
+        m = re.search('Air Temperature:\D*(?P<data>[\-\d.]*)', sensorHtml )
         if m == None:
             logger.warning("Problem parsing out air temp from %s"%url )
         else:
@@ -2487,7 +2487,7 @@ def doPollWindAB3( loc, ip ):
     
     html = "" 
     if sensorCode == 200:
-        m = re.search('Outside Temp</td>\s*.*>(?P<data>[\d.]{3,7}) C',sensorHtml)
+        m = re.search('Outside Temp</td>\s*.*>(?P<data>[\-\d.]{3,7}) C',sensorHtml)
         if m == None:
             logger.warning("Problem parsing out air temp from %s"%url )
         else:
@@ -2567,7 +2567,7 @@ def doPollWindAB4( loc, ip ):
             
     html = "" 
     if sensorCode == 200:
-        m = re.search('Temperature:</dt>[\W]*<dd>(?P<data>[\d.]{1,5})&deg',sensorHtml,re.MULTILINE)
+        m = re.search('Temperature:</dt>[\W]*<dd>(?P<data>[\-\d.]{1,5})&deg',sensorHtml,re.MULTILINE)
         if m == None:
             logger.warning("Problem parsing out air temp from %s"%url )
         else:
