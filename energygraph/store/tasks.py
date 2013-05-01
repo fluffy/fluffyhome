@@ -22,12 +22,6 @@ def taskShowAllWindSensors(): # refresh the wind cache
     doShowAllWindSensors()
 
 
-#@periodic_task(run_every=crontab(minute="*/10")) # every 5 minutes
-#@periodic_task( run_every=crontab(minute="*") ) 
-#def taskPollRedDeer(): # refresh the wind cache 
-#     doPollWindAB2( 'red-deer', None )   # AMA has removed weather information 
-
-
 @periodic_task(run_every=crontab(minute="*/5")) # every 5 minutes
 def taskPollKiteRanch(): # refresh the wind cache 
     logger.info( "Running taskPollKiteRanch " )
@@ -50,4 +44,29 @@ def taskPollRedDeerAirport(): # refresh the wind cache
 def taskPollLethbrideAirport(): # refresh the wind cache 
     logger.info( "Running task taskPollLethbrideAirport" )
     doPollWindAB4( 'ab-30', None )  
+
+
+@periodic_task(run_every=crontab(minute="*/10")) # every 10 minutes
+def taskPollChestermere(): # refresh the wind cache 
+     doPollWindAB1( '1_10', None )  
+
+
+@periodic_task(run_every=crontab(minute="*/10")) # every 10 minutes
+def taskPollGleichen(): # refresh the wind cache 
+     doPollWindAB1( '1_14', None )
+
+
+@periodic_task(run_every=crontab(minute="*/10")) # every 10 minutes
+def taskPollGranum(): # refresh the wind cache 
+     doPollWindAB1( '2_08', None )
+
+
+@periodic_task(run_every=crontab(minute="*/10")) # every 10 minutes
+def taskPollCanmore(): # refresh the wind cache 
+     doPollWindAB1( '1_02', None )
+
+     
+@periodic_task(run_every=crontab(minute="*/10")) # every 10 minutes
+def taskPollMonarch(): # refresh the wind cache 
+     doPollWindAB1( '3_08b', None )  
 

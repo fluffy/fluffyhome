@@ -1061,6 +1061,9 @@ def editSensor(request,userName,sensorName):
         if initVals['unitsWhenOn'] == '':
             initVals['unitsWhenOn'] = 'None'
             
+        if initVals['type'] == '':
+            initVals['type'] = 'None'
+            
         form = EditSensorForm( initVals, instance=record, auto_id=False  )
 
     #logger.debug( "debug for form=%s"%form )
@@ -2323,45 +2326,54 @@ def pollWindAB1(request,loc,user=None):
     if ( ip2 != None ):
         ip = ip2
    
-    url = "http://www.ama.ab.ca/road_report/camera/%s.htm"%loc
-    result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
-
+    url = "http://511.alberta.ca/ab/cameras/camera_%s.html"%loc
+    #result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
+    try:
+        response = urllib2.urlopen( url , timeout=30 )
+    except urllib2.URLError as e:
+        print e.reason
+        raise e
+    sensorHtml =  response.read()
+    sensorCode =  response.getcode()
+    
     html = "" 
-    if result.status_code == 200:
-        m = re.search('Air Temperature:\D*(?P<data>[\d.]*)',result.content)
+    if sensorCode == 200:
+        m = re.search('Air Temperature:</h3>[\W]*<div>(?P<data>[\-\d.]{1,5}) &deg',sensorHtml,re.MULTILINE)
         if m == None:
             logger.warning("Problem parsing out air temp from %s"%url )
         else:
             temp = m.group('data')
             html += "<p> temp = %s </p>"%temp
 
-            name = 'alberta-%s-temp'%loc
+            name = 'alberta1-%s-temp'%( loc.replace('_','-') )
             if sensorExistsByName( name ):
                 storeMeasurementByName( name, temp )
             else:
                 findEnroll( name, ip )
 
-        m = re.search('Wind Speed:\D*(?P<data>[\d.]*)',result.content)
+        #m = re.search('Wind Speed:\D*(?P<data>[\d.]*)',result.content)
+        m = re.search('Wind Speed:</h3>[\W]*<div>(?P<data>[\d.]{1,5}) km/h',sensorHtml,re.MULTILINE)
         if m == None:
             logger.warning("Problem parsing out wind speed from %s"%url )
         else:
             speed = m.group('data')
             html += "<p> speed = %s </p>"%speed
 
-            name = 'alberta-%s-speed'%loc
+            name = 'alberta1-%s-speed'%( loc.replace('_','-') )
             if sensorExistsByName( name ):
                 storeMeasurementByName( name, speed )
             else:
                 findEnroll( name, ip )
 
-        m = re.search('at (?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
+        #m = re.search('at (?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
+        m = re.search('Weather Updated:</h3>[\W]*<div>[a-zA-Z0-9 ]{1,25}(?P<hour> \d{1,2}):(?P<min>\d\d)',sensorHtml,re.MULTILINE)
         if m == None:
             logger.warning("Problem parsing out update from %s"%url )
         else:
             time = int( m.group('hour') )%12  * 100 +  int( m.group('min') )
             html += "<p> time = %s </p>"%time
 
-            name = 'alberta-%s-time'%loc
+            name = 'alberta1-%s-time'%( loc.replace('_','-') )
             if sensorExistsByName( name ):
                 storeMeasurementByName( name, time )
             else:
@@ -2369,7 +2381,7 @@ def pollWindAB1(request,loc,user=None):
 
     else:
         html += "<p> Problem in fetch </p>"
-        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,result.status_code) )
+        logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,sensorCode) )
         
     response = HttpResponse()
     response.write( html );
