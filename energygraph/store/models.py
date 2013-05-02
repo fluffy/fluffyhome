@@ -118,7 +118,7 @@ def findSensorMetaByID(sensorID, callFrom=None):
 
 
 def getSensorUserIDByID(sensorID):
-    assert sensorID > 0
+    assert sensorID > 0, "Can't lookup a sensorID of %s "%sensorID
     meta = findSensorMetaByID(sensorID,"getSensorUserIDByID")
     userID = meta['userID']
     assert userID > 0
@@ -126,7 +126,7 @@ def getSensorUserIDByID(sensorID):
 
 
 def getSensorCategoryByID(sensorID):
-    assert sensorID > 0
+    assert sensorID > 0, "Can't lookup a sensorID of %s "%sensorID
     meta = findSensorMetaByID(sensorID,"getSensorCategoryByID")
     userID = meta['category']
     assert userID > 0
@@ -134,7 +134,7 @@ def getSensorCategoryByID(sensorID):
 
 
 def getSensorLabelByID(sensorID):
-    assert sensorID > 0
+    assert sensorID > 0 , "Can't lookup a sensorID of %s "%sensorID
     meta = findSensorMetaByID(sensorID,"getSensorLabelByID")
     label = meta['label']
     assert label is not None
@@ -142,7 +142,7 @@ def getSensorLabelByID(sensorID):
 
 
 def getSensorNamelByID(sensorID):
-    assert sensorID > 0
+    assert sensorID > 0, "Can't lookup a sensorID of %s "%sensorID
     meta = findSensorMetaByID(sensorID,"getSensorNamelByID")
     name = meta['sensorName']
     assert name is not None
@@ -150,7 +150,7 @@ def getSensorNamelByID(sensorID):
 
 
 def getSensorUnitsByID(sensorID):
-    assert sensorID > 0
+    assert sensorID > 0, "Can't lookup a sensorID of %s "%sensorID
     meta = findSensorMetaByID(sensorID,"getSensorUnitsByID")
     assert meta is not None
     units = meta['units']
