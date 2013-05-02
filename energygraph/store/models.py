@@ -1,4 +1,4 @@
-# Copyright (c) 2010, Cullen Jennings. All rights reserved.
+# Copyright (c) 2010 - 2013 Cullen Jennings. All rights reserved.
 
 import logging
 from datetime import timedelta
@@ -1377,28 +1377,10 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
 
     # find before and after points
     if prev is None:
-        query = Measurement2.objects
-        logger.debug("# DB search for prev computeHourlyBySensorID" )
-        query = query.filter( sensorID = sensorID )
-        query = query.filter( time__lte = utime )
-        query = query.order_by("-time") 
-        prev = None
-        try:
-            prev = query.all()[0]
-        except IndexError:
-            pass
+        prev = findMeasurementBefore(  sensorID, utime,"# DB search for prev computeHourlyBySensorID" )
         
     if next is None:
-        query = Measurement2.objects
-        logger.debug("# DB search for next computeHourlyBySensorID " )
-        query = query.filter( sensorID = sensorID )
-        query = query.filter( time__gte =  utime )
-        query = query.order_by("time") 
-        next = None
-        try:
-            next = query.all()[0]
-        except IndexError:
-            pass
+        next = findMeasurementAfter(  sensorID, utime,"# DB search for next computeHourlyBySensorID " );
 
     query = Hourly2.objects
     logger.debug("# DB search for computeHourlyBySensorID" )
@@ -1406,7 +1388,6 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
     query = query.filter( time = utime) 
     #hourly = query.all()[0]
 
-    
     #records = query.all()[0:1000]
     #if len( records ) > 0:
     #    hourly = records.pop()
@@ -1562,9 +1543,79 @@ class Measurement2(models.Model):
     patchLevel = models.IntegerField() # version that data has been upgraded too 
 
 
+def findRecentMeasurements( sensorID ):
+    now = long( time.time() )
+    t = now
+    t = t - 36*3600
+
+    query = Measurement2.objects 
+    logger.debug("# DB search for findRecentMeasurements" )
+    query = query.filter( sensorID = sensorID )
+    query = query.filter( time__gt = t )
+    query = query.order_by("-time") 
+    maxLimit = 30
+    p = query.all()[0:maxLimit]
+    return p
+
+
+def findMeasurementBefore( sensorID, utime, msg=None ):
+    query = Measurement2.objects
+    logger.debug( msg )
+    query = query.filter( sensorID = sensorID )
+    query = query.filter( time__lte = utime )
+    query = query.order_by("-time") 
+    prev = None
+    try:
+        prev = query.all()[0]
+    except IndexError:
+        prev = None
+    return prev
+
+
+def findMeasurementAfter( sensorID, utime, msg=None ):
+    query = Measurement2.objects
+    logger.debug( msg )
+    query = query.filter( sensorID = sensorID )
+    query = query.filter( time__gte =  utime )
+    query = query.order_by("time") 
+    next = None
+    try:
+        next = query.all()[0]
+    except IndexError:
+        next = None
+    return next
+
+
+def findMeasurementsBetween( sensorID, start, end ):
+    query = Measurement2.objects 
+    logger.debug("# DB search for findMeasurementsBetween" )
+    query = query.filter( sensorID = sensorID )
+    query = query.filter( time__gte =  start )
+    query = query.filter( time__lt = end )
+    query = query.order_by("-time")
+
+    maxLimit = 13000
+    p = query.all()[0:maxLimit]
+
+    if len(p) == maxLimit:
+        logger.error("findMeasurementsBetween hit max entires of %d "%( len(p) ) )
+        c = query.count(100000)
+        logger.error("count is %d which is bigger than %d"%( c, maxLimit ) )
+        assert c <= maxLimit , "Too many meassurments for this day %d > max of %d"%(c,maxLimit)
+        return None
+    
+    return p
+
+
+def saveMeasurement( m ):
+    m.save()
+
+
 def thinMeasurements( sensorID, t ):
     # make so at interval from t  - oneHour to t, there is only one measurement (the last)
 
+    assert False, "Removed this no USE "
+    
     query = Measurement2.objects 
     logger.debug("# DB search for thinMeasurements" )
     query = query.filter( sensorID = sensorID )
@@ -1657,15 +1708,7 @@ def getSensorValue( sensorID ):
         globalLastMeasurementValue[sensorID] = ret
         return ret
 
-    query = Measurement2.objects
-    logger.debug("# DB search for getSensorValue for sensor %s"%( getSensorNamelByID(sensorID) ))
-    query = query.filter( sensorID = sensorID )
-    query = query.order_by("-time") 
-    p = None
-    try:
-        p = query.all()[0]
-    except IndexError:
-        pass
+    p = findMeasurementBefore( sensorID, now, "# DB search for getSensorValue for sensor %s"%( getSensorNamelByID(sensorID) ) )
     
     ret = 0.0
     if p is not None:
@@ -1699,15 +1742,7 @@ def getSensorLastTime( sensorID ):
         globalLastMeasurementTime[sensorID] = ret
         return ret
 
-    query = Measurement2.objects
-    logger.debug("# DB search getSensorLastTime " )
-    query = query.filter( sensorID = sensorID )
-    query = query.order_by("-time") 
-    p = None
-    try:
-        p = query.all()[0] 
-    except IndexError:
-        pass
+    p = findMeasurementBefore( sensorID, now, "# DB search getSensorLastTime " )
     
     ret = 0
     if p is not None:
@@ -1741,15 +1776,7 @@ def getSensorLastIntegral( sensorID ):
         globalLastMeasurementIntegral[sensorID] = ret
         return ret
 
-    query = Measurement2.objects
-    logger.debug("# DB search for getSensorLastIntegral" )
-    query = query.filter( sensorID = sensorID )
-    query = query.order_by("-time") 
-    p = None
-    try:
-        p = query.all()[0] 
-    except IndexError:
-        pass
+    p = findMeasurementBefore( sensorID, now, "# DB search getSensorLastIntegral " )
 
     ret = 0.0
     if p is not None:
@@ -1784,17 +1811,8 @@ def getSensorLastEnergy( sensorID ):
         globalLastMeasurementEnergy[sensorID] = ret
         return ret
 
-    query = Measurement2.objects
-    logger.debug("# DB search for getSensorLastEnergy" )
-    query = query.filter( sensorID = sensorID )
-    query = query.order_by("-time") 
-    #p = query.all()[0] 
-    p = None
-    try:
-        p = query.all()[0] 
-    except IndexError:
-        pass
-    
+    p = findMeasurementBefore( sensorID, now, "# DB search getSensorLastEnergy " )
+     
     ret = 0.0
     if p is not None:
         if p.energy is not None:
@@ -1843,40 +1861,6 @@ def getSensorPower( sensorID , value=None):
     return watts
     
 
-def findMeasurementsBetween( sensorID, start, end ):
-    query = Measurement2.objects 
-    logger.debug("# DB search for findMeasurementsBetween" )
-    query = query.filter( sensorID = sensorID )
-    query = query.filter( time__gte =  start )
-    query = query.filter( time__lt = end )
-    query = query.order_by("-time")
-
-    maxLimit = 13000
-    p = query.all()[0:maxLimit]
-
-    if len(p) == maxLimit:
-        logger.error("findMeasurementsBetween hit max entires of %d "%( len(p) ) )
-        c = query.count(100000)
-        logger.error("count is %d which is bigger than %d"%( c, maxLimit ) )
-        assert c <= maxLimit , "Too many meassurments for this day %d > max of %d"%(c,maxLimit)
-        return None
-    
-    return p
-
-
-def findRecentMeasurements( sensorID ):
-    now = long( time.time() )
-    t = now
-    t = t - 36*60*60
-
-    query = Measurement2.objects 
-    logger.debug("# DB search for findRecentMeasurements" )
-    query = query.filter( sensorID = sensorID )
-    query = query.filter( time__gt = t )
-    query = query.order_by("-time") 
-    maxLimit = 30
-    p = query.all()[0:maxLimit]
-    return p
 
 
 def storeMeasurementByName( sensorName, value, mTime=0, sum=None, reset=False ,energy=None, patchLevel=None ):
@@ -1920,15 +1904,8 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , energy=N
     # TODO - load from cache 
     p = None
     if sum is None:
-        query = Measurement2.objects
-        logger.debug("# DB search for prev value for storeMeasurement" )
-        query = query.filter( sensorID = sensorID )
-        query = query.order_by("-time") 
-        p = None
-        try:
-            p = query.all()[0] 
-        except IndexError:
-            pass
+        now = long( time.time() )
+        p = findMeasurementBefore( sensorID, now, "# DB search for prev value for storeMeasurement" )
     
         if p is not None:
             if ( sTime >= p.time ):
@@ -1988,7 +1965,7 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , energy=N
         m.energy = 0.0
 
     patchMeasurement( m )
-    m.save()
+    saveMeasurement( m )
     logger.debug("# DB put for storeMeasurement id=%d value=%f integral=%d "%(m.sensorID,m.value,m.integral) )
 
     global globalLastMeasurementTime
@@ -2097,28 +2074,10 @@ def getSensorIntegral(sensorID,utime,prev=None,next=None): # utime is unix integ
 
     # find before and after points
     if prev is None:
-        query = Measurement2.objects
-        logger.debug("# DB search for prev getSensorIntegral" )
-        query = query.filter( sensorID = sensorID )
-        query = query.filter( time__lte = utime )
-        query = query.order_by("-time") 
-        prev = None
-        try:
-            prev = query.all()[0]
-        except IndexError:
-            pass
+        prev = findMeasurementBefore( sensorID, utime, "# DB search for prev getSensorIntegral" )
         
     if next is None:
-        query = Measurement2.objects
-        logger.debug("# DB search for next getSensorIntegral " )
-        query = query.filter( sensorID = sensorID )
-        query = query.filter( time__gte =  utime )
-        query = query.order_by("time") 
-        next = None
-        try:
-            next = query.all()[0]
-        except IndexError:
-            pass
+        next = findMeasurementAfter( sensorID, utime, "# DB search for next getSensorIntegral" )
 
     if prev != None and prev.integral == None:
         prev.integral = 0.0
@@ -2189,28 +2148,11 @@ def getSensorEnergy(sensorID, utime, prev=None, next=None ): # utime is unix int
 
     # find before and after points
     if prev is None:
-        query = Measurement2.objects
-        logger.debug("# DB search for prev getSensorEnergy" )
-        query = query.filter( sensorID = sensorID )
-        query = query.filter( time__lte = utime )
-        query = query.order_by("-time") 
-        prev = None
-        try:
-            prev = query.all()[0]
-        except IndexError:
-            pass
+        prev = findMeasurementBefore( sensorID, utime, "# DB search for prev getSensorEnergy" )
 
     if next is None:
-        query = Measurement2.objects
-        logger.debug("# DB search for next getSensorEnergy" )
-        query = query.filter( sensorID = sensorID )
-        query = query.filter( time__gte = utime )
-        query = query.order_by("time") 
-        next = None
-        try:
-            next = query.all()[0]
-        except IndexError:
-            pass
+        next = findMeasurementAfter( sensorID, utime, "# DB search for next getSensorEnergy" )
+        
 
     if prev != None and prev.energy == None:
         prev = None
