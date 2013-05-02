@@ -1,17 +1,68 @@
 # Copyright (c) 2013 Cullen Jennings. All rights reserved.
 
+import os
+import sys
+import urlparse
 import logging
+
 #from datetime import timedelta
 from datetime import datetime
 import time
-#from sets import Set
+
 from django.db import models
 import json
-#from django.core.exceptions import ObjectDoesNotExist
+
+from pymongo import MongoClient
+from pymongo import ASCENDING, DESCENDING
 
 #from energygraph.store.cache import *
 
 logger = logging.getLogger('energygraph')
+
+
+class Mongo:
+    """ class to wrap the connection to MOngo DB """
+    client = None 
+    db = None 
+    collection = None 
+
+    def __init__( self ):
+        self.client = None
+        
+    def connect( self ):
+        url = "mongo://localhost:27017"
+        try:
+            url = os.environ['MONGO_URL'] 
+        except KeyError:
+            pass
+        print "MONGO_URL = ", url
+
+        urlparse.uses_netloc.append('mongo')
+        url = urlparse.urlparse( url )
+        assert url.hostname is not None, "Problem with Mongo URL"
+        
+        self.client = MongoClient(  host=url.hostname, port=url.port)
+        assert self.client is not None, "Failed to connect to Mongo server"
+
+        self.db = self.client['energygraph']
+        assert self.db is not None, "Failed to connect to Mongo energygraph DB"
+
+        self.collection = self.db['measurements']
+        assert self.collection is not None, "Failed to connect to measurement collection"
+
+        doc = self.db.version.find_one();
+        dbVersion = 1
+        if ( doc == None) or ( not 'version' in doc ) or ( doc['version'] != dbVersion ):
+            # wrong version of DB - need to create
+            logger.info("Setting up mongo DB to version %d"%dbVersion )
+
+            self.collection.ensure_index( [ ("sensorID",DESCENDING), ("time",DESCENDING) ] );
+            self.collection.ensure_index( [ ("sensorID",DESCENDING), ("time",ASCENDING) ] );
+            
+            self.db.version.save( { 'version': dbVersion } )
+
+
+mongo = Mongo()
 
 
     
@@ -25,71 +76,122 @@ class Measurement2(models.Model):
 
 
 def findRecentMeasurements( sensorID ):
-    now = long( time.time() )
-    t = now
-    t = t - 36*3600
+    ''' Finds the 30 most recent measurements in the last 36 hours '''
+    if mongo.client is None:
+            mongo.connect()
 
-    query = Measurement2.objects 
-    logger.debug("# DB search for findRecentMeasurements" )
-    query = query.filter( sensorID = sensorID )
-    query = query.filter( time__gt = t )
-    query = query.order_by("-time") 
+    now = long( time.time() )
+    t = now - 36*3600
     maxLimit = 30
-    p = query.all()[0:maxLimit]
-    return p
+
+    filter = { 'sensorID': long(sensorID), 'time' :{'$lte':long(now),'$gte':long(t)} }
+    docs = mongo.collection.find( filter ).sort( 'time', DESCENDING ).limit(maxLimit)
+
+    ret = []
+    for doc in docs:
+        #logger.debug( "found doc = %s"%doc )
+        m = Measurement2()
+        m.sensorID = doc[ 'sensorID' ]
+        m.time = doc[ 'time' ]
+        m.integral = doc[ 'integral' ]
+        m.value = doc[ 'value' ]
+        m.energy = doc[ 'energy' ]
+        m.patchLevel = doc[ 'patchLevel' ]
+
+        ret.append( m ) 
+    
+    return ret
 
 
 def findMeasurementBefore( sensorID, utime, msg=None ):
-    query = Measurement2.objects
     logger.debug( msg )
-    query = query.filter( sensorID = sensorID )
-    query = query.filter( time__lte = utime )
-    query = query.order_by("-time") 
-    prev = None
-    try:
-        prev = query.all()[0]
-    except IndexError:
-        prev = None
-    return prev
+    if mongo.client is None:
+            mongo.connect()
+
+    filter = { 'sensorID': long(sensorID), 'time' :{'$lte':long(utime)} }
+    docs = mongo.collection.find( filter ).sort( 'time', DESCENDING ).limit(1)
+
+    ret = None
+    for doc in docs:
+        #logger.debug( "found doc = %s"%doc )
+        ret = Measurement2()
+        ret.sensorID = doc[ 'sensorID' ]
+        ret.time = doc[ 'time' ]
+        ret.integral = doc[ 'integral' ]
+        ret.value = doc[ 'value' ]
+        ret.energy = doc[ 'energy' ]
+        ret.patchLevel = doc[ 'patchLevel' ]
+    
+    return ret
 
 
 def findMeasurementAfter( sensorID, utime, msg=None ):
-    query = Measurement2.objects
     logger.debug( msg )
-    query = query.filter( sensorID = sensorID )
-    query = query.filter( time__gte =  utime )
-    query = query.order_by("time") 
-    next = None
-    try:
-        next = query.all()[0]
-    except IndexError:
-        next = None
-    return next
+    if mongo.client is None:
+        mongo.connect()
+            
+    filter = { 'sensorID': long(sensorID), 'time' :{'$gte':long(utime)} }
+    docs = mongo.collection.find( filter ).sort( 'time', ASCENDING ).limit(1)
+
+    ret = None
+    for doc in docs:
+        #logger.debug( "found doc = %s"%doc )
+        ret = Measurement2()
+        ret.sensorID = doc[ 'sensorID' ]
+        ret.time = doc[ 'time' ]
+        ret.integral = doc[ 'integral' ]
+        ret.value = doc[ 'value' ]
+        ret.energy = doc[ 'energy' ]
+        ret.patchLevel = doc[ 'patchLevel' ]
+    
+    return ret
+
+
 
 
 def findMeasurementsBetween( sensorID, start, end ):
-    query = Measurement2.objects 
     logger.debug("# DB search for findMeasurementsBetween" )
-    query = query.filter( sensorID = sensorID )
-    query = query.filter( time__gte =  start )
-    query = query.filter( time__lt = end )
-    query = query.order_by("-time")
+    if mongo.client is None:
+            mongo.connect()
 
-    maxLimit = 13000
-    p = query.all()[0:maxLimit]
+    maxLimit = 13000 # TODO - remove  - this was a GAE limit 
 
-    if len(p) == maxLimit:
-        logger.error("findMeasurementsBetween hit max entires of %d "%( len(p) ) )
-        c = query.count(100000)
-        logger.error("count is %d which is bigger than %d"%( c, maxLimit ) )
-        assert c <= maxLimit , "Too many meassurments for this day %d > max of %d"%(c,maxLimit)
-        return None
+    filter = { 'sensorID': long(sensorID), 'time' :{'$lt':long(end),'$gte':long(start)} }
+    docs = mongo.collection.find( filter ).sort( 'time', DESCENDING ).limit(maxLimit)
+
+    ret = []
+    for doc in docs:
+        #logger.debug( "found doc = %s"%doc )
+        m = Measurement2()
+        m.sensorID = doc[ 'sensorID' ]
+        m.time = doc[ 'time' ]
+        m.integral = doc[ 'integral' ]
+        m.value = doc[ 'value' ]
+        m.energy = doc[ 'energy' ]
+        m.patchLevel = doc[ 'patchLevel' ]
+
+        ret.append( m ) 
     
-    return p
+    return ret
+
 
 
 def saveMeasurement( m ):
-    m.save()
+    # m.save()
+
+    if mongo.client is None:
+            mongo.connect()
+
+    record = { 'sensorID': long(m.sensorID),
+               'time': long(m.time),
+               'patchLevel': long(m.patchLevel),
+               'integral': float( m.integral ),
+               'value': float( m.value ),
+               'energy': float( m.energy ) }
+
+    mongo.collection.insert( record )
+
+    
 
 
 def thinMeasurements( sensorID, t ):
