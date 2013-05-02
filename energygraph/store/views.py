@@ -1278,7 +1278,8 @@ def doShowAllWindSensors():
                 name = string.replace( meta['sensorName'], "-speed" , "-time" )
                 sensorID = findSensorID( 'wind' , name );
                 v1 = None
-                v1 = getSensorValue( sensorID ) 
+                if sensorID > 0:
+                    v1 = getSensorValue( sensorID ) 
                 if v1 is not None:
                     sensorData['timeMin'] = '%02d'%( int( round( v1 , 0 ) )%100  )
                     sensorData['timeHour'] = '%d'%( int( round( v1 , 0 ) )/100  )
@@ -1287,7 +1288,8 @@ def doShowAllWindSensors():
                 name2 = string.replace( meta['sensorName'], "-speed" , "-temp" )
                 sensorID2 = findSensorID( 'wind' , name2 );
                 v2 = None
-                v2 = getSensorValue( sensorID2 ) 
+                if sensorID2 > 0:
+                    v2 = getSensorValue( sensorID2 ) 
                 if v2 is not None:
                     sensorData['temp'] = int( round( v2 , 0 ) )
 
