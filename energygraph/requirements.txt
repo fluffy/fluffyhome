@@ -12,6 +12,7 @@ kombu==2.5.10
 paramiko==1.10.1
 psycopg2==2.5
 pycrypto==2.6
+pymongo==2.5
 python-dateutil==2.1
 pytz==2013b
 redis==2.7.2
