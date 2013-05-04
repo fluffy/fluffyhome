@@ -9,13 +9,18 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
 
 from store.views import *
+from oauth.views import *
+
 import settings
 
 admin.autodiscover()
 
 
 urlpatterns = patterns('',
- 
+    # Stuff for OAuth
+    (r'^oauth/start/$', start ),
+    (r'^oauth/redir$', redir ),
+   
     #(r'^wind/$', redirect_to, { 'url':'/wind/ab-south/'} ),
     url(r'^wind/$', RedirectView.as_view(url='/wind/ab-south/'), name='ab-south-wind'),
 
