@@ -37,6 +37,7 @@ def cron():
 @task
 def web():
     """ Run local webserver """
+    local( "redis-cli -n 0 flushdb" );
     local( "../manage.py runserver" );
 
 

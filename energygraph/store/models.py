@@ -1064,29 +1064,11 @@ def findUserIdByName( userName ):
 
 
 
-class Hourly2(models.Model):
-    sensorID   = models.IntegerField() # system wide unique identifer for sensor 
-    userID     = models.IntegerField() # user that owns the sensor
-    patchLevel  = models.IntegerField() # version that data has been upgraded too 
-    time       = models.IntegerField() # time this messarement was made (seconds since unix epoch)
-    integral   = models.FloatField() # integral of value over time up to this meassurment (units * seconds)
-    value      = models.FloatField() # value of sensor at time of meassurment (units)
-    energy     = models.FloatField() # cumulative energy used in watt seconds (Joules) 
-    hourOfDay  = models.IntegerField() # 0 to (24-1), hour of day messarement was made 
-    hourOfWeek  = models.IntegerField() # 0 to (24*7-1), hour of week messarement was made (Available in patchlevel >= 2)
-    groupOtherValue = models.FloatField() # for groups, value of groupTotal - sum of group values (units)
-    groupOtherEnergy = models.FloatField() # for groups, value of groupTotal - sum of group energy (units)
-
-    def __unicode__(self):
-        user = findUserNameByID( self.userID )
-        meta = findSensorMetaByID( self.sensorID )
-        label = meta[ 'label' ]
-        time = datetime.fromtimestamp( self.time )
-        return u'%s/%s: %s at time %s' % (user,label,self.value, time.strftime('%D %H:%M') )
 
     
 
-def hourlyPatchCount(): 
+def hourlyPatchCount():
+    assert False
     level = getPatchLevel()
 
     sensorID = getSensorIDByName( 'ECM1240-42414-ch2' )
@@ -1108,6 +1090,7 @@ def hourlyPatchCount():
 
         
 def hourlyPatchFast(): 
+    assert False
     level = getPatchLevel()
     maxUpgrade = 1000
     
@@ -1144,6 +1127,7 @@ def hourlyPatchFast():
 
 
 def hourlyPatch(): 
+    assert False
     maxUpgrade = 50
 
     level = getPatchLevel()
@@ -1169,34 +1153,6 @@ def hourlyPatch():
     logger.info("hourlyPatch patched %d"%(c) )   
     return c
 
-
-def getHourlyByUserIDTime( userID, start=None, end=None , hour=None, hourOfWeek=None ):
-    utime = long(  time.time() )
-    utime = utime - utime % 3600
-
-    assert (hourOfWeek is None) or (hour is None)
-    
-    if start is None:
-        start = utime - 24*3600
-    if end is None:
-        end = utime
-
-    if end > utime:
-        end = utime
-
-    query = Hourly2.objects 
-    logger.debug("# DB search for getHourlyByUserIDTime" )
-    query = query.filter( userID = userID )
-    if hour is not None:
-        query = query.filter( hourOfDay = hour )
-    if hourOfWeek is not None:
-        query = query.filter( hourOfWeek = hourOfWeek )
-    query = query.filter( time__lte =  end) 
-    query = query.filter( time__gte =   start ) 
-    query = query.order_by("-time") 
-    results = query.all()
-
-    return results
 
 
 def getHourlyEnergyTotalByGroupID( groupID, utime ):
@@ -1295,7 +1251,7 @@ def getHourlyEnergyOtherByGroupID( groupID, utime ):
     return ret
 
 
-def getHourlyEnergyBySensorID( sensorID, utime ): # TODO - can we get rid of this 
+def getHourlyEnergyBySensorID( sensorID, utime ): # TODO - can we get rid of this
     assert sensorID > 0
     assert utime > 0 ,  "Problem with invalid utime of %d"%utime
     assert utime <= long( time.time() )
@@ -1311,16 +1267,8 @@ def getHourlyEnergyBySensorID( sensorID, utime ): # TODO - can we get rid of thi
 
     logger.debug("getHourlyEnergyBySensorID: sensorID=%d time=%d hour ago"%( sensorID ,
                                                                               (utime-time.time())/3600.0 ) )
-
-    query = Hourly2.objects
-    logger.debug("# DB search for getHourlyEnergyBySensorID" )
-    query = query.filter( sensorID = sensorID )
-    query = query.filter( time = utime)
-    hourly = None
-    try:
-        hourly = query.all()[0]
-    except IndexError:
-        pass
+   
+    hourly = getHourlyBySensorIDTime( sensorID, utime )
     
     if hourly is None:
         hourly = computeHourlyBySensorID( sensorID , utime )
@@ -1347,15 +1295,7 @@ def getHourlyIntegralBySensorID( sensorID, utime ):
     utime = long( utime )
     utime = utime - utime % 3600
 
-    query = Hourly2.objects
-    logger.debug("# DB search for getHourlyIntegralBySensorID" )
-    query = query.filter( sensorID = sensorID )
-    query = query.filter( time = utime) 
-    hourly = None
-    try:
-        hourly = query.all()[0]
-    except IndexError:
-        pass
+    hourly = getHourlyBySensorIDTime( sensorID, utime )
     
     if hourly is None:
         hourly = computeHourlyBySensorID( sensorID , utime )
@@ -1383,24 +1323,7 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
     if next is None:
         next = findMeasurementAfter(  sensorID, utime,"# DB search for next computeHourlyBySensorID " );
 
-    query = Hourly2.objects
-    logger.debug("# DB search for computeHourlyBySensorID" )
-    query = query.filter( sensorID = sensorID )
-    query = query.filter( time = utime) 
-    #hourly = query.all()[0]
-
-    #records = query.all()[0:1000]
-    #if len( records ) > 0:
-    #    hourly = records.pop()
-    #if len( records ) > 0:
-    #    logger.debug("# DB delete extra records for computeHourlyBySensorID" )
-    #    db.delete( records )
-    
-    hourly = None
-    try:
-       hourly = query.all()[0]
-    except IndexError:
-        pass
+    hourly = getHourlyBySensorIDTime( sensorID, utime )
     
     if hourly is None:
         hourly = Hourly2()
@@ -1422,10 +1345,10 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
     hourly.patchLevel = 0
     
     if patchMeasurement( prev ):
-        prev.save()
+        saveHourly( prev )
         
     if patchMeasurement( next ):
-        next.save()
+        saveHourly( next )
         
     hourly.patchLevel = getPatchLevel()
     
@@ -1442,7 +1365,7 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
         hourly.groupOtherEnergy = getHourlyEnergyOtherByGroupID( sensorID, utime )
 
     logger.debug("# DB put for computeHourlyBySensorID" )
-    hourly.save()
+    saveHourly( hourly )
 
     logger.debug( "hourly integral = %f"%hourly.integral )
     logger.debug( "hourly value = %f"%hourly.value )
@@ -1570,7 +1493,6 @@ def patchMeasurement( m ):
         pass # nothing to do - this patch upgraded the hourOfWeek handled elswhere 
  
     m.patchLevel = getPatchLevel()
-    #m.save()
     return True
     
 
