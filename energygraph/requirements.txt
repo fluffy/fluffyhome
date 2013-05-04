@@ -9,9 +9,11 @@ celery-with-redis==3.0
 django-celery==3.0.17
 flower==0.4.3
 kombu==2.5.10
+oauthlib==0.4.0
 paramiko==1.10.1
 psycopg2==2.5
 pycrypto==2.6
+pymongo==2.5
 python-dateutil==2.1
 pytz==2013b
 redis==2.7.2
