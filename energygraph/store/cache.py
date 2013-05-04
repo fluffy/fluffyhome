@@ -27,15 +27,11 @@ class Memcache:
             #raise
             pass
 
-        print "OS VAR: ", url
-
         urlparse.uses_netloc.append('redis')
         url = urlparse.urlparse( url )
-
         assert url.hostname is not None, "Problem with redis URL"
         
         self.cache = redis.StrictRedis(  host=url.hostname, port=url.port, password=url.password, db=0 )
-
         assert self.cache is not None, "Failed to connect to REDIS server"
 
         try:

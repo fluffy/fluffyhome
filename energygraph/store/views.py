@@ -1,4 +1,4 @@
-# Copyright (c) 2010, Cullen Jennings. All rights reserved.
+# Copyright (c) 2010-2013, Cullen Jennings. All rights reserved.
 
 import logging
 import sys
