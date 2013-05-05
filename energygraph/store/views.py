@@ -1088,7 +1088,7 @@ def createSensor(request,userName,sensorName):
     assert record is not None, "can't find record in DB"
 
     if request.method == 'POST': 
-        logger.debug( "POST data is %s"%str(request.POST) ) 
+        #logger.debug( "POST data is %s"%str(request.POST) ) 
         data = request.POST
 
         record.label = data.get("label")
@@ -1099,12 +1099,8 @@ def createSensor(request,userName,sensorName):
         record.hidden = ( data.get("hidden") == "1" )
         record.ignore = ( data.get("ignore") == "1" )
 
-        logger.debug( "before units was <%s>" % record.units  ) 
         if "units" in data:
-            if data.get("units") != "None":
-                record.units = data.get("units")
-                logger.debug( "set units to %s " % data.get("units")  ) 
-        #record.units = "None"
+            record.units = data.get("units")
 
         if "displayMin" in data:
             if data.get("displayMin") != "None":
@@ -1113,9 +1109,6 @@ def createSensor(request,userName,sensorName):
             if data.get("displayMax") != "None":
                 record.displayMax = float( data.get("displayMax") )
                 
-        if "watts" in data:
-            if data.get("watts") != "None":
-                record.watts = float( data.get("watts") )
         if "threshold" in data:
             if data.get("threshold") != "None":
                 record.threshold = float( data.get("threshold") )
@@ -1125,25 +1118,24 @@ def createSensor(request,userName,sensorName):
                 record.maxUpdateTime = float( data.get("maxUpdateTime") )
                 
         if "unitsWhenOn" in data:
-            if data.get("unitsWhenOn") != "None":
-                record.units = data.get("unitsWhenOn")
+            record.unitsWhenOn = data.get("unitsWhenOn")
         if "valueWhenOn" in data:
             if data.get("valueWhenOn") != "None":
-                record.watts = float( data.get("valueWhenOn") )
+                record.valueWhenOn = float( data.get("valueWhenOn") )
+        if "watts" in data:
+            if data.get("watts") != "None":
+                record.watts = float( data.get("watts") )
 
         if "inGroupName" in data:
             groupName = data.get("inGroupName")
             groupID = findSensorID(userName,groupName,create=True)
             record.inGroup = groupID
 
+        logger.debug( "UNITS PRE SAVE was <%s>" % record.units  ) 
         record.save()
+
         updateUserSettingsEpoch(userName)
 
-        if True:
-            logger.debug( "UNITS saves was <%s>" % record.units  ) 
-            record = findSensor( sensorID ,"createSensor" )
-            logger.debug( "UNITS loaded was <%s>" % record.units  ) 
-            
         return HttpResponse('<h1>Updated sensor %s</h1>'%sensorName  )  
 
     logger.debug( "Problem creating sensor %s"%sensorName )  
