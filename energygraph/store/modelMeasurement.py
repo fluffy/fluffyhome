@@ -21,7 +21,7 @@ logger = logging.getLogger('energygraph')
 
 
 class Mongo:
-    """ class to wrap the connection to MOngo DB """
+    """ class to wrap the connection to Mongo DB """
     client = None 
     db = None 
     measurements = None 
@@ -55,14 +55,18 @@ class Mongo:
         assert self.hourlys is not None, "Failed to connect to measurement collection"
 
         doc = self.db.version.find_one();
-        dbVersion = 1
+        dbVersion = 2
         if ( doc == None) or ( not 'version' in doc ) or ( doc['version'] != dbVersion ):
             # wrong version of DB - need to create
             logger.info("Setting up mongo DB to version %d"%dbVersion )
 
             self.measurements.ensure_index( [ ("sensorID",DESCENDING), ("time",DESCENDING) ] );
             self.measurements.ensure_index( [ ("sensorID",DESCENDING), ("time",ASCENDING) ] );
-            
+
+            self.hourlys.ensure_index( [ ("sensorID",ASCENDING), ("time",ASCENDING) ] );
+            self.hourlys.ensure_index( [ ("userID",ASCENDING), ("time",DESCENDING) ] );
+            # TODO - consider adding index for hourOfDay and hourOfWeek 
+
             self.db.version.save( { 'version': dbVersion } )
 
 

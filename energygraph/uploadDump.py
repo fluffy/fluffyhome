@@ -82,7 +82,7 @@ def main():
     assert root is not None
 
 
-    if False : # create the user 
+    if False: # create the user 
         users = tree.findall("user")
         for user in users:
             userName = user.attrib.get("userName")
@@ -94,7 +94,7 @@ def main():
             u = url + "/user/" + userName + "/prefs/"
             post( data , u ,  "application/x-www-form-urlencoded" , options.userName, options.password );
 
-    if True :# create the sensors 
+    if True: # create the sensors groups 
         sensors = tree.findall("sensor")
         for sensor in sensors:
             sensorName = sensor.attrib.get("sensorName")
@@ -103,8 +103,24 @@ def main():
             attributes = sensor.items()
             data = urlencode( attributes )
             u = url + "/sensor/" + sensorUser + "/" + sensorName + "/create/"
+            fields = dict( attributes )
 
-            post( data , u ,  "application/x-www-form-urlencoded" ,  options.userName, options.password  );
+            if fields['category'] == 'Group':
+                post( data , u ,  "application/x-www-form-urlencoded" ,  options.userName, options.password  );
+            
+    if True: # create the sensors 
+        sensors = tree.findall("sensor")
+        for sensor in sensors:
+            sensorName = sensor.attrib.get("sensorName")
+            sensorUser = sensor.attrib.get("userName")
+            
+            attributes = sensor.items()
+            data = urlencode( attributes )
+            u = url + "/sensor/" + sensorUser + "/" + sensorName + "/create/"
+            fields = dict( attributes )
+
+            if fields['category'] != 'Group':
+                post( data , u ,  "application/x-www-form-urlencoded" ,  options.userName, options.password  );
 
     #create the meassurement data 
     count = 0

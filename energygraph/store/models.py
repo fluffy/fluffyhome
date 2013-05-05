@@ -32,12 +32,14 @@ class Sensor(models.Model):
     groupTotal = models.BooleanField() # don't show the sesnsor on main displays of data 
     killed = models.BooleanField() # mark this true to effetively delete a sensor
 
-    category = models.CharField( max_length=15, choices=[ ("Group","Group"), ("Sensor","Sensor") ] ) # dep , "Computed"
+    category = models.CharField( max_length=15,
+                                 choices=[ ("Group","Group"), ("Sensor","Sensor") ] )
                                 
-    type = models.CharField(max_length=15, choices=[ ("None","None"),("Electricity","Electricity"),("Gas","Gas"),("Water","Water")   ] ) # rename resource
-                                                    #   , "Elecricity","Temp","Switch","Humidity", "Any" ])) #depricate lower ones
+    type = models.CharField( max_length=15,
+                             choices=[ ("None","None"), ("Electricity","Electricity"), ("Gas","Gas"), ("Water","Water") ] )
                                                     
-    units = models.CharField(max_length=10, choices=[("None","None"),("V","V"),("W","W"),("C","C"),("F","F"),("lps","lps"),("A","A"),("%","%"),("RH%","RH%"),("Pa","Pa"),("km/h","km/h")] ) #,'k' 'Ws' #TODO fix, degC and degF
+    units = models.CharField (max_length=10,
+                              choices=[("None","None"),("V","V"),("W","W"),("C","C"),("F","F"),("lps","lps"),("A","A"),("%","%"),("RH%","RH%"),("Pa","Pa"),("km/h","km/h"),("m/s","m/s")] ) #,'k' 'Ws' #TODO fix, degC and degF
     
     unitsWhenOn = models.CharField(max_length=10, choices=[("None","None"),("W","W"),("lps","lps")]) 
 
@@ -1321,7 +1323,7 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
         prev = findMeasurementBefore(  sensorID, utime,"# DB search for prev computeHourlyBySensorID" )
         
     if next is None:
-        next = findMeasurementAfter(  sensorID, utime,"# DB search for next computeHourlyBySensorID " );
+        next = findMeasurementAfter(  sensorID, utime,"# DB search for next computeHourlyBySensorID " )
 
     hourly = getHourlyBySensorIDTime( sensorID, utime )
     
@@ -1410,7 +1412,7 @@ def checkKnownIP( ip, sensorID=0, calledBy=""):
     logger.debug( cachekey) 
     id = memcache.get( cachekey ) 
     if id != None:
-        globalKnownIP[ip] = True;
+        globalKnownIP[ip] = True
         return True
  
     query = KnownIP.objects
@@ -1428,7 +1430,7 @@ def checkKnownIP( ip, sensorID=0, calledBy=""):
         return False
 
     memcache.put( cachekey, True , 24*3600 )
-    globalKnownIP[ip] = True;
+    globalKnownIP[ip] = True
     return True
 
 

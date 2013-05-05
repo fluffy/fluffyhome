@@ -121,7 +121,7 @@ def showStats( request ):
     day = now - now % (24*3600)
     now = long( time.time() )
     minute0 = now - now % 60
-    now = now-60;
+    now = now-60
     minute1 = now - now % 60
 
     sensors = findAllNonGroupSensors( )
@@ -288,7 +288,7 @@ def showLineGraphCSV(request,userName,sensorName):
     response = HttpResponse()
     #response = HttpResponse("text/plain")
     response['Content-Disposition'] = 'attachment; filename=%s-%s.csv'%(userName,sensorName)
-    response.write( html );
+    response.write( html )
     return response 
 
 
@@ -357,7 +357,7 @@ def showPlotJson_OLD_NO_USE(request,userName,sensorName):
     #response = HttpResponse("text/plain")
     response = HttpResponse()
     #response['Content-Disposition'] = 'attachment; filename=somefilename.csv'
-    response.write( html );
+    response.write( html )
 
     return response 
 
@@ -744,7 +744,7 @@ def todayJson(request,userName,sensorName):
                          userName )
 
     response = HttpResponse()
-    response.write( data );
+    response.write( data )
     return response 
 
 
@@ -1088,43 +1088,48 @@ def createSensor(request,userName,sensorName):
     assert record is not None, "can't find record in DB"
 
     if request.method == 'POST': 
-        #logger.debug( "POST data is %s"%str(request.POST) ) 
+        logger.debug( "POST data is %s"%str(request.POST) ) 
         data = request.POST
 
-        record.label = data.get("label");
-        record.category = data.get("category");
+        record.label = data.get("label")
+        record.category = data.get("category")
         record.type = data.get("type")
-        record.groupTotal = ( data.get("groupTotal") == "1" );
-        record.public = ( data.get("public") == "1" );
-        record.hidden = ( data.get("hidden") == "1" );
-        record.ignore = ( data.get("ignore") == "1" );
+        record.groupTotal = ( data.get("groupTotal") == "1" )
+        record.public = ( data.get("public") == "1" )
+        record.hidden = ( data.get("hidden") == "1" )
+        record.ignore = ( data.get("ignore") == "1" )
+
+        logger.debug( "before units was <%s>" % record.units  ) 
         if "units" in data:
             if data.get("units") != "None":
-                record.units = data.get("units");
+                record.units = data.get("units")
+                logger.debug( "set units to %s " % data.get("units")  ) 
+        #record.units = "None"
+
         if "displayMin" in data:
             if data.get("displayMin") != "None":
-                record.displayMin = float( data.get("displayMin") );
+                record.displayMin = float( data.get("displayMin") )
         if "displayMax" in data:
             if data.get("displayMax") != "None":
-                record.displayMax = float( data.get("displayMax") );
+                record.displayMax = float( data.get("displayMax") )
                 
         if "watts" in data:
             if data.get("watts") != "None":
-                record.watts = float( data.get("watts") );
+                record.watts = float( data.get("watts") )
         if "threshold" in data:
             if data.get("threshold") != "None":
-                record.threshold = float( data.get("threshold") );
+                record.threshold = float( data.get("threshold") )
                 
         if "maxUpdateTime" in data:
             if data.get("maxUpdateTime") != "None":
-                record.maxUpdateTime = float( data.get("maxUpdateTime") );
+                record.maxUpdateTime = float( data.get("maxUpdateTime") )
                 
         if "unitsWhenOn" in data:
             if data.get("unitsWhenOn") != "None":
-                record.units = data.get("unitsWhenOn");
+                record.units = data.get("unitsWhenOn")
         if "valueWhenOn" in data:
             if data.get("valueWhenOn") != "None":
-                record.watts = float( data.get("valueWhenOn") );
+                record.watts = float( data.get("valueWhenOn") )
 
         if "inGroupName" in data:
             groupName = data.get("inGroupName")
@@ -1133,11 +1138,15 @@ def createSensor(request,userName,sensorName):
 
         record.save()
         updateUserSettingsEpoch(userName)
+
+        if True:
+            logger.debug( "UNITS saves was <%s>" % record.units  ) 
+            record = findSensor( sensorID ,"createSensor" )
+            logger.debug( "UNITS loaded was <%s>" % record.units  ) 
             
         return HttpResponse('<h1>Updated sensor %s</h1>'%sensorName  )  
 
     logger.debug( "Problem creating sensor %s"%sensorName )  
-
     return HttpResponseNotFound('<h1>Problem with create sensor %s </h1>'%( sensorName ) )
 
 
@@ -1152,7 +1161,7 @@ def loadAllSensors(request,userName):
 
     for s in sensorsIDs:
         assert s > 0
-        meta = findSensorMetaByID( s ,"showAllSensors" );
+        meta = findSensorMetaByID( s ,"showAllSensors" )
 
     return HttpResponse('<h1>Updated sensor cache for user %s </h1>'%(userName) )  
 
@@ -1186,7 +1195,7 @@ def doShowAllWindSensors():
     groupList = []
     for s in sensorsIDs:
         assert s > 0
-        meta = findSensorMetaByID( s ,"showAllWindSensors" );
+        meta = findSensorMetaByID( s ,"showAllWindSensors" )
 
         if meta['category'] == "Group":
                 groupList.append( (meta['label'],s) )
@@ -1194,7 +1203,7 @@ def doShowAllWindSensors():
 
     # if any sensor is not in any group, put it in the All group
     for s in sensorsIDs:
-        meta = findSensorMetaByID( s ,"showAllWindSensors 1" );
+        meta = findSensorMetaByID( s ,"showAllWindSensors 1" )
         if meta['sensorName'] == "All": # don't put the All group in itself 
             meta['inGroup'] = 0
             continue
@@ -1276,7 +1285,7 @@ def doShowAllWindSensors():
 
                 # get the time sensor
                 name = string.replace( meta['sensorName'], "-speed" , "-time" )
-                sensorID = findSensorID( 'wind' , name );
+                sensorID = findSensorID( 'wind' , name )
                 v1 = None
                 if sensorID > 0:
                     v1 = getSensorValue( sensorID ) 
@@ -1286,7 +1295,7 @@ def doShowAllWindSensors():
 
                 # get the temp sensor
                 name2 = string.replace( meta['sensorName'], "-speed" , "-temp" )
-                sensorID2 = findSensorID( 'wind' , name2 );
+                sensorID2 = findSensorID( 'wind' , name2 )
                 v2 = None
                 if sensorID2 > 0:
                     v2 = getSensorValue( sensorID2 ) 
@@ -1326,7 +1335,7 @@ def showAllSensorsFunc(request,userName):
     groupList = []
     for s in sensorsIDs:
         assert s > 0
-        meta = findSensorMetaByID( s ,"showAllSensors" );
+        meta = findSensorMetaByID( s ,"showAllSensors" )
 
         if meta['category'] == "Group":
                 groupList.append( (meta['label'],s) )
@@ -1335,7 +1344,7 @@ def showAllSensorsFunc(request,userName):
 
     # if any sensor is not in any group, put it in the All group
     for s in sensorsIDs:
-        meta = findSensorMetaByID( s ,"showAllSensors 1" );
+        meta = findSensorMetaByID( s ,"showAllSensors 1" )
         if meta['sensorName'] == "All": # don't put the All group in itself 
             meta['inGroup'] = 0
             continue
@@ -1361,7 +1370,7 @@ def showAllSensorsFunc(request,userName):
         # find and sort the sensors in this group 
         sList = []
         for s in sensorsIDs:
-            meta = findSensorMetaByID( s ,"showAllSensors 2" );
+            meta = findSensorMetaByID( s ,"showAllSensors 2" )
             if meta['inGroup'] == grpID:
                     sList.append( (meta['label'],s) )
 
@@ -1373,7 +1382,7 @@ def showAllSensorsFunc(request,userName):
     # output all the stuff in the outlist paying attention to tags 
     for sensorPair in outList:
         sensorID = sensorPair[0]
-        meta = findSensorMetaByID( sensorID ,"showAllSensors 3" );
+        meta = findSensorMetaByID( sensorID ,"showAllSensors 3" )
 
         if meta['killed']:
             continue
@@ -1670,7 +1679,7 @@ def qTaskThin(userName,sensorName,t):
     assert False, "depricatea as uses q Task "
     logger.info("qTaskThin: user=%s sensor=%s time=%s"%(userName,sensorName,t) )
 
-    #thinqueue = taskqueue.Queue( "thin" );
+    #thinqueue = taskqueue.Queue( "thin" )
     
     if userName == "*":
         users = findAllUserNames() 
@@ -1887,7 +1896,7 @@ def updateAllValues(request): # this is just like updateAllValues but it queues 
 
 
 def about(request):
-    ver = "TBD";
+    ver = "TBD"
     try:
         ver = os.environ['SERVER_SOFTWARE']
     except:
@@ -2156,7 +2165,7 @@ def postSensorValues(request):
         bt=0
         bn=str( "" )
         
-        valArray = [];
+        valArray = []
         if ( type(jData) == list ):  # should depricate - this is the messurement object with no wrapper
             valArray = jData
         if ( type(jData) == dict ):
@@ -2303,7 +2312,7 @@ def jsonFour(request,user):
     #response = HttpResponse("text/plain")
     response = HttpResponse()
     #response['Content-Disposition'] = 'attachment; filename=somefilename.csv'
-    response.write( html );
+    response.write( html )
 
     return response 
 
@@ -2386,7 +2395,7 @@ def pollWindAB1(request,loc,user=None):
         logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,sensorCode) )
         
     response = HttpResponse()
-    response.write( html );
+    response.write( html )
     return response 
 
 
@@ -2461,7 +2470,7 @@ def doPollWindAB2( loc, ip ):
         logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,sensorCode) )
         
     response = HttpResponse()
-    response.write( html );
+    response.write( html )
     return response 
 
 
@@ -2534,7 +2543,7 @@ def doPollWindAB3( loc, ip ):
         logger.warning( "Problem fetching content for %s - reponse code = %s "%( url, sensorCode ) )
         
     response = HttpResponse()
-    response.write( html );
+    response.write( html )
     return response 
 
 
@@ -2614,5 +2623,5 @@ def doPollWindAB4( loc, ip ):
         logger.warning( "Problem fetching content for %s - reponse code = %s "%(url,sensorCode) )
         
     response = HttpResponse()
-    response.write( html );
+    response.write( html )
     return response 
