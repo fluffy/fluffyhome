@@ -192,7 +192,7 @@ INSTALLED_APPS = (
 
     'energygraph.store',
 
-    'south'
+    #'south'
 )
 
 # APPEND_SLASH=False
@@ -321,5 +321,4 @@ CELERYBEAT_SCHEDULE = {
 
 SOUTH_MIGRATION_MODULES = {
     'djcelery': 'ignore',
-    'djkombu': 'ignore',
 }
