@@ -20,6 +20,8 @@ You can muck with DB with
 psql -d energygraph -U fluffy -h localhost
 SELECT "userID", "userName", "passwd" FROM store_user ORDER BY "userID" ;
 SELECT "sensorID", "userID", "sensorName" FROM store_sensor ORDER BY "sensorID";
+can fix up passwords with
+UPDATE store_user SET "passwd" = 'newpwd'  WHERE "userID" = 5 ;
 
 
 
