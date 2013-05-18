@@ -16,6 +16,12 @@ su postgres
 createuser -S -D -R fluffy
 createdb hero 
 
+You can muck with DB with 
+psql -d energygraph -U fluffy -h localhost
+SELECT "userID", "userName", "passwd" FROM store_user ORDER BY "userID" ;
+SELECT "sensorID", "userID", "sensorName" FROM store_sensor ORDER BY "sensorID";
+
+
 
 manage.py syncdb
 

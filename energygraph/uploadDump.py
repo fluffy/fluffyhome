@@ -82,7 +82,7 @@ def main():
     assert root is not None
 
 
-    if False: # create the user 
+    if True: # create the user 
         users = tree.findall("user")
         for user in users:
             userName = user.attrib.get("userName")
