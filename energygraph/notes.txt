@@ -14,7 +14,7 @@ sudo pip install django-celery
 install postgres, create user, create DB 
 su postgres
 createuser -S -D -R fluffy
-createdb hero 
+createdb energygraph 
 
 You can muck with DB with 
 psql -d energygraph -U fluffy -h localhost
@@ -22,6 +22,20 @@ SELECT "userID", "userName", "passwd" FROM store_user ORDER BY "userID" ;
 SELECT "sensorID", "userID", "sensorName" FROM store_sensor ORDER BY "sensorID";
 can fix up passwords with
 UPDATE store_user SET "passwd" = 'newpwd'  WHERE "userID" = 5 ;
+right now am using django auth passwords on one in this DB so that does not
+matter 
+
+ECM1240-5723-aux5 for user 3 (plagd)   is sensorID 115 
+ECM1240-42340-ch2 for user 1 cullen is sensorid 40 
+
+mongo 
+use energygraph
+show collections
+db.measurements1.find( { sensorID: 40 } , { time: true, value: true  }  ).sort({ time: -11 } ).limit(5)
+db.measurements1.find( { sensorID: 115 } , { time: true, value: true,integral:true   }  ).sort( { time: -1 } ).limit(10)
+
+
+
 
 
 
