@@ -11,7 +11,7 @@ def deploy():
     run( "cd src/fluffyhome; git pull" );
     run( "cd src/fluffyhome/energygraph; sudo pip install -q -r requirements.txt ");
     run( "cd src/fluffyhome/; ./manage.py syncdb ");
-    run( "cd src/fluffyhome/; ./manage.py migrate store ");
+    #run( "cd src/fluffyhome/; ./manage.py migrate store ");
     run( "cd src/fluffyhome/; ./manage.py collectstatic -v 1 --noinput");
     run( "sudo redis-cli -n 0 flushdb" )
     run( "sudo supervisorctl reload" )
