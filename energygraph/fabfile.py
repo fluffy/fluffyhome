@@ -74,7 +74,7 @@ def deployServer():
     #sudo( "cd /etc/apache2/sites-available; ln -sf /home/fluffy/src/fluffyhome/energygraph/apache.conf fluffyhome" )
     #sudo( "cd /etc/apache2/sites-enabled;  ln -sf ../sites-available/fluffyhome" );
 
-    #run( "cd ~/src/fluffyhome/energygraph; if [ ! -f apache.conf ] ; then cat apache.tmpl | sed -e 's/www\.fluffyhome/fh4.fluffyhome/' > apache.conf ; fi " )
+    run( "cd ~/src/fluffyhome/energygraph; if [ ! -f apache.conf ] ; then cat apache.tmpl | sed -e 's/www\.fluffyhome/fh4.fluffyhome/' > apache.conf ; fi " )
 
     #sudo( "apache2ctl restart" )
 
