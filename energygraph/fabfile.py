@@ -61,7 +61,7 @@ def deployServer():
     
     #run( "mkdir -p ~/src" )
     #run( "cd ~/src; if [ ! -d fluffyhome ] ; then git clone git@github.com:fluffy/fluffyhome.git ; fi" )
-
+    #run( "cd ~/src/fluffyhome/energygraph; git pull" )
 
     #run( "cd ~/src/fluffyhome/energygraph; sudo pip install -r requirements.txt " )
     #run( "mkdir -p ~/src/fluffyhome/energygraph/logs" )
@@ -71,10 +71,14 @@ def deployServer():
     #run( "cd ~/src/fluffyhome/energygraph; ../manage.py syncdb --noinput" )
     #run( "cd src/fluffyhome/energygraph; ../manage.py collectstatic -v 1 --noinput");
 
+
+    # TOOD - next one fails if run twice and needs way to set password 
+    # run( "cd src/fluffyhome/energygraph; ../manage.py createsuperuser --username=fluffy --email=fluffy@iii.ca --noinput");
+
     #sudo( "cd /etc/apache2/sites-available; ln -sf /home/fluffy/src/fluffyhome/energygraph/apache.conf fluffyhome" )
     #sudo( "cd /etc/apache2/sites-enabled;  ln -sf ../sites-available/fluffyhome" );
 
-    run( "cd ~/src/fluffyhome/energygraph; if [ ! -f apache.conf ] ; then cat apache.tmpl | sed -e 's/www\.fluffyhome/fh4.fluffyhome/' > apache.conf ; fi " )
+    #run( "cd ~/src/fluffyhome/energygraph; if [ ! -f apache.conf ] ; then cat apache.tmpl | sed -e 's/www\.fluffyhome/fh4.fluffyhome/' > apache.conf ; fi " )
 
     #sudo( "apache2ctl restart" )
 
@@ -83,11 +87,15 @@ def deployServer():
     #sudo( "mkdir -p /var/lib/celery" )
     #sudo( "chmod a+rw /var/lib/celery" )
 
+    # TODO - next two are not workign 
     #sudo( "supervisorctl reload" )
     #sudo( "supervisorctl restart celery" )
 
-    run( "sudo apache2ctl restart" )
+    #run( "sudo apache2ctl restart" )
 
+    # TODO - wait some time
+    local( "sleep 5" )
+    local( "./uploadDump.py ~/Documents/FluffyHomeData/all-dump.xml http://fh4.fluffyhome.com" )
 
     
 
