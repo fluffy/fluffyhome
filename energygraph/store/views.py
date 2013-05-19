@@ -1921,7 +1921,6 @@ def setupServer(request):
     record = findUserByName( userName )
     if record is None:
         createUser( userName , "123456"  ) 
-
         
     return HttpResponse() # return a 200
 

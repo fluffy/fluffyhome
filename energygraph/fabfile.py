@@ -54,7 +54,8 @@ def deployServer():
     
     run( "sudo apt-get -y install redis-server" )
     run( "sudo pip install redis" ) 
-    
+    run( "sudo redis-cli -n 0 flushdb" )
+      
     sudo( "apt-get -y install rabbitmq-server" )
     
     run( "sudo pip install django fabric django-celery" )
@@ -78,7 +79,7 @@ def deployServer():
     run( "cd src/fluffyhome/energygraph; ../manage.py collectstatic -v 1 --noinput");
 
     # TOOD - next one fails if run twice and needs way to set password 
-    # run( "cd src/fluffyhome/energygraph; ../manage.py createsuperuser --username=fluffy --email=fluffy@iii.ca --noinput");
+    # run( "cd src/fluffyhome/energygraph; ../manage.py createsuperuser --username=fluffy --email=fluffy@iii.ca");
 
     sudo( "cd /etc/apache2/sites-available; ln -sf /home/fluffy/src/fluffyhome/energygraph/apache.conf fluffyhome" )
     sudo( "cd /etc/apache2/sites-enabled;  ln -sf ../sites-available/fluffyhome" );
@@ -94,15 +95,13 @@ def deployServer():
     sudo( "mkdir -p /var/log/celery" )
     sudo( "chmod a+rw /var/log/celery" )
 
+    run( "sudo apache2ctl restart" )
+
     sudo( "supervisorctl reload" )
     sudo( "supervisorctl restart celery" )
 
-    run( "sudo apache2ctl restart" )
-
-    # TODO - wait some time
-    #local( "sleep 5" )
     local( "curl http://fh4.fluffyhome.com/admin/setupServer " )
-    #local( "./uploadDump.py ~/Documents/FluffyHomeData/all-dump.xml http://fh4.fluffyhome.com" )
+    local( "./uploadDump.py ~/Documents/FluffyHomeData/all-dump.xml http://fh4.fluffyhome.com" )
 
     
 
