@@ -20,6 +20,13 @@ def deploy():
 
 
 @task
+@hosts('fh4.fluffyhome.com')
+def deployServer():
+    """ Setup a new server """
+    run( "sudo apt-get install emacs23-nox" )
+
+
+@task
 def build():
     """ Make all the local stuff and push to github for deployment """
     local( "../manage.py syncdb" );
