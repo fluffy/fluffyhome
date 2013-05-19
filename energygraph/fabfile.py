@@ -23,8 +23,49 @@ def deploy():
 @hosts('fh4.fluffyhome.com')
 def deployServer():
     """ Setup a new server """
-    run( "sudo apt-get install emacs23-nox" )
+    #run( "sudo apt-get -y install ufw" )
+    #run( "sudo ufw default deny" )
+    #run( "sudo ufw logging on" )
+    #run( "sudo ufw allow ssh/tcp" )
+    #run( "sudo ufw limit ssh/tcp" )
+    #run( "sudo ufw allow http/tcp" )
+    #run( "echo y | sudo ufw enable" )
 
+    #sudo( 'echo "fluffy ALL = NOPASSWD: ALL"  > /etc/sudoers.d/cullen' )
+    #sudo( 'echo "fluffy ALL=(postgres) NOPASSWD: ALL"  >> /etc/sudoers.d/cullen' )
+    #sudo( "chmod 0440 /etc/sudoers.d/cullen" )
+
+    #run( "sudo apt-get -y install fail2ban" )
+    #run( "sudo apt-get -y install logcheck logcheck-database" )
+
+    #run( "sudo apt-get -y install emacs23-nox git-core build-essential gcc tcsh" )
+    #run( "sudo apt-get -y install apache2" )
+
+    #run( "sudo apt-get -y install python python-dev python-setuptools" )
+    #run( "sudo easy_install pip" )
+    #run( "sudo pip install virtualenv virtualenvwrapper" )
+    #run( "sudo pip install pytz" )
+
+    #run( "sudo apt-get -y install postgresql python-psycopg2 postgresql-contrib libpq-dev" )
+    #run( 'psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname=\'fluffy\'" | grep -q 1 || echo "CREATE ROLE fluffy WITH LOGIN ENCRYPTED PASSWORD \'none\';" | sudo -u postgres psql ' )
+    #run( "psql -l | grep energygraph | wc -l | grep -q 1  ||  sudo -u postgres createdb -w -O fluffy energygraph" )
+ 
+    #run( "sudo apt-get -y install mongodb" )
+    
+    #run( "sudo apt-get -y install redis-server" )
+    #run( "sudo pip install redis" ) 
+    
+    #sudo( "apt-get -y install rabbitmq-server" )
+    
+    #run( "sudo pip install django fabric django-celery" )
+    
+    #run( "mkdir -p ~/src" )
+    #run( "cd ~/src; if [ ! -d fluffyhome ] ; then git clone git@github.com:fluffy/fluffyhome.git ; fi" )
+    
+    #run( "cd ~/src/fluffyhome/energygraph; if [ ! -f secrets.py ] ; then cat secrets.tmpl | sed -e 's/pwdReplace/none/' > secrets.py ; fi " )
+    run( "cd ~/src/fluffyhome/energygraph; ../manage.py syncdb --noinput" )
+
+    
 
 @task
 def build():

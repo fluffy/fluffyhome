@@ -36,8 +36,11 @@ CREATE USER fluffy WITH PASSWORD 'myPassword';
 GRANT ALL PRIVILEGES ON DATABASE energygraph to fluffy;
 \q
 
+Might try 
+sudo -u postgres createdb --owner fluffy energygraph 
 
-
+Can also set password in psql with 
+\password fluffy
 
 
 

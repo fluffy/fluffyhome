@@ -30,7 +30,7 @@ system_update_hostname "$SYS_HOSTNAME"
 # Create user account
 system_add_user "$USER_NAME" "$USER_PASSWORD" "sudo" "/bin/bash"
 if [ "$USER_SSHKEY" ]; then
-    system_user_add_ssh_key "$USER_NAME" "$USER_SSHKEY"
+    system_user_add_ssh_key "$USER_NAME" \" "$USER_SSHKEY" \" 
 fi
 
 
@@ -43,7 +43,7 @@ touch /tmp/restart-ssh
 
 
 # Lock user account if not used for login
-system_lock_user "root"
+passwd -l root
 
 
 # Install Postfix
