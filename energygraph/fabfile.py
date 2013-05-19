@@ -2,7 +2,7 @@
 from fabric.api import *
 
 @task
-@hosts('fh3.fluffyhome.com')
+@hosts('fh4.fluffyhome.com')
 def deploy():
     """ Get the code on report host """
     build()
@@ -63,7 +63,22 @@ def deployServer():
     #run( "cd ~/src; if [ ! -d fluffyhome ] ; then git clone git@github.com:fluffy/fluffyhome.git ; fi" )
     
     #run( "cd ~/src/fluffyhome/energygraph; if [ ! -f secrets.py ] ; then cat secrets.tmpl | sed -e 's/pwdReplace/none/' > secrets.py ; fi " )
-    run( "cd ~/src/fluffyhome/energygraph; ../manage.py syncdb --noinput" )
+    #run( "cd ~/src/fluffyhome/energygraph; ../manage.py syncdb --noinput" )
+
+    #sudo( "cd /etc/apache2/sites-available; ln -sf /home/fluffy/src/fluffyhome/energygraph/apache.conf fluffyhome" )
+    #sudo( "cd /etc/apache2/sites-enabled;  ln -sf ../sites-available/fluffyhome" );
+
+    #sudo( "apache2ctl restart" )
+
+    #sudo( "apt-get -y install supervisor" )
+    #sudo( "cd /etc/supervisor/conf.d; ln -sf /home/fluffy/src/fluffyhome/energygraph/supervisor-celery.conf " )
+    #sudo( "mkdir -p /var/lib/celery" )
+    #sudo( "chmod a+rw /var/lib/celery" )
+
+    sudo( "supervisorctl reload" )
+    sudo( "supervisorctl restart celery" )
+
+
 
     
 

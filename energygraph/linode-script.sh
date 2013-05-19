@@ -20,12 +20,9 @@ system_update
 
 source <ssinclude StackScriptID="124"> # lib-system
 
-
-
 # Configure system
 source <ssinclude StackScriptID="123"> # lib-system-ubuntu
 system_update_hostname "$SYS_HOSTNAME"
-
 
 # Create user account
 system_add_user "$USER_NAME" "$USER_PASSWORD" "sudo" "/bin/bash"
@@ -33,44 +30,25 @@ if [ "$USER_SSHKEY" ]; then
     system_user_add_ssh_key "$USER_NAME" \" "$USER_SSHKEY" \" 
 fi
 
-
-
 # Configure sshd
 system_sshd_permitrootlogin "No"
 system_sshd_passwordauthentication "Yes"
 touch /tmp/restart-ssh
 
-
-
 # Lock user account if not used for login
 passwd -l root
-
 
 # Install Postfix
 postfix_install_loopback_only # SS1
 
-
 # Setup logcheck
 system_security_logcheck
-
 
 # Setup fail2ban
 system_security_fail2ban
 
-
 # Setup firewall
 system_security_ufw_configure_basic
-
-
-source <ssinclude StackScriptID="126"> # lib-python
-python_install
-
-
-# lib-system - SS124
-system_install_utils
-system_install_build
-system_install_git
-
 
 # Install and configure apache and mod_wsgi
     source <ssinclude StackScriptID="122"> # lib-apache
@@ -78,28 +56,8 @@ system_install_git
     apache_mod_wsgi_install
     apache_cleanup
 
-
-
-# Install PostgreSQL and setup database
-    source <ssinclude StackScriptID="125"> # lib-postgresql
-    postgresql_install
-    #postgresql_create_user "$POSTGRESQL_USER" "$POSTGRESQL_PASSWORD"
-
-
-
-# Install MongoDB
-    source <ssinclude StackScriptID="128"> # lib-mongodb
-    mongodb_install
-
-
-#install emacs 
-apt-get -y install emacs23-nox 
-
-
 restart_services
 restart_initd_services
-
-
 
 # Send info message
 cat > ~/setup_message <<EOD
