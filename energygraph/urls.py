@@ -66,6 +66,8 @@ urlpatterns = patterns('',
 
     (r'^admin/updateAll/$', updateAllValues ),
     
+    (r'^admin/setupServer/$', setupServer ), 
+
     (r'^admin/stats/$', showStats ), 
     (r'^admin/dump/meta/$', dumpMeta ), 
     (r'^admin/updateAllNow/$', updateAllValuesNow ), 

@@ -1910,6 +1910,22 @@ def about(request):
         'host':request.META["HTTP_HOST"] } )
 
 
+def setupServer(request):
+
+    userName = "wind"
+    record = findUserByName( userName )
+    if record is None:
+        createUser( userName , "123456"  ) 
+
+    userName = "fluffy"
+    record = findUserByName( userName )
+    if record is None:
+        createUser( userName , "123456"  ) 
+
+        
+    return HttpResponse() # return a 200
+
+    
 def store(request,userName,sensorName):
     return storeNoAuth(request,userName,sensorName) 
 
