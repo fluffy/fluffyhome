@@ -1,8 +1,10 @@
 
 from fabric.api import *
 
+# note serial drivers do not work on osx 10.8 so can not move to mini50
+
 @task
-@hosts('fluffymini50.fluffyhome.com')
+@hosts('fluffymac32.fluffyhome.com')
 def deploy():
     local( "git commit --allow-empty -a -m 'update from build' " );
     local( "git push" );
