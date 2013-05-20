@@ -367,7 +367,22 @@ processData( int sock , char* url1, char* url2 )
       else
       {
          fprintf(stderr,"Bad check sum. check=%02x sum=%02x \n",check,sum);
-         for( i=0; i<msgPos; i++ ) fprintf(stderr,"%02x ",msgBuf[i] ); fprintf( stderr, "\n" );
+         if ( 1 )
+         {
+            // print buffer for debug 
+            for( i=0; i<msgPos; i++ ) 
+            {
+               if ( msgBuf[i] >= 0xFe )
+               {
+               fprintf(stderr,"%02X ",msgBuf[i] ); 
+               }
+               else
+               {
+                  fprintf(stderr,"%02x ",msgBuf[i] ); 
+               }
+            }
+            fprintf( stderr, "\n" );
+         }
       }
    }
 }
