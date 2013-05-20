@@ -23,6 +23,9 @@ def deploy():
 @hosts('fh4.fluffyhome.com')
 def deployServer():
     """ Setup a new server """
+    sudo( 'echo "fluffy ALL = NOPASSWD: ALL"  > /etc/sudoers.d/cullen ; chmod 0440 /etc/sudoers.d/cullen ' )
+    sudo( 'echo "fluffy ALL=(postgres) NOPASSWD: ALL"  >> /etc/sudoers.d/cullen' )
+
     run( "sudo apt-get -y install ufw" )
     run( "sudo ufw default deny" )
     run( "sudo ufw logging on" )
@@ -30,10 +33,6 @@ def deployServer():
     run( "sudo ufw limit ssh/tcp" )
     run( "sudo ufw allow http/tcp" )
     run( "echo y | sudo ufw enable" )
-
-    sudo( 'echo "fluffy ALL = NOPASSWD: ALL"  > /etc/sudoers.d/cullen' )
-    sudo( 'echo "fluffy ALL=(postgres) NOPASSWD: ALL"  >> /etc/sudoers.d/cullen' )
-    sudo( "chmod 0440 /etc/sudoers.d/cullen" )
 
     run( "sudo apt-get -y install fail2ban" )
     run( "sudo apt-get -y install logcheck logcheck-database" )

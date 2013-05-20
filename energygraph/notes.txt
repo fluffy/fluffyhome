@@ -1,3 +1,37 @@
+
+Build the node with wirewall, ssh, and fluffy user - see linode-script.sh
+
+Build and boot setting up password for user fluffy
+
+set up DNS to point to new server 
+
+ssh on to it and set up ssh key for remote login if not done by linnode script 
+
+generate ssh key with 
+ssh-keygen -help -t rsa -C "fluffy@iii.ca"
+cat ~/.ssh/id_rsa.pub 
+put that key in github repo 
+do a 
+ssh git@github.com
+and verify fingerprint 
+
+do a 
+fab deployServer
+
+On the new host do 
+cd src/fluffyhome/energygraph; 
+../manage.py createsuperuser --username=fluffy --email=fluffy@iii.ca
+and set up password for django supersuer 
+
+go to 
+http://fh4.fluffyhome.com/admin-django/
+and set add user wind 
+then go to 
+http://fh4.fluffyhome.com/admin-django/store/user/
+and depending on auth model may need to update passowrd 
+
+------------------------------------------------------------------
+
 # some simple notes no how to install and 
 
 #set up the DNS to point at machine 
@@ -82,6 +116,10 @@ cd /home/fluffy/src/fluffyhome/energygraph
 cp secrets.tmpl secrets.py and edit 
 
 sudo pip install -r requirements.txt
+
+
+---------------------
+
 
 
 # note following asks a bunch of questions 
