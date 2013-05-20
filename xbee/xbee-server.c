@@ -26,7 +26,7 @@
 
 typedef float Value;
 
-int verbose = 0;
+int verbose = 1;
 
 
 
