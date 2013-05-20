@@ -28,6 +28,18 @@ def backupDB():
     run( "cd ~; tar cvfz fluffyhome_DB.tgz backup" )
     get( "fluffyhome_DB.tgz" , "/Users/fluffy/Documents/FluffyHomeData" )
    
+
+@task
+def restoreDB():
+    #local( "cp /Users/fluffy/Documents/FluffyHomeData/fluffyhome_DB.tgz /tmp/db.tgz" )
+    #local( "cd /tmp; tar xvfz /tmp/db.tgz " )
+    #date = prompt("What postgress date (exanmple 2013-05-20)")
+    #local( "cp /tmp/backup/postgres_%s /tmp/pg.dump "%date )
+    #local( "dropdb -h localhost energygraph" )
+    #local( "sudo -u postgres createdb -h localhost -O fluffy energygraph" )
+    #local( "psql -h localhost -U fluffy energygraph <  /tmp/pg.dump " )
+    local( "cd /tmp/backup/dump; mongorestore energygraph " )
+
     
 @task
 @hosts('fh4.fluffyhome.com')
@@ -68,7 +80,7 @@ def deployServer():
     sudo( "apt-get -y install rabbitmq-server" )
     
     run( "sudo pip install django fabric django-celery" )
-    
+
     run( "mkdir -p ~/src" )
     run( "mkdir -p ~/backup" )
 
