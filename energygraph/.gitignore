@@ -10,3 +10,5 @@ settings.old
 secrets.py
 secrets.old
 foo.dump.Z
+foo.xml
+

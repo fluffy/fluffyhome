@@ -2,7 +2,7 @@
 from fabric.api import *
 
 @task
-@hosts('fh4.fluffyhome.com')
+@hosts('fh3.fluffyhome.com')
 def deploy():
     """ Get the code on report host """
     build()
@@ -19,6 +19,15 @@ def deploy():
     run( "sudo apache2ctl restart" )
 
 
+@task
+@hosts('fh3.fluffyhome.com')
+def backupDB():
+    #run( 'cd ~/backup; pg_dump energygraph > postgres_$(date +"%F") ' )
+    #run( 'cd ~/backup; mongodump ' )
+    #run( "tar cvfz fluffyhome_DB.tgz backup" )
+    get( "fluffyhome_DB.tgz" , "/Users/fluffy/Documents/FluffyHomeData" )
+   
+    
 @task
 @hosts('fh4.fluffyhome.com')
 def deployServer():
@@ -60,6 +69,8 @@ def deployServer():
     run( "sudo pip install django fabric django-celery" )
     
     run( "mkdir -p ~/src" )
+    run( "mkdir -p ~/backup" )
+
     run( "cd ~/src; if [ ! -d fluffyhome ] ; then git clone git@github.com:fluffy/fluffyhome.git ; fi" )
     run( "cd ~/src/fluffyhome/energygraph; git pull" )
 
