@@ -162,11 +162,20 @@ def loaddata():
 
 
 @task
-def computeOld():
+def computeOldLocal():
     start = 1357020000 # unix timestamp for jan 1, 2013 
     now = time.time()
     days = long( (now - start) / ( 24*3600) )
 
     for d in range(0,days):
         local( "curl http://127.0.0.1:8000/admin/updateAllPrev/%s/"%d )
-    
+
+
+@task
+def computeOld():
+    start = 1357020000 # unix timestamp for jan 1, 2013 
+    now = time.time()
+    days = long( (now - start) / ( 24*3600) )
+
+    for d in range(0,days):
+        local( "curl http://test.fluffyhome.com/admin/updateAllPrev/%s/"%d )
