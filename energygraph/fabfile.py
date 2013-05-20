@@ -2,7 +2,7 @@
 from fabric.api import *
 
 @task
-@hosts('fh3.fluffyhome.com')
+@hosts('fh4.fluffyhome.com')
 def deploy():
     """ Get the code on report host """
     build()
