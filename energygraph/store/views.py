@@ -1845,7 +1845,7 @@ def updateAllValuesNow(request):
     return HttpResponse('<h1>Completed update all hourly values</h1>'  )  
 
 
-@login_required()
+#@login_required() # TODO - add in 
 def updatePrevValues(request,pDay):
 
     pDay = long( pDay )
@@ -1858,7 +1858,7 @@ def updatePrevValues(request,pDay):
     startTime = endTime - goBack
         
     doUpdateAllValuesNow( startTime, endTime )
-    return HttpResponse('<h1>Completed update all hourly values for day %s </h1>'%pDay  )  
+    return HttpResponse('<h1>Completed update all hourly values for day %s </h1>\n'%pDay  )  
 
 
 
