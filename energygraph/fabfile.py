@@ -22,9 +22,9 @@ def deploy():
 @task
 @hosts('fh3.fluffyhome.com')
 def backupDB():
-    #run( 'cd ~/backup; pg_dump energygraph > postgres_$(date +"%F") ' )
-    #run( 'cd ~/backup; mongodump ' )
-    #run( "tar cvfz fluffyhome_DB.tgz backup" )
+    run( 'cd ~/backup; pg_dump energygraph > postgres_$(date +"%F") ' )
+    run( 'cd ~/backup; mongodump ' )
+    run( "tar cvfz fluffyhome_DB.tgz backup" )
     get( "fluffyhome_DB.tgz" , "/Users/fluffy/Documents/FluffyHomeData" )
    
     
