@@ -280,7 +280,7 @@ void postMsg( char* url1, char* url2, Value* prev, Value* delta, Value* current 
    
 void parseMsg( int len,  unsigned char msg[] , Value* current )
 {
-   if (0)
+   if (1)
    {
       fprintf(stderr,"Msg: ");
       int i;
