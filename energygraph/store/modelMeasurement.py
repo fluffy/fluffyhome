@@ -24,8 +24,8 @@ class Mongo:
     """ class to wrap the connection to Mongo DB """
     client = None 
     db = None 
-    measurements = None 
-    hourlys = None 
+    measurements1 = None 
+    hourly1 = None 
 
     def __init__( self ):
         self.client = None
@@ -48,33 +48,33 @@ class Mongo:
         self.db = self.client['energygraph']
         assert self.db is not None, "Failed to connect to Mongo energygraph DB"
 
-        self.measurements = self.db['measurements1']
-        assert self.measurements is not None, "Failed to connect to measurement collection"
+        self.measurements1 = self.db['measurements1']
+        assert self.measurements1 is not None, "Failed to connect to measurement collection"
 
-        self.hourlys = self.db['hourlys']
-        assert self.hourlys is not None, "Failed to connect to measurement collection"
+        self.hourly1 = self.db['hourly1']
+        assert self.hourly1 is not None, "Failed to connect to hourly collection"
 
-        doc = self.db.version.find_one();
-        dbVersion = 2
+        doc = self.db.version1.find_one();
+        dbVersion = 3
         if ( doc == None) or ( not 'version' in doc ) or ( doc['version'] != dbVersion ):
             # wrong version of DB - need to create
             logger.info("Setting up mongo DB to version %d"%dbVersion )
 
-            self.measurements.ensure_index( [ ("sensorID",DESCENDING), ("time",DESCENDING) ] );
-            self.measurements.ensure_index( [ ("sensorID",DESCENDING), ("time",ASCENDING) ] );
+            self.measurements1.ensure_index( [ ("sensorID",DESCENDING), ("time",DESCENDING) ] );
+            self.measurements1.ensure_index( [ ("sensorID",DESCENDING), ("time",ASCENDING) ] );
 
-            self.hourlys.ensure_index( [ ("sensorID",ASCENDING), ("time",ASCENDING) ] );
-            self.hourlys.ensure_index( [ ("userID",ASCENDING), ("time",DESCENDING) ] );
+            self.hourly1.ensure_index( [ ("sensorID",ASCENDING), ("time",ASCENDING) ] );
+            self.hourly1.ensure_index( [ ("userID",ASCENDING), ("time",DESCENDING) ] );
             # TODO - consider adding index for hourOfDay and hourOfWeek 
 
-            self.db.version.save( { 'version': dbVersion } )
+            self.db.version1.save( { 'version': dbVersion } )
 
 
 mongo = Mongo()
 
 
     
-class Measurement2: #(models.Model): # TODO - remove inheritance 
+class Measurement1: #(models.Model): # TODO - remove inheritance 
     sensorID   = models.IntegerField() # system wide unique identifer for sensor
     time       = models.IntegerField() # time this messarement was made (seconds since unix epoch)
     integral   = models.FloatField() # integral of value over time up to this meassurment (units * seconds)
@@ -93,12 +93,12 @@ def findRecentMeasurements( sensorID ):
     maxLimit = 30
 
     filter = { 'sensorID': long(sensorID), 'time' :{'$lte':long(now),'$gte':long(t)} }
-    docs = mongo.measurements.find( filter ).sort( 'time', DESCENDING ).limit(maxLimit)
+    docs = mongo.measurements1.find( filter ).sort( 'time', DESCENDING ).limit(maxLimit)
 
     ret = []
     for doc in docs:
         #logger.debug( "found doc = %s"%doc )
-        m = Measurement2()
+        m = Measurement1()
         m.sensorID = doc[ 'sensorID' ]
         m.time = doc[ 'time' ]
         m.integral = doc[ 'integral' ]
@@ -117,12 +117,12 @@ def findMeasurementBefore( sensorID, utime, msg=None ):
             mongo.connect()
 
     filter = { 'sensorID': long(sensorID), 'time' :{'$lte':long(utime)} }
-    docs = mongo.measurements.find( filter ).sort( 'time', DESCENDING ).limit(1)
+    docs = mongo.measurements1.find( filter ).sort( 'time', DESCENDING ).limit(1)
 
     ret = None
     for doc in docs:
         #logger.debug( "found doc = %s"%doc )
-        ret = Measurement2()
+        ret = Measurement1()
         ret.sensorID = doc[ 'sensorID' ]
         ret.time = doc[ 'time' ]
         ret.integral = doc[ 'integral' ]
@@ -139,12 +139,12 @@ def findMeasurementAfter( sensorID, utime, msg=None ):
         mongo.connect()
             
     filter = { 'sensorID': long(sensorID), 'time' :{'$gte':long(utime)} }
-    docs = mongo.measurements.find( filter ).sort( 'time', ASCENDING ).limit(1)
+    docs = mongo.measurements1.find( filter ).sort( 'time', ASCENDING ).limit(1)
 
     ret = None
     for doc in docs:
         #logger.debug( "found doc = %s"%doc )
-        ret = Measurement2()
+        ret = Measurement1()
         ret.sensorID = doc[ 'sensorID' ]
         ret.time = doc[ 'time' ]
         ret.integral = doc[ 'integral' ]
@@ -165,12 +165,12 @@ def findMeasurementsBetween( sensorID, start, end ):
     maxLimit = 13000 # TODO - remove  - this was a GAE limit 
 
     filter = { 'sensorID': long(sensorID), 'time' :{'$lt':long(end),'$gte':long(start)} }
-    docs = mongo.measurements.find( filter ).sort( 'time', DESCENDING ).limit(maxLimit)
+    docs = mongo.measurements1.find( filter ).sort( 'time', DESCENDING ).limit(maxLimit)
 
     ret = []
     for doc in docs:
         #logger.debug( "found doc = %s"%doc )
-        m = Measurement2()
+        m = Measurement1()
         m.sensorID = doc[ 'sensorID' ]
         m.time = doc[ 'time' ]
         m.integral = doc[ 'integral' ]
@@ -197,7 +197,7 @@ def saveMeasurement( m ):
                'value': float( m.value ),
                'energy': float( m.energy ) }
 
-    mongo.measurements.insert( record )
+    mongo.measurements1.insert( record )
 
     
 
@@ -207,7 +207,7 @@ def thinMeasurements( sensorID, t ):
 
     assert False, "Removed this no USE "
     
-    query = Measurement2.objects 
+    query = Measurement1.objects 
     logger.debug("# DB search for thinMeasurements" )
     query = query.filter( sensorID = sensorID )
     query = query.filter( time__gt = t-3600 )
@@ -230,7 +230,7 @@ def thinMeasurements( sensorID, t ):
 
 
     
-class Hourly2:  #(  models.Model): # TODO remove inheritance
+class Hourly1:  #(  models.Model): # TODO remove inheritance
     sensorID   = models.IntegerField() # system wide unique identifer for sensor 
     userID     = models.IntegerField() # user that owns the sensor
     patchLevel  = models.IntegerField() # version that data has been upgraded too 
@@ -267,7 +267,7 @@ def saveHourly( m ):
                'groupOtherValue': float(m.groupOtherValue),
                'groupOtherEnergy': float(m.groupOtherEnergy) }
 
-    mongo.hourlys.insert( record )
+    mongo.hourly1.insert( record )
 
 
 def getHourlyBySensorIDTime( sensorID, utime ):
@@ -276,25 +276,27 @@ def getHourlyBySensorIDTime( sensorID, utime ):
         mongo.connect()
             
     filter = { 'sensorID':long(sensorID), 'time':long(utime)  }
-    docs = mongo.measurements.find( filter ).limit(2)
+    docs = mongo.hourly1.find( filter ).limit(2)
 
     h = None
     count = 0
     for doc in docs:
         count += 1
-        assert count < 2 
-        h = Hourly2()
+        if count > 1 :
+            #assert count < 2 # TODO FIND AND FIX 
+            logger.warning( "have uplicate hourly reading for sensor %s at %s"%(sensorID,utime) )
+        h = Hourly1()
         h.sensorID = doc[ 'sensorID' ]
-        m.userID = doc[ 'userID' ]
-        m.patchLevel = doc[ 'patchLevel' ]
-        m.time = doc[ 'time' ]
-        m.integral = doc[ 'integral' ]
-        m.value = doc[ 'value' ]
-        m.energy = doc[ 'energy' ]
-        m.hourOfDay = doc[ 'hourOfDay' ]
-        m.hourOfWeek = doc[ 'hourOfWeek' ]
-        m.groupOtherValue = doc[ 'groupOtherValue' ]
-        m.groupOtherEnergy = doc[ 'groupOtherEnergy' ]
+        h.userID = doc[ 'userID' ]
+        h.patchLevel = doc[ 'patchLevel' ]
+        h.time = doc[ 'time' ]
+        h.integral = doc[ 'integral' ]
+        h.value = doc[ 'value' ]
+        h.energy = doc[ 'energy' ]
+        h.hourOfDay = doc[ 'hourOfDay' ]
+        h.hourOfWeek = doc[ 'hourOfWeek' ]
+        h.groupOtherValue = doc[ 'groupOtherValue' ]
+        h.groupOtherEnergy = doc[ 'groupOtherEnergy' ]
     
     return h 
 
@@ -327,23 +329,23 @@ def getHourlyByUserIDTime( userID, start=None, end=None , hourOfDay=None, hourOf
     if hourOfWeek is not None:
         filter['hourOfWeek'] = long(hourOfWeek)
         
-    docs = mongo.measurements.find( filter ).sort( 'time', DESCENDING ).limit(maxLimit)
+    docs = mongo.hourly1.find( filter ).sort( 'time', DESCENDING ).limit(maxLimit)
 
     results = []
 
     for doc in docs:
-        h = Hourly2()
+        h = Hourly1()
         h.sensorID = doc[ 'sensorID' ]
-        m.userID = doc[ 'userID' ]
-        m.patchLevel = doc[ 'patchLevel' ]
-        m.time = doc[ 'time' ]
-        m.integral = doc[ 'integral' ]
-        m.value = doc[ 'value' ]
-        m.energy = doc[ 'energy' ]
-        m.hourOfDay = doc[ 'hourOfDay' ]
-        m.hourOfWeek = doc[ 'hourOfWeek' ]
-        m.groupOtherValue = doc[ 'groupOtherValue' ]
-        m.groupOtherEnergy = doc[ 'groupOtherEnergy' ]
+        h.userID = doc[ 'userID' ]
+        h.patchLevel = doc[ 'patchLevel' ]
+        h.time = doc[ 'time' ]
+        h.integral = doc[ 'integral' ]
+        h.value = doc[ 'value' ]
+        h.energy = doc[ 'energy' ]
+        h.hourOfDay = doc[ 'hourOfDay' ]
+        h.hourOfWeek = doc[ 'hourOfWeek' ]
+        h.groupOtherValue = doc[ 'groupOtherValue' ]
+        h.groupOtherEnergy = doc[ 'groupOtherEnergy' ]
 
         results.append( h )
         

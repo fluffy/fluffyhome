@@ -32,38 +32,7 @@ and depending on auth model may need to update passowrd
 
 ------------------------------------------------------------------
 
-# some simple notes no how to install and 
 
-#set up the DNS to point at machine 
-
-
-#edit 
-/etc/sudoers.d/cullen 
-to be 
-fluffy ALL = NOPASSWD: ALL
-
-sudo apt-get install -y git
-
-sudo apt-get -y install emacs23-nox 
-sudo apt-get -y install python-dev
-sudo apt-get -y install build-essential tcsh
-
-apt-get install postgresql python-psycopg2
-
-sudo apt-get install -y rabbitmq-server
-
-sudo pip install pytz
-sudo pip install django
-sudo pip install django-celery
-
-
-install postgres, create user, create DB 
-su postgres
-sudo -u postgres dropuser fluffy
-# on follwing line, the -W forces prompt for passwd 
-sudo -u postgres createuser -D -R -S -W fluffy 
-sudo -u postgres createdb energygraph 
-Above did not work but follwing id 
 sudo -u postgres psql
 DROP USER fluffy ; 
 CREATE USER fluffy WITH PASSWORD 'myPassword';
@@ -88,7 +57,7 @@ right now am using django auth passwords on one in this DB so that does not
 matter 
 
 ECM1240-5723-aux5 for user 3 (plagd)   is sensorID 115 
-ECM1240-42340-ch2 for user 1 cullen is sensorid 40 
+ECM1240-42340-ch2 for user 1 cullen is sensorid 40 aka "Dryer ECM1c2"
 
 mongo 
 use energygraph
@@ -96,61 +65,8 @@ show collections
 db.measurements1.find( { sensorID: 40 } , { time: true, value: true  }  ).sort({ time: -11 } ).limit(5)
 db.measurements1.find( { sensorID: 115 } , { time: true, value: true,integral:true   }  ).sort( { time: -1 } ).limit(10)
 
-
-
-
-sudo apt-get -y install redis-server
-sudo pip install redis
-
-
-ssh-keygen -t rsa -C "fluffy@iii.ca"
-cd ~/.ssh
-cat id_rsa.pub
-# add this key to github
-
-mkdir -p ~/src;
-cd ~/src
-git clone git@github.com:fluffy/fluffyhome.git
-
-cd /home/fluffy/src/fluffyhome/energygraph
-cp secrets.tmpl secrets.py and edit 
-
-sudo pip install -r requirements.txt
-
-
----------------------
-
-
-
-# note following asks a bunch of questions 
-../manage.py syncdb
-
-
-../manage.py syncdb
-
-
-
-# may have to edit hostname in /fluffyhome/energygraph/apache.conf
-cd  /etc/apache2/sites-available
-sudo ln -s /home/fluffy/src/fluffyhome/energygraph/apache.conf fluffyhome
-cd ../sites-enabled
-sudo ln -s ../sites-available/fluffyhome
-
-sudo apache2ctl restart
-
-
-sudo apt-get install supervisor
-cd /etc/supervisor/conf.d
-sudo ln -s /home/fluffy/src/fluffyhome/energygraph/supervisor-celery.conf 
-sudo mkdir /var/lib/celery
-sudo chmod a+rw /var/lib/celery
-
-sudo supervisorctl reload 
-sudo supervisorctl restart celery
-
-
-
-
+b.hourly1.find( { sensorID: 40 }, { time: true, value:
+true,integral:true,hourOfWeek:true   }  ).sort( { time: -1 } ).limit( 20 )
 
 
 can monitors task in celery with a web server started with 
@@ -169,7 +85,6 @@ setenv DJANGO_DEBUG TRUE
 setenv AWS_ACCESS_KEY_ID "foobar"
 setenv AWS_SECRET_ACCESS_KEY "barfoo"
 
-../manage.py syncdb
 
 
 On my local devel mac, for the celry cron jobs use 
@@ -178,14 +93,5 @@ On my local devel mac, for the celry cron jobs use
 and run main program with 
 ../manage.py runserver
 
-
- sudo pip install celery celery-with-redis flower pytz django-celery
-
-
-
-
-pip install fabric 
-
-
-You can now deploy with 
+deploy with
 fab deploy

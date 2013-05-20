@@ -1838,11 +1838,15 @@ def updateAllValuesNow(request):
 
 
 def doUpdateAllValuesNow():
+
+    goBack = 3*3600 # TODO - how far in past should this go
+    # goBack = 7*24*3600 # TODO - remove
+    
     users = findAllUserNames()
     for userName in users:
         now = long( time.time() )
         now = now - now % 3600
-        for t in range( now - 8*3600, now+1, 3600 ):  # TODO - how far in past should this go 
+        for t in range( now - goBack, now+1, 3600 ):  
             userID = findUserIDByName( userName )
             assert userID is not None
             sensors = findAllSensorsByUserID(userID)

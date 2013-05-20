@@ -40,6 +40,7 @@ def restoreDB():
     local( "psql -h localhost -U fluffy energygraph <  /tmp/pg.dump " )
     local( 'mongo energygraph --eval "db.dropDatabase()" ' )
     local( "cd /tmp/backup/dump; mongorestore energygraph " )
+    local( "sudo redis-cli -n 0 flushdb" )
 
     
 @task
