@@ -161,7 +161,7 @@ def main():
         
         count = count+1
 
-        if count > 20 :
+        if count > 100 :
             data += "\n]\n"
             u = url + "/sensorValues/" 
             post( data , u , "application/json" ,  options.userName, options.password  );
@@ -179,4 +179,5 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
+    sys.exit( 0 )

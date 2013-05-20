@@ -45,11 +45,15 @@ set day = `printf %03d $n`
 
 foreach sensor ( $sensors )
 
-if ( ( ! -e  fh3_up_${user}_${sensor}_${year}_${day}.xml ) && ( -e  dump_${user}_${sensor}_${year}_${day}.xml ) ) then
+if ( ( ! -e  fh4_up_${user}_${sensor}_${year}_${day}.xml ) && ( -e  dump_${user}_${sensor}_${year}_${day}.xml ) ) then
 
 echo Uploading $sensor $year $day
-./uploadDump.py dump_${user}_${sensor}_${year}_${day}.xml http://fh3.fluffyhome.com
-touch fh3_up_${user}_${sensor}_${year}_${day}.xml
+
+if ( { ./uploadDump.py dump_${user}_${sensor}_${year}_${day}.xml http://fh4.fluffyhome.com } ) then 
+    touch fh4_up_${user}_${sensor}_${year}_${day}.xml
+else
+    echo problem Uploading $sensor $year $day
+endif
 
 endif
 

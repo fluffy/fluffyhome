@@ -5,6 +5,7 @@ old
 bin
 include
 lib
+apache.conf
 settings.old
 secrets.py
 secrets.old
