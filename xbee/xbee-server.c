@@ -160,7 +160,7 @@ void postMsg( char* url, char* addr, Value value1, Value value2 ) // should
 
    
 int 
-parseMsg( int len,  unsigned char msg[], char* url )
+parseMsg( int len,  unsigned char msg[], char* url1, char* url2 )
 {
    assert( len > 1 );
    int i;
@@ -202,16 +202,27 @@ parseMsg( int len,  unsigned char msg[], char* url )
          float val2 = 0.0;
          sscanf( msg+12, "%s %f %f", name , &val1 , &val2 );
          
-         postMsg( url, addr, val1, val2 );
+         postMsg( url1, addr, val1, val2 );
+         postMsg( url2, addr, val1, val2 );
       }
       else if ( (msg[12] == '{') && (msg[13] == '"' ) && (msg[14] == 'm') && (msg[15] == '"') && (msg[16] == ':' ) )
       {
          char* buf = msg+12;
          if ( verbose )
          {
-            fprintf(stderr,"Post Message len=%d to %s:\n%s\n",len-12,url,buf);
+            fprintf(stderr,"Post Message len=%d to %s:\n%s\n",len-12,url1,buf);
          }
-         postValue( url, buf );
+         postValue( url1, buf );
+
+         if ( url2 )
+         {
+            if ( verbose )
+            {
+               fprintf(stderr,"Post Message len=%d to %s:\n%s\n",len-12,url2,buf);
+            }
+            postValue( url2, buf );
+         }
+         
       }
       else
       {
@@ -227,7 +238,7 @@ parseMsg( int len,  unsigned char msg[], char* url )
 
 
 void
-processData( int sock , char* url )
+processData( int sock , char* url1, char* url2 )
 {
    while (1)
    {
@@ -273,7 +284,7 @@ processData( int sock , char* url )
          continue;
       }
       
-      int ok = parseMsg( len , msgBuf , url  );
+      int ok = parseMsg( len , msgBuf , url1, url2   );
 
       /*  if ( ok )
       {
@@ -341,7 +352,8 @@ main(int argc, char* argv[] )
    
    int port = 0;
    char* dev = "/dev/cu.usbserial-FTDXSAVO";
-   char* url = "http://www.fluffyhome.com/sensorValues/";
+   char* url1 = "http://www.fluffyhome.com/sensorValues/";
+   char* url2 = "http://test.fluffyhome.com/sensorValues/";
   
    if ( argc > 1 )
    {
@@ -350,7 +362,12 @@ main(int argc, char* argv[] )
    
    if ( argc > 2  )
    {
-      url = argv[2];
+      url1 = argv[2];
+   }
+
+   if ( argc > 3  )
+   {
+      url2 = argv[3];
    }
    
    int sock = 0;
@@ -359,7 +376,7 @@ main(int argc, char* argv[] )
 
    fprintf(stderr,"Starting proceessin xbee data (sock=%d) \n",sock);
    
-   processData( sock , url );
+   processData( sock , url1, url2 );
 
    return 0;
 }
