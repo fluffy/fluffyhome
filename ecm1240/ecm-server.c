@@ -372,9 +372,11 @@ processData( int sock , char* url1, char* url2 )
             // print buffer for debug 
             for( i=0; i<msgPos; i++ ) 
             {
-               if ( msgBuf[i] >= 0xFe )
+               if ( ( i+1 < msgPos ) && ( msgBuf[i] == 0xFE ) && ( msgBuf[i+1] == 0xFF ) )
                {
-               fprintf(stderr,"%02X ",msgBuf[i] ); 
+                  fprintf(stderr,"%02X ",msgBuf[i] ); 
+                  i++;
+                  fprintf(stderr,"%02X ",msgBuf[i] ); 
                }
                else
                {
