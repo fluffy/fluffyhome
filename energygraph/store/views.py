@@ -1854,7 +1854,7 @@ def updatePrevValues(request,pDay):
     now = now - now % (3600*24) 
     goBack = 24*3600 # TODO - how far in past should this go
 
-    endTime = now - pDay * 24 * 3600
+    endTime = now - ( pDay * 24 * 3600 ) 
     startTime = endTime - goBack
         
     doUpdateAllValuesNow( startTime, endTime )
@@ -1864,14 +1864,14 @@ def updatePrevValues(request,pDay):
 
 def doUpdateAllValuesNow(startTime, endTime):
 
-    goBack = 3*3600 # TODO - how far in past should this go
-    # goBack = 7*24*3600 # TODO - remove
+    startTime = long( startTime )
+    endTime = long( endTime )
+
+    logger.debug( "Update for day %s" % ( startTime/(24*3600) ) )
     
     users = findAllUserNames()
     for userName in users:
-        now = long( time.time() )
-        now = now - now % 3600
-        for t in range( now - goBack, now+1, 3600 ):  
+        for t in range( startTime, endTime, 3600 ):  
             userID = findUserIDByName( userName )
             assert userID is not None
             sensors = findAllSensorsByUserID(userID)
@@ -1879,12 +1879,12 @@ def doUpdateAllValuesNow(startTime, endTime):
                 if sensor.killed != True:
                     if sensor.category != "Group":
                         taskUpdateValues( userName, sensor.sensorName , t )
-                        logger.debug( "Updated %s/%s/%d"%(  userName, sensor.sensorName , (t-now)/3600 ) )
+                        logger.debug( "Updated %s/%s/%d"%(  userName, sensor.sensorName , (t-endTime)/3600 ) )
             for sensor in sensors: # do the ones that ARE a group
                 if sensor.killed != True:
                     if sensor.category == "Group":
                         taskUpdateValues( userName, sensor.sensorName , t )
-                        logger.debug( "Updated %s/%s/%d"%(  userName, sensor.sensorName , (t-now)/3600 ) )
+                        logger.debug( "Updated %s/%s/%d"%(  userName, sensor.sensorName , (t-endTime)/3600 ) )
 
 
 
