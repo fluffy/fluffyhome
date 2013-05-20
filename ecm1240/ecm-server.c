@@ -478,7 +478,7 @@ main(int argc, char* argv[] )
    int port = 0;
    char* dev = "/dev/cu.KeySerial1";
    char* url1 = "http://www.fluffyhome.com/sensorValues/";
-   char* url2 = "http://fh2.herokuapp.com/sensorValues/";
+   char* url2 = "http://test.fluffyhome.com/sensorValues/";
    verbose = 0;
    
    if ( argc > 1 )
