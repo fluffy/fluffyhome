@@ -330,7 +330,7 @@ processData( int sock , char* url1, char* url2 )
    current.time = 0;
    delta.time =0;
    
-   int i=0;
+   //int i=0;
    
    while (1)
    {
@@ -366,6 +366,7 @@ processData( int sock , char* url1, char* url2 )
       else
       {
          fprintf(stderr,"Bad check sum. check=%02x sum=%02x \n",check,sum);
+         for( int i=0; i<msgPos; i++ ) fprintf(stderr,"%02x ",msgBuf[i] ); fprintf( stderr, "\n" );
       }
    }
 }
