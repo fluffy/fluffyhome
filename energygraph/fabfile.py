@@ -31,13 +31,14 @@ def backupDB():
 
 @task
 def restoreDB():
-    #local( "cp /Users/fluffy/Documents/FluffyHomeData/fluffyhome_DB.tgz /tmp/db.tgz" )
-    #local( "cd /tmp; tar xvfz /tmp/db.tgz " )
-    #date = prompt("What postgress date (exanmple 2013-05-20)")
-    #local( "cp /tmp/backup/postgres_%s /tmp/pg.dump "%date )
-    #local( "dropdb -h localhost energygraph" )
-    #local( "sudo -u postgres createdb -h localhost -O fluffy energygraph" )
-    #local( "psql -h localhost -U fluffy energygraph <  /tmp/pg.dump " )
+    local( "cp /Users/fluffy/Documents/FluffyHomeData/fluffyhome_DB.tgz /tmp/db.tgz" )
+    local( "cd /tmp; tar xvfz /tmp/db.tgz " )
+    date = prompt("What postgress date (exanmple 2013-05-20)")
+    local( "cp /tmp/backup/postgres_%s /tmp/pg.dump "%date )
+    local( "dropdb -h localhost energygraph" ) # wants password for fluffy user in DB 
+    local( "sudo -u postgres createdb -h localhost -O fluffy energygraph" ) #wants pwd for postgres user in DB 
+    local( "psql -h localhost -U fluffy energygraph <  /tmp/pg.dump " )
+    local( 'mongo energygraph --eval "db.dropDatabase()" ' )
     local( "cd /tmp/backup/dump; mongorestore energygraph " )
 
     
