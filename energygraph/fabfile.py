@@ -2,7 +2,7 @@
 from fabric.api import *
 
 @task
-@hosts('fh4.fluffyhome.com')
+@hosts('test.fluffyhome.com')
 def deploy():
     """ Get the code on report host """
     build()
@@ -20,7 +20,7 @@ def deploy():
 
 
 @task
-@hosts('fh4.fluffyhome.com')
+@hosts('test.fluffyhome.com')
 def backupDB():
     run( "mkdir -p ~/backup" )
     run( 'cd ~/backup; pg_dump energygraph > postgres_$(date +"%F") ' )
@@ -44,7 +44,7 @@ def restoreDB():
 
     
 @task
-@hosts('fh4.fluffyhome.com')
+@hosts('test.fluffyhome.com')
 def deployServer():
     """ Setup a new server """
     sudo( 'echo "fluffy ALL = NOPASSWD: ALL"  > /etc/sudoers.d/cullen ; chmod 0440 /etc/sudoers.d/cullen ' )
@@ -109,7 +109,7 @@ def deployServer():
     sudo( "cd /etc/apache2/sites-available; ln -sf /home/fluffy/src/fluffyhome/energygraph/apache.conf fluffyhome" )
     sudo( "cd /etc/apache2/sites-enabled;  ln -sf ../sites-available/fluffyhome" );
 
-    run( "cd ~/src/fluffyhome/energygraph; if [ ! -f apache.conf ] ; then cat apache.tmpl | sed -e 's/www\.fluffyhome/fh4.fluffyhome/' > apache.conf ; fi " )
+    run( "cd ~/src/fluffyhome/energygraph; if [ ! -f apache.conf ] ; then cat apache.tmpl | sed -e 's/www\.fluffyhome/test.fluffyhome/' > apache.conf ; fi " )
 
     sudo( "apache2ctl restart" )
 
@@ -125,8 +125,8 @@ def deployServer():
     sudo( "supervisorctl reload" )
     sudo( "supervisorctl restart celery" )
 
-    local( "curl http://fh4.fluffyhome.com/admin/setupServer " )
-    local( "./uploadDump.py ~/Documents/FluffyHomeData/all-dump.xml http://fh4.fluffyhome.com" )
+    local( "curl http://test.fluffyhome.com/admin/setupServer " )
+    local( "./uploadDump.py ~/Documents/FluffyHomeData/all-dump.xml http://test.fluffyhome.com" )
 
     
 

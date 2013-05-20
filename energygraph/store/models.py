@@ -1078,7 +1078,7 @@ def hourlyPatchCount():
 
     logger.debug("hourlyPatch sensorID = %d"%sensorID )
     
-    query = Hourly2.objects
+    query = Hourly1.objects
     query = query.filter( patchLevel__lt = level)
     
     #query = query.filter( 'hourOfDay =', 0 )
@@ -1096,7 +1096,7 @@ def hourlyPatchFast():
     level = getPatchLevel()
     maxUpgrade = 1000
     
-    query = Hourly2.objects
+    query = Hourly1.objects
     query = query.filter( patchLevel__lt = level) 
     logger.debug("# DB search for hourlyPatch" )
 
@@ -1139,7 +1139,7 @@ def hourlyPatch():
 
     logger.debug("hourlyPatch sensorID = %d"%sensorID )
     
-    query = Hourly2.objects
+    query = Hourly1.objects
     query = query.filter( patchLevel__lt = level) 
     query = query.filter( sensorID = sensorID )
     #query = query.order_by("time")  # can't do this and do comparison to patchLevel
@@ -1328,7 +1328,7 @@ def computeHourlyBySensorID( sensorID, utime, prev=None, next=None ):
     hourly = getHourlyBySensorIDTime( sensorID, utime )
     
     if hourly is None:
-        hourly = Hourly2()
+        hourly = Hourly1()
         hourly.sensorID = sensorID
         hourly.time = utime 
         meta = findSensorMetaByID( sensorID )

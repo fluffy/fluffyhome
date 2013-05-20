@@ -1744,7 +1744,7 @@ def thinValues(request,userName,sensorName,pTime):
 
 @login_required()
 def updateValues(request,userName,sensorName,pTime):
-    assert Flase, "depricate as uses q task "
+    assert False, "depricate as uses q task "
     logger.info("TASK: Running task updateValues %s/%s/%s"%(userName,sensorName,pTime) )
 
     #if userName != "*" and sensorName != "*":
@@ -1833,11 +1833,36 @@ def sendNotify(userName, sensorName, summary, note ):
                 
 @login_required()
 def updateAllValuesNow(request):
-    doUpdateAllValuesNow()
+
+    now = long( time.time() )
+    now = now - now % 3600
+    goBack = 3*3600 # TODO - how far in past should this go
+
+    startTime = now - goBack
+    endTime = now
+    
+    doUpdateAllValuesNow( startTime, endTime )
     return HttpResponse('<h1>Completed update all hourly values</h1>'  )  
 
 
-def doUpdateAllValuesNow():
+@login_required()
+def updatePrevValues(request,pDay):
+
+    pDay = long( pDay )
+    
+    now = long( time.time() )
+    now = now - now % (3600*24) 
+    goBack = 24*3600 # TODO - how far in past should this go
+
+    endTime = now - pDay * 24 * 3600
+    startTime = endTime - goBack
+        
+    doUpdateAllValuesNow( startTime, endTime )
+    return HttpResponse('<h1>Completed update all hourly values for day %s </h1>'%pDay  )  
+
+
+
+def doUpdateAllValuesNow(startTime, endTime):
 
     goBack = 3*3600 # TODO - how far in past should this go
     # goBack = 7*24*3600 # TODO - remove

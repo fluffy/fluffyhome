@@ -47,7 +47,7 @@ urlpatterns = patterns('',
 
     (r'^sensorValues/$', postSensorValues ), 
     (r'^alarmValues/$', postAlarmValues ), 
- 
+
     #(r'^tasks/update/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[0-9]{8}T[0-9]{6}Z)/$', updateValues ), 
     #(r'^tasks/update/(?P<userName>[\*a-zA-Z]\w{0,64})/(?P<sensorName>[\*\w][\-\w]{0,64})/(?P<pTime>[\*])/$', updateValues ), 
 
@@ -64,13 +64,14 @@ urlpatterns = patterns('',
     (r'^tasks/pollWindAB3/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB3 ), 
     (r'^tasks/pollWindAB4/(?P<loc>[\*\w][\-\w]{0,64})/$', pollWindAB4 ), 
 
-    (r'^admin/updateAll/$', updateAllValues ),
+    #(r'^admin/updateAllNow/$', updateAllValues ),
+    (r'^admin/updateAllNow/$', updateAllValuesNow ), 
+    (r'^admin/updateAllPrev/(?P<pDay>[\d]{1,3})/$', updatePrevValues ), # pass this number of days in past to update (7 would mean update valuse for day 7 days ago )
     
     (r'^admin/setupServer/$', setupServer ), 
 
     (r'^admin/stats/$', showStats ), 
     (r'^admin/dump/meta/$', dumpMeta ), 
-    (r'^admin/updateAllNow/$', updateAllValuesNow ), 
 
     #(r'^admin/patchHourly/$', patchHourly ), 
     #(r'^admin/patchHourlyCount/$', patchHourlyCount ), 
