@@ -350,6 +350,14 @@ processData( int sock , char* url1, char* url2 )
          unsigned char d = getChar( sock );
          //fprintf(stderr," %02x",d);
          msgBuf[msgPos++]=d;
+
+         if ( msgBuf[0] != 0x03 )
+         {
+            //  probably out of sync and not a messeage this understands 
+            fprintf(stderr,"Bad message ID\n");
+            continue; // go back to looking for sync
+         }
+         
          if ( msgPos >= sizeof(msgBuf)-1 )
          {
             fprintf(stderr,"Message is too large\n");
