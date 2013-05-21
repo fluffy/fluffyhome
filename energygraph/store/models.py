@@ -1774,7 +1774,7 @@ def storeMeasurement( sensorID, value, mTime=0, sum=None, reset=False , energy=N
     if patchLevel is None:
        patchLevel = 0
        
-    m = Measurement2()
+    m = Measurement1()
     m.sensorID = sensorID
     m.time = sTime
     m.value = v

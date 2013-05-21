@@ -252,7 +252,7 @@ def showLineGraphCSV(request,userName,sensorName):
     assert timeOffset != None
 
     # get most recent values
-    query = Measurement2.objects
+    query = Measurement1.objects
     query = query.filter( sensorID = sensorID )
     query = query.order_by("-time") #TODO - should have time based limits 
     measurements = query.all()[:1000] #TODO need to deal with more than 1000 meassurements
@@ -318,7 +318,7 @@ def showPlotJson_OLD_NO_USE(request,userName,sensorName):
     assert timeOffset != None
 
     # get most recent values
-    query = Measurement2.objects
+    query = Measurement1.objects
     query = query.filter( sensorID = sensorID )
     query = query.order_by("-time") #TODO - should have time based limits 
     measurements = query.all()[:1000] #TODO need to deal with more than 1000 meassurements
