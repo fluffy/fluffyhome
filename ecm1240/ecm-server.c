@@ -280,7 +280,7 @@ void postMsg( char* url1, char* url2, Value* prev, Value* delta, Value* current 
    
 void parseMsg( int len,  unsigned char msg[] , Value* current )
 {
-   if (1)
+   if ( verbose )
    {
       fprintf(stderr,"Msg: ");
       int i;
@@ -367,7 +367,7 @@ processData( int sock , char* url1, char* url2 )
       else
       {
          fprintf(stderr,"Bad check sum. check=%02x sum=%02x \n",check,sum);
-         if ( 1 )
+         if ( verbose )
          {
             // print buffer for debug 
             for( i=0; i<msgPos; i++ ) 
@@ -495,7 +495,7 @@ main(int argc, char* argv[] )
    assert( sizeof(long long) <= 8 );
    
    int port = 0;
-   char* dev = "/dev/cu.KeySerial1";
+   char* dev = "/dev/cu.USA19H5d1P1.1";// "/dev/cu.KeySerial1";
    char* url1 = "http://www.fluffyhome.com/sensorValues/";
    char* url2 = "http://test.fluffyhome.com/sensorValues/";
    verbose = 0;
