@@ -2365,13 +2365,17 @@ def enrollSensor2(request,sensorName,secret,user=None):
     return HttpResponseRedirect( "/user/%s/enroll/add/%s/"%(user,sensorName) )
 
 
-
 @login_required()
 def pollWindAB1(request,loc,user=None):
     ip = request.META.get('REMOTE_ADDR') # works on google app engine 
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
     if ( ip2 != None ):
         ip = ip2
+
+    return doPollWindAB1( loc )
+
+
+def doPollWindAB1( loc ):
    
     url = "http://511.alberta.ca/ab/cameras/camera_%s.html"%loc
     #result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
@@ -2396,7 +2400,7 @@ def pollWindAB1(request,loc,user=None):
             if sensorExistsByName( name ):
                 storeMeasurementByName( name, temp )
             else:
-                findEnroll( name, ip )
+                findEnroll( name, "127.0.0.1" )
 
         #m = re.search('Wind Speed:\D*(?P<data>[\d.]*)',result.content)
         m = re.search('Wind Speed:</h3>[\W]*<div>(?P<data>[\d.]{1,5}) km/h',sensorHtml,re.MULTILINE)
@@ -2410,7 +2414,7 @@ def pollWindAB1(request,loc,user=None):
             if sensorExistsByName( name ):
                 storeMeasurementByName( name, speed )
             else:
-                findEnroll( name, ip )
+                findEnroll( name, "127.0.0.1" )
 
         #m = re.search('at (?P<hour>\d{1,2}):(?P<min>\d\d)',result.content)
         m = re.search('Weather Updated:</h3>[\W]*<div>[a-zA-Z0-9 ]{1,25}(?P<hour> \d{1,2}):(?P<min>\d\d)',sensorHtml,re.MULTILINE)
@@ -2424,7 +2428,7 @@ def pollWindAB1(request,loc,user=None):
             if sensorExistsByName( name ):
                 storeMeasurementByName( name, time )
             else:
-                findEnroll( name, ip )
+                findEnroll( name, "127.0.0.1" )
 
     else:
         html += "<p> Problem in fetch </p>"
@@ -2442,10 +2446,10 @@ def pollWindAB2(request,loc,user=None):
     if ( ip2 != None ):
         ip = ip2
 
-    return doPollWindAB2( loc, ip )
+    return doPollWindAB2( loc )
 
    
-def doPollWindAB2( loc, ip ):
+def doPollWindAB2( loc ):
     url = "http://www.ama.ab.ca/road_reports/cameras/%s"%loc
     #result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
 
@@ -2473,7 +2477,7 @@ def doPollWindAB2( loc, ip ):
             if sensorExistsByName( name ):
                 storeMeasurementByName( name, temp )
             else:
-                findEnroll( name, ip )
+                findEnroll( name, "127.0.0.1" )
 
         m = re.search('Wind Speed:\D*(?P<data>[\d.]*)',sensorHtml)
         if m == None:
@@ -2486,7 +2490,7 @@ def doPollWindAB2( loc, ip ):
             if sensorExistsByName( name ):
                 storeMeasurementByName( name, speed )
             else:
-                findEnroll( name, ip )
+                findEnroll( name, "127.0.0.1" )
 
         m = re.search('at (?P<hour>\d{1,2}):(?P<min>\d\d)',sensorHtml)
         if m == None:
@@ -2499,7 +2503,7 @@ def doPollWindAB2( loc, ip ):
             if sensorExistsByName( name ):
                 storeMeasurementByName( name, time )
             else:
-                findEnroll( name, ip )
+                findEnroll( name, "127.0.0.1" )
 
     else:
         html += "<p> Problem in fetch </p>"
@@ -2517,10 +2521,10 @@ def pollWindAB3(request,loc,user=None):
     if ( ip2 != None ):
         ip = ip2
 
-    return doPollWindAB3( loc, ip )
+    return doPollWindAB3( loc )
 
 
-def doPollWindAB3( loc, ip ):
+def doPollWindAB3( loc ):
     url = "http://www.weatherlink.com/user/%s/index.php?view=summary&headers=0"%loc
     #result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
 
@@ -2545,7 +2549,7 @@ def doPollWindAB3( loc, ip ):
             if sensorExistsByName( name ):
                 storeMeasurementByName( name, temp )
             else:
-                findEnroll( name, ip )
+                findEnroll( name, "127.0.0.1" )
 
         m = re.search('Wind Speed</td>\s*.*>(?P<data>[\d.]{1,3}) km/h',sensorHtml)
         if m == None:
@@ -2558,7 +2562,7 @@ def doPollWindAB3( loc, ip ):
             if sensorExistsByName( name ):
                 storeMeasurementByName( name, speed )
             else:
-                findEnroll( name, ip )
+                findEnroll( name, "127.0.0.1" )
 
 
         m = re.search('as of (?P<hour>\d{1,2}):(?P<min>\d\d)',sensorHtml)
@@ -2572,7 +2576,7 @@ def doPollWindAB3( loc, ip ):
             if sensorExistsByName( name ):
                 storeMeasurementByName( name, time )
             else:
-                findEnroll( name, ip )
+                findEnroll( name, "127.0.0.1" )
 
     else:
         html += "<p> Problem in fetch </p>"
@@ -2589,10 +2593,10 @@ def pollWindAB4(request,loc,user=None):
     ip2 = request.META.get('HTTP_X_FORWARDED_FOR') # Needed for webfaction proxy 
     if ( ip2 != None ):
         ip = ip2
-    return doPollWindAB4( loc, ip )
+    return doPollWindAB4( loc )
 
 
-def doPollWindAB4( loc, ip ):
+def doPollWindAB4( loc ):
     #url = "http://text.www.weatheroffice.gc.ca/forecast/city_e.html?%s&unit=m"%loc
     url = "http://weather.gc.ca/city/pages/%s_metric_e.html"%loc
     #result = urlfetch.fetch(url, allow_truncated=True, follow_redirects=False, deadline=5, validate_certificate=False)
@@ -2625,7 +2629,7 @@ def doPollWindAB4( loc, ip ):
             if sensorExistsByName( name ):
                 storeMeasurementByName( name, temp )
             else:
-                findEnroll( name, ip )
+                findEnroll( name, "127.0.0.1" )
 
         m = re.search('Wind:</dt>[\W\<\>\"a-zA-Z ]*(?P<data>[\d.]{1,5})',sensorHtml,re.MULTILINE)
         if m == None:
@@ -2638,7 +2642,7 @@ def doPollWindAB4( loc, ip ):
             if sensorExistsByName( name ):
                 storeMeasurementByName( name, speed )
             else:
-                findEnroll( name, ip )
+                findEnroll( name, "127.0.0.1" )
 
 
         m = re.search('Date: </dt>[\W]*<dd>(?P<hour>\d{1,2}):(?P<min>\d\d)',sensorHtml,re.MULTILINE)
@@ -2652,7 +2656,7 @@ def doPollWindAB4( loc, ip ):
             if sensorExistsByName( name ):
                 storeMeasurementByName( name, time )
             else:
-                findEnroll( name, ip )
+                findEnroll( name, "127.0.0.1" )
 
     else:
         html += "<p> Problem in fetch </p>"
