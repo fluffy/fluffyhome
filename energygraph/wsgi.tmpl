@@ -36,8 +36,9 @@ djcelery.setup_loader()
 
 
 import newrelic.agent
-newrelic.agent.initialize( '/Users/fluffy/src/fluffyhome/energygraph/newrelic.ini', 'development' )
-#newrelic.agent.initialize( '/home/fluffy/src/fluffyhome/energygraph/newrelic.ini' , 'test' )
+
+#newrelic.agent.initialize( '/Users/fluffy/src/fluffyhome/energygraph/newrelic.ini', 'development' )
+newrelic.agent.initialize( '/home/fluffy/src/fluffyhome/energygraph/newrelic.ini' , 'test' )
 #newrelic.agent.initialize( '/home/fluffy/src/fluffyhome/energygraph/newrelic.ini' , 'production' )
 
 
