@@ -157,7 +157,7 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'energygraph.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-# WSGI_APPLICATION = 'energygraph.wsgi.application'
+WSGI_APPLICATION = 'energygraph.wsgi.application'
 
 TEMPLATE_DIRS = (
     'templates',

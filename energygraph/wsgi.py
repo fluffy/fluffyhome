@@ -30,8 +30,15 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "energygraph.settings")
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 
+
 import djcelery
 djcelery.setup_loader()
+
+
+import newrelic.agent
+newrelic.agent.initialize( '/Users/fluffy/src/fluffyhome/energygraph/newrelic.ini', 'development' )
+#newrelic.agent.initialize( '/home/fluffy/src/fluffyhome/energygraph/newrelic.ini' , 'test' )
+#newrelic.agent.initialize( '/home/fluffy/src/fluffyhome/energygraph/newrelic.ini' , 'production' )
 
 
 import django.core.handlers.wsgi
@@ -41,3 +48,6 @@ application = django.core.handlers.wsgi.WSGIHandler()
 # Apply WSGI middleware here.
 # from helloworld.wsgi import HelloWorldApplication
 # application = HelloWorldApplication(application)
+
+application = newrelic.agent.wsgi_application()(application)
+

@@ -6,6 +6,7 @@ bin
 include
 lib
 apache.conf
+newrelic.ini
 settings.old
 secrets.py
 secrets.old
