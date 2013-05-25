@@ -83,6 +83,9 @@ def deployServer():
     
     run( "sudo pip install django fabric django-celery" )
 
+    run( 'echo "America/Edmonton" | sudo tee /etc/timezone' )
+    run( 'sudo dpkg-reconfigure --frontend noninteractive tzdata' )
+
     run( "mkdir -p ~/src" )
     run( "mkdir -p ~/backup" )
 
