@@ -10,8 +10,8 @@ from energygraph.store.views import *
 logger = logging.getLogger('energygraph')
 
 
-#@periodic_task(run_every=crontab(hour="*", minute="25,55", day_of_week="*"))  
-@periodic_task(run_every=crontab(hour="*", minute="*", day_of_week="*"))  
+@periodic_task(run_every=crontab(hour="*", minute="3,27,57", day_of_week="*"))  
+#@periodic_task(run_every=crontab(hour="*", minute="*", day_of_week="*"))  
 def taskUpdateHourly(): # /tasks/update/*/*/*/
     logger.info( "Running task taskUpdateHourly" )
 
