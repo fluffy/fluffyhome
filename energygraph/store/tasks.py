@@ -17,7 +17,7 @@ def taskUpdateHourly(): # /tasks/update/*/*/*/
 
     now = long( time.time() )
     now = now - now % 3600
-    goBack = 3*3600 # TODO - how far in past should this go
+    goBack = 2*3600 # TODO - how far in past should this go
 
     startTime = now - goBack
     endTime = now
