@@ -100,6 +100,8 @@ def deployServer():
 
     run( "cd ~/src/fluffyhome/energygraph; if [ ! -f secrets.py ] ; then cat secrets.tmpl | sed -e 's/pwdReplace/none/' > secrets.py ; fi " )
 
+    run( "cd ~/src/fluffyhome/energygraph; if [ ! -f newrelic.ini ] ; then cat newrelic.tmpl | sed -e 's/keyReplace/none/' > newrelic.ini ; fi " )
+
     run( "cd ~/src/fluffyhome/energygraph; ../manage.py syncdb --noinput" )
     run( "cd src/fluffyhome/energygraph; ../manage.py collectstatic -v 1 --noinput");
 
