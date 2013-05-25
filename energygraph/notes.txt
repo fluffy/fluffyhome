@@ -15,8 +15,16 @@ do a
 ssh git@github.com
 and verify fingerprint 
 
+set up reverse DNS 
+
+
 do a 
 fab deployServer
+
+edit the licence key in newrelic.ini
+
+
+
 
 On the new host do 
 cd src/fluffyhome/energygraph; 
