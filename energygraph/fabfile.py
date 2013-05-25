@@ -130,6 +130,8 @@ def deployServer():
     local( "curl http://test.fluffyhome.com/admin/setupServer " )
     local( "./uploadDump.py ~/Documents/FluffyHomeData/all-dump.xml http://test.fluffyhome.com" )
 
+    print("need to update license key in newrelic.ini")
+
     
 
 @task
