@@ -56,7 +56,7 @@ def taskPollLethbrideAirport(): # refresh the wind cache
 
 @periodic_task(run_every=crontab(minute="*/10")) # every 10 minutes
 def taskPollChestermere(): # refresh the wind cache 
-     doPollWindAB1( '1_10', None )  
+     doPollWindAB1( '1_10' )  
 
 
 @periodic_task(run_every=crontab(minute="*/10")) # every 10 minutes
