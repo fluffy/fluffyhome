@@ -1,5 +1,12 @@
+Energy Graph
+==================
 
-Build the node with wirewall, ssh, and fluffy user - see linode-script.sh
+Django application to graph results of home energy monitor 
+
+---------
+# How to set up new machine 
+
+Build a linux node with firewall, ssh, and fluffy user - see linode-script.sh
 
 Build and boot setting up password for user fluffy
 
@@ -23,9 +30,6 @@ fab deployServer
 
 edit the licence key in newrelic.ini
 
-
-
-
 On the new host do 
 cd src/fluffyhome/energygraph; 
 ../manage.py createsuperuser --username=fluffy --email=fluffy@iii.ca
@@ -39,7 +43,7 @@ http://fh4.fluffyhome.com/admin-django/store/user/
 and depending on auth model may need to update passowrd 
 
 ------------------------------------------------------------------
-
+# Random noes on DataBase usage 
 
 sudo -u postgres psql
 DROP USER fluffy ; 
@@ -80,6 +84,9 @@ true,integral:true,hourOfWeek:true   }  ).sort( { time: -1 } ).limit( 20 )
 can monitors task in celery with a web server started with 
 celery flower --broker=redis://localhost:6379/0
 
+
+---------------------------
+# environment setup for local devel 
 
 Set up following environment variables
 
