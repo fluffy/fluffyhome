@@ -9,6 +9,7 @@ coverage==3.6
 django-celery==3.0.17
 flower==0.4.3
 kombu==2.5.10
+newrelic==1.11.0.55
 oauthlib==0.4.0
 paramiko==1.10.1
 psycopg2==2.5
