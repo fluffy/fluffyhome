@@ -21,8 +21,8 @@ def taskUpdateHourly(): # /tasks/update/*/*/*/
     startTime = now - goBack
     endTime = now
     
-    doUpdateAllValuesNow()
-    
+    doUpdateAllValuesNow( startTime, endTime )
+     
 
 #@periodic_task(run_every=crontab(minute="*/5")) # every 5 minutes
 def taskShowAllWindSensors(): # refresh the wind cache 
