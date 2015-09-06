@@ -46,15 +46,18 @@ sudo apt-get -y install curl
 #sudo apt-get update
 #sudo apt-get -y install mongodb-org
 
+sudo apt-get -y install mongodb 
+sudo apt-get -y install python-pymongo
+
 #sudo apt-get -y install redis
-#sudo apt-get -y install redis-server
+sudo apt-get -y install redis-server
 #sudo cp /etc/redis/redis.conf /etc/redis/redis.conf.default
 #sudo service redis-server restart
 
 #curl http://www.rabbitmq.com/rabbitmq-signing-key-public.asc  | sudo apt-key add -
 #sudo sh -c 'echo "deb http://www.rabbitmq.com/debian/ testing main" > /etc/apt/sources.list.d/rabbitmq.list '
 #sudo apt-get update
-#sudo apt-get -y install rabbitmq-server 
+sudo apt-get -y install rabbitmq-server 
 
 #sudo apt-get -y install nodejs
 #sudo apt-get -y install npm 
@@ -75,12 +78,27 @@ sudo apt-get -y install nginx
 
 sudo rm /etc/nginx/sites-enabled/default
 
-echo usefull commands
-echo sudo start ircexp 
-echo sudo forever restartall
-echo sudo service nginx restart
-
 sudo apt-get -y install python-django
+
+sudo apt-get -y install postgresql postgresql-contrib
+
+sudo apt-get -y install uwsgi 
+sudo apt-get -y install uwsgi-plugin-python3
+sudo apt-get -y install uwsgi-plugin-python
+
+sudo  apt-get -y  install python-pip
+
+pip install uwsgitop
+
+
+echo do the stuff in energeygraph/fab.py file for deploy server
+
+
+sudo cp /home/fluffy/src/fluffyhome/fluffyhome-uwsgi.ini /etc/uwsgi/apps-available/fluffyhome-uwsgi.ini
+sudo ln -s /etc/uwsgi/apps-available/fluffyhome-uwsgi.ini /etc/uwsgi/apps-enabled/fluffyhome-uwsgi.ini
+
+sudo cp /home/fluffy/src/fluffyhome/fluffyhome-nginx.conf  /etc/nginx/sites-available/fluffyhome-nginx.conf
+sudo ln -s /etc/nginx/sites-available/fluffyhome-nginx.conf /etc/nginx/sites-enabled/fluffyhome-nginx.conf
 
 
 

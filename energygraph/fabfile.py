@@ -109,7 +109,7 @@ def deployServer():
     run( "cd src/fluffyhome/energygraph; ../manage.py collectstatic -v 1 --noinput");
 
     # TOOD - next one fails if run twice and needs way to set password 
-    # run( "cd src/fluffyhome/energygraph; ../manage.py createsuperuser --username=fluffy --email=fluffy@iii.ca");
+    # run( "cd ~/src/fluffyhome/energygraph; ../manage.py createsuperuser --username=fluffy --email=fluffy@iii.ca");
 
     sudo( "cd /etc/apache2/sites-available; ln -sf /home/fluffy/src/fluffyhome/energygraph/apache.conf fluffyhome" )
     sudo( "cd /etc/apache2/sites-enabled;  ln -sf ../sites-available/fluffyhome" );
