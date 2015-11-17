@@ -168,22 +168,21 @@ postValue( char* bufUrl , char* bufData )
 }
 
 
-void postMsg( char* url1, char* url2, Value* prev, Value* delta, Value* current )
+void postMsg( char* url1, char* url2, Value* prev, Value* current )
 {
    int i;
    int doPost = 0;
    
-   if ( current->time > prev->time+60*15 ) doPost=1;
+   if ( current->time > prev->time+30 ) doPost=1;
 
    if ( adiff( prev->currentX100[0] , current->currentX100[0] ) >= 30 ) doPost=1;
    if ( adiff( prev->currentX100[1] , current->currentX100[1] ) >= 30 ) doPost=1;
    if ( adiff( prev->voltageX10     , current->voltageX10 ) >= 5 ) doPost=1;
 
-   if ( prev->time + 60 >= current->time ) doPost=0; // time too, short, overried
+   if ( prev->time + 15 >= current->time ) doPost=0; // time too, short, overried
                                                  // any previos post 
    if (!doPost) 
    {
-      memcpy( delta, current, sizeof(Value) );
       return;
    }
    
@@ -197,33 +196,11 @@ void postMsg( char* url1, char* url2, Value* prev, Value* delta, Value* current 
                    current->serial,current->time);
 #endif
 
-   int deltaTime = current->time - delta->time;
-   if ( deltaTime > 5 ) // don't use delta time if it is big or ngative
-   {
-      deltaTime = 0 ;
-   }
-   if ( deltaTime < 0 ) // don't use delta time if it is big or ngative
-   {
-      deltaTime = 0 ;
-   }
    
    for( i=0; i < 2 ; i++)
    {
-      if ( verbose ) // send the current 
-      { 
-         value = (float)(current->currentX100[i]) / 100.0;
-      len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-current%d\", \"v\":%f },\n",
-                      current->serial,i+1,value);
-      }
-      
-
-      len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%d\", ",
+       len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%d\", ",
                       current->serial,i+1);
-      if ( ( deltaTime > 0 ) && ( current->energy[i] >= delta->energy[i] ) )
-      {
-         len += snprintf(bufData+len,sizeof(bufData)-len,"\"v\":%f, ",
-                         (float)(current->energy[i] - delta->energy[i])/(float)deltaTime );
-      }
       len += snprintf(bufData+len,sizeof(bufData)-len,"\"s\":%llu },\n",
                       current->energy[i]);
    }
@@ -233,11 +210,6 @@ void postMsg( char* url1, char* url2, Value* prev, Value* delta, Value* current 
    {
       len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%dPolar\", ",
                       current->serial,i+1);
-      if ( ( deltaTime > 0 ) && ( current->energyPolar[i] >= delta->energyPolar[i] ) )
-      {
-         len += snprintf(bufData+len,sizeof(bufData)-len,"\"v\":%f, ",
-                         (float)(current->energyPolar[i] - delta->energyPolar[i])/(float)deltaTime );
-      }
       len += snprintf(bufData+len,sizeof(bufData)-len,"\"s\":%llu },\n",
                       current->energyPolar[i]);
    }
@@ -247,11 +219,6 @@ void postMsg( char* url1, char* url2, Value* prev, Value* delta, Value* current 
    {
       len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-aux%d\", ",
                       current->serial,i+1);
-      if ( ( deltaTime > 0 ) && ( current->auxEnergy[i] >= delta->auxEnergy[i] ) )
-      {
-         len += snprintf(bufData+len,sizeof(bufData)-len," \"v\":%f, ",
-                        (float)(current->auxEnergy[i] - delta->auxEnergy[i])/(float)deltaTime );
-      }
       len += snprintf(bufData+len,sizeof(bufData)-len," \"s\":%u },\n",current->auxEnergy[i]);
    }
 
@@ -271,12 +238,12 @@ void postMsg( char* url1, char* url2, Value* prev, Value* delta, Value* current 
    postValue( url2, bufData );
 
    memcpy( prev, current, sizeof(Value) );
-   memcpy( delta, current, sizeof(Value) );
 }
 
    
 void parseMsg( int len,  unsigned char msg[] , Value* current )
 {
+#if 0
    if ( verbose )
    {
       fprintf(stderr,"Msg: ");
@@ -287,6 +254,7 @@ void parseMsg( int len,  unsigned char msg[] , Value* current )
       }
       fprintf(stderr,"\n");
    }
+#endif
    
    if ( msg[0] == 3 )
    {
@@ -323,12 +291,9 @@ processData( int sock , char* url1, char* url2 )
    int c;
    int i;
    
-   Value prev,delta,current;
+   Value prev,current;
    prev.time = 0;
    current.time = 0;
-   delta.time =0;
-   
-   //int i=0;
    
    while (1)
    {
@@ -367,7 +332,7 @@ processData( int sock , char* url1, char* url2 )
       if ( check == sum )
       {
          parseMsg( msgPos-2 , msgBuf , &current );
-         postMsg( url1, url2, &prev, &delta, &current );
+         postMsg( url1, url2, &prev, &current );
       }
       else
       {
