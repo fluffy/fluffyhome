@@ -234,8 +234,14 @@ void postMsg( char* url1, char* url2, Value* prev, Value* current )
    }
    //fprintf(stderr,"Post Message len=%d to %s \n",len,url);
 
-   postValue( url1, bufData );
-   postValue( url2, bufData );
+   if (url1)
+   {
+      postValue( url1, bufData );
+   }
+   if (url2)
+   {
+      postValue( url2, bufData );
+   }
 
    memcpy( prev, current, sizeof(Value) );
 }
