@@ -12,7 +12,7 @@
 	<key>ProgramArguments</key>
 	<array>
 	  <string>/usr/bin/ecm-server</string>
-	  <string>/dev/cu.USA19H5d2P1.1</string>
+	  <string>/dev/cu.USA19Hfa12P1.1</string>
 	  <string>http://www.fluffyhome.com/sensorValues/</string>
 	</array>
 </dict>

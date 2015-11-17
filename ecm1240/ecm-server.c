@@ -2,9 +2,7 @@
  * Copyright Cullen Jennings 2009, 2010. All rights reserved.
  */
 
-#include <sys/types.h>   
-#include <sys/socket.h>  
-#include <arpa/inet.h>   
+
 #include <unistd.h>
 
 #include <string.h>
@@ -47,16 +45,15 @@ typedef struct
 } Value;
 
 
-int abs( int x )
+int adiff( unsigned int a, unsigned int b )
 {
-   if (x<0 )
+   if ( a > b )
    {
-      return -x;
+      return a - b ;
    }
    else
    {
-      return x;
-      
+      return b - a;
    }
 }
 
@@ -178,9 +175,9 @@ void postMsg( char* url1, char* url2, Value* prev, Value* delta, Value* current 
    
    if ( current->time > prev->time+60*15 ) doPost=1;
 
-   if ( abs( prev->currentX100[0] - current->currentX100[0] ) >= 30 ) doPost=1;
-   if ( abs( prev->currentX100[1] - current->currentX100[1] ) >= 30 ) doPost=1;
-   if ( abs( prev->voltageX10 - current->voltageX10 ) >= 5 ) doPost=1;
+   if ( adiff( prev->currentX100[0] , current->currentX100[0] ) >= 30 ) doPost=1;
+   if ( adiff( prev->currentX100[1] , current->currentX100[1] ) >= 30 ) doPost=1;
+   if ( adiff( prev->voltageX10     , current->voltageX10 ) >= 5 ) doPost=1;
 
    if ( prev->time + 60 >= current->time ) doPost=0; // time too, short, overried
                                                  // any previos post 
@@ -444,55 +441,6 @@ void runSerial( char* device, char* url1, char* url2 )
 }
 
 
-void runIP( int port, char* url1, char* url2  )
-{
-   int listenPort = 8083;
-   int lSock = 0;
-   int dataSock = 0;
-   struct    sockaddr_in saddr;
-   
-   if ( (lSock = socket(AF_INET, SOCK_STREAM, 0)) < 0 ) 
-   {
-      fprintf(stderr, "Listen failed\n");
-      exit(EXIT_FAILURE);
-   }
-   
-   memset(&saddr, 0, sizeof(saddr));
-    saddr.sin_port        = htons(listenPort);
-    saddr.sin_family      = AF_INET;
-    saddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    
-    if ( bind(lSock, (struct sockaddr *) &saddr, sizeof(saddr)) < 0 ) 
-    {
-       fprintf(stderr, "Bind failed\n");
-       exit(EXIT_FAILURE);
-    }
-    
-    if ( listen(lSock, 2) < 0 ) 
-    {
-       fprintf(stderr, "Listen failed\n");
-       exit(EXIT_FAILURE);
-    }
-    
-    if ( 1 )
-    {
-       if ( (dataSock = accept(lSock, NULL, NULL) ) < 0 )
-       {
-          fprintf(stderr, "accept failed\n");
-          exit(EXIT_FAILURE);
-       }
-    
-       processData( dataSock, url1, url2  );
-       
-       if ( close(dataSock) < 0 )
-       {
-          fprintf(stderr, "close failed\n");
-          exit(EXIT_FAILURE);
-       }
-    }
-}
-
-
 int 
 main(int argc, char* argv[] )
 {
@@ -502,37 +450,33 @@ main(int argc, char* argv[] )
    assert( sizeof(long long) > 4 );
    assert( sizeof(long long) <= 8 );
    
-   int port = 0;
    char* dev = "/dev/cu.USA19H5d1P1.1";// "/dev/cu.KeySerial1";
    char* url1 = "http://www.fluffyhome.com/sensorValues/";
-   char* url2 = "http://test.fluffyhome.com/sensorValues/";
+   char* url2 = NULL; // "http://test.fluffyhome.com/sensorValues/";
    verbose = 0;
    
    if ( argc > 1 )
    {
       dev = argv[1];
-      port = strtol( argv[1], NULL, 10 );
    }
    
    if ( argc > 2  )
    {
       url1 = argv[2];
    }
+
+   if ( argc > 3  )
+   {
+      url2 = argv[3];
+   }
    
-   if ( argc > 3 )
+   if ( argc > 4 )
    {
       verbose = 1;
    }
    
-   if ( port )
-   {
-      runIP( port , url1, url2 );
-   }
-   else
-   {
-      runSerial( dev, url1 , url2  );
-   }
-
+   runSerial( dev, url1 , url2  );
+   
    return 0;
 }
 
