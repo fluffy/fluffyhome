@@ -425,26 +425,68 @@ main(int argc, char* argv[] )
    char* url1 = "http://www.fluffyhome.com/sensorValues/";
    char* url2 = NULL; // "http://test.fluffyhome.com/sensorValues/";
    verbose = 0;
+
+   int arg = 1;
+   int argOK = 1;
    
-   if ( argc > 1 )
+   while ( arg < argc )
    {
-      dev = argv[1];
-   }
-   
-   if ( argc > 2  )
-   {
-      url1 = argv[2];
+      // make sure the arg starts with - 
+      if ( argv[arg][0] != '-' )
+      {
+         argOK = 0 ; break;
+      }
+
+      // parse the argument with no 2nd values
+      if ( argv[arg][1] == 'v' )
+      {
+         verbose = 1;
+         arg++; continue;
+      }
+      
+      // check there is a second value 
+      if ( arg+1 >= argc )
+      {
+         argOK = 0;  break;
+      }
+      
+      // parse the argumeths with 2nd value    
+      if ( argv[arg][1] == 'd' )
+      {
+          dev = argv[arg+1];
+          arg += 2; continue;       
+      }
+
+      // parse the argumeths with 2nd value    
+      if ( argv[arg][1] == 's' )
+      {
+          url1 = argv[arg+1];
+          arg += 2; continue;       
+      }
+
+      // parse the argumeths with 2nd value    
+      if ( argv[arg][1] == 'b' )
+      {
+          url2 = argv[arg+1];
+          arg += 2; continue;       
+      }
+
+      // bad argument
+       argOK = 0 ; break;
    }
 
-   if ( argc > 3  )
+   if ( !argOK )
    {
-      url2 = argv[3];
+       syslog(LOG_INFO,"Bad command line: Usage ecm-server [-v] [-d device] [-s serverURL] [-b backupServerURL] ");
+       return -1;
    }
-   
-   if ( argc > 4 )
-   {
-      verbose = 1;
-   }
+
+#if 0 
+   printf("verbose = %d \n", verbose );
+   printf("dev = %s \n", dev );
+   printf("url1 = %s \n", url1 );
+   printf("url2 = %s \n", url2 );
+#endif
    
    runSerial( dev, url1 , url2  );
    
