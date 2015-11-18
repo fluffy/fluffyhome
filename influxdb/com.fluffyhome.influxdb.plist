@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- copy this to  /Library/LaunchDaemons -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>KeepAlive</key>
+	<true/>
+	<key>Label</key>
+	<string>com.fluffyhome.influxdb</string>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>ProgramArguments</key>
+	<array>
+	  <string>/usr/bin/influxd</string>
+	  <string>-config</string>
+	  <string>/etc/influxdb/influxdb.conf</string>
+	</array>
+
+  <key>UserName</key>
+  <string>_postgres</string>
+
+  <key>StandardErrorPath</key>
+  <string>/var/log/influxdb-err.log</string>
+
+  <key>StandardOutPath</key>
+  <string>/var/log/influxdb.log</string>
+
+</dict>
+</plist>
