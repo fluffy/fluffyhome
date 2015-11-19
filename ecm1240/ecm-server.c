@@ -35,7 +35,7 @@ typedef struct
       unsigned int time; // seconds
 
       unsigned int voltageX10; // volts times 10 
-      unsigned int dcVoltageX100; // voltes times 100 
+      unsigned int dcVoltageX100; // volts times 100 
 
       unsigned int currentX100[2]; // amps times 100
       unsigned long long energy[2]; // Joules
@@ -168,6 +168,81 @@ postValue( char* bufUrl , char* bufData )
 }
 
 
+void encodeSenMLMsg( char bufData[], int bufSize, int* used, Value* current )
+{
+   int len = 0;
+   int i;
+   float value;
+
+   len += snprintf(bufData+len,bufSize-len,"{\"m\":[\n");
+
+# if 0  // send the time 
+   len += snprintf(bufData+len,bufSize-len,"{\"n\":\"ECM1240-%d-time\", \"v\":1.0, \"s\":%u },\n",
+                   current->serial,current->time);
+#endif
+
+   
+   for( i=0; i < 2 ; i++)
+   {
+       len += snprintf(bufData+len,bufSize-len,"{\"n\":\"ECM1240-%d-ch%d\", ",
+                      current->serial,i+1);
+      len += snprintf(bufData+len,bufSize-len,"\"s\":%llu },\n",
+                      current->energy[i]);
+   }
+
+#if 0 // do the polar values 
+   for( i=0; i < 2 ; i++)
+   {
+      len += snprintf(bufData+len,bufSize-len,"{\"n\":\"ECM1240-%d-ch%dPolar\", ",
+                      current->serial,i+1);
+      len += snprintf(bufData+len,bufSize-len,"\"s\":%llu },\n",
+                      current->energyPolar[i]);
+   }
+#endif 
+
+   for( i=0; i < 5 ; i++)
+   {
+      len += snprintf(bufData+len,bufSize-len,"{\"n\":\"ECM1240-%d-aux%d\", ",
+                      current->serial,i+1);
+      len += snprintf(bufData+len,bufSize-len," \"s\":%u },\n",current->auxEnergy[i]);
+   }
+
+   value = (float)(current->voltageX10) / 10.0;
+   len += snprintf(bufData+len,bufSize-len,"{\"n\":\"ECM1240-%d-voltage\", \"v\":%f }\n",
+                   current->serial,value);
+
+   len += snprintf(bufData+len,bufSize-len,"]}");
+
+   *used = len;
+}
+
+
+void encodeLineProtocolMsg( char bufData[], int bufSize, int* used, Value* current )
+{
+   int len = 0;
+   int i;
+   float value;
+
+   for( i=0; i < 2 ; i++)
+   {
+      len += snprintf(bufData+len,bufSize-len,"ECM1240-%d-ch%d,u=J energy=%llu\n",
+                      current->serial, i+1, current->energy[i]);
+   }
+
+   for( i=0; i < 5 ; i++)
+   {
+      len += snprintf(bufData+len,bufSize-len,"ECM1240-%d-aux%d,u=J energy=%u\n",
+                      current->serial, i+1, current->auxEnergy[i]);
+   }
+
+   value = (float)(current->voltageX10) / 10.0;
+   len += snprintf(bufData+len,bufSize-len,"ECM1240-%d-voltage,u=V voltage=%f\n",
+                   current->serial, value);
+
+   *used = len;
+}
+
+
 void postMsg( char* url1, char* url2, Value* prev, Value* current )
 {
    int i;
@@ -188,51 +263,14 @@ void postMsg( char* url1, char* url2, Value* prev, Value* current )
    
    char bufData[2*1024];
    int len=0;
-   float value;
-   len += snprintf(bufData+len,sizeof(bufData)-len,"{\"m\":[\n");
 
-# if 0  // send the time 
-   len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-time\", \"v\":1.0, \"s\":%u },\n",
-                   current->serial,current->time);
-#endif
-
-   
-   for( i=0; i < 2 ; i++)
-   {
-       len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%d\", ",
-                      current->serial,i+1);
-      len += snprintf(bufData+len,sizeof(bufData)-len,"\"s\":%llu },\n",
-                      current->energy[i]);
-   }
-
-#if 0 // do the polar values 
-   for( i=0; i < 2 ; i++)
-   {
-      len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-ch%dPolar\", ",
-                      current->serial,i+1);
-      len += snprintf(bufData+len,sizeof(bufData)-len,"\"s\":%llu },\n",
-                      current->energyPolar[i]);
-   }
-#endif 
-
-   for( i=0; i < 5 ; i++)
-   {
-      len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-aux%d\", ",
-                      current->serial,i+1);
-      len += snprintf(bufData+len,sizeof(bufData)-len," \"s\":%u },\n",current->auxEnergy[i]);
-   }
-
-   value = (float)(current->voltageX10) / 10.0;
-   len += snprintf(bufData+len,sizeof(bufData)-len,"{\"n\":\"ECM1240-%d-voltage\", \"v\":%f }\n",
-                   current->serial,value);
-
-   len += snprintf(bufData+len,sizeof(bufData)-len,"]}");
-
+   //encodeSenMLMsg( bufData, sizeof(bufData), &len, current );
+   encodeLineProtocolMsg( bufData, sizeof(bufData), &len, current );
+         
    if (verbose)
    {
       fprintf(stderr,"Post Message len=%d to %s and %s:\n%s\n",len,url1,url2,bufData);
    }
-   //fprintf(stderr,"Post Message len=%d to %s \n",len,url);
 
    if (url1)
    {
@@ -478,6 +516,7 @@ main(int argc, char* argv[] )
    if ( !argOK )
    {
        syslog(LOG_INFO,"Bad command line: Usage ecm-server [-v] [-d device] [-s serverURL] [-b backupServerURL] ");
+       printf("Bad command line: Usage ecm-server [-v] [-d device] [-s serverURL] [-b backupServerURL] \n" );
        return -1;
    }
 
