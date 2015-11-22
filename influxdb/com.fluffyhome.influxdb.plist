@@ -11,19 +11,13 @@
 	<true/>
 	<key>ProgramArguments</key>
 	<array>
-	  <string>/usr/bin/influxd</string>
+	  <string>/usr/local/bin/influxd</string>
 	  <string>-config</string>
 	  <string>/etc/influxdb/influxdb.conf</string>
 	</array>
 
   <key>UserName</key>
   <string>_postgres</string>
-
-  <key>StandardErrorPath</key>
-  <string>/var/log/influxdb-err.log</string>
-
-  <key>StandardOutPath</key>
-  <string>/var/log/influxdb.log</string>
 
 </dict>
 </plist>

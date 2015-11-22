@@ -11,11 +11,11 @@
 	<true/>
 	<key>ProgramArguments</key>
 	<array>
-	  <string>/usr/bin/ecm-server</string>
-      <string>-d</string>
-	  <string>/dev/cu.USA19Hfa12P1.1</string>
-      <string>-s</string>
-      <string>http://localhost:8086/write?db=fluffyhome</string>
+	  <string>/usr/local/bin/ecm-server</string>
+	  <string>-d</string>
+	  <string>/dev/cu.USA19Hfd13P1.1</string>
+	  <string>-s</string>
+	  <string>http://localhost:8086/write?db=fluffyhome</string>
   	</array>
 </dict>
 </plist>
