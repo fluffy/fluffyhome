@@ -1,4 +1,4 @@
-FROM ubuntu:14
+FROM ubuntu:14.04
 MAINTAINER Cullen Jennings <fluffy@iii.ca>
 
 RUN apt-get update && apt-get dist-upgrade -y
