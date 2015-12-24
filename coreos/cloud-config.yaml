@@ -1,0 +1,13 @@
+#cloud-config
+
+users:
+  - name: "fluffy"
+    passwd: "TODO gen with mkpasswd --method=SHA-512 --rounds=4096"
+    groups:
+      - "sudo"
+      - "docker"
+    ssh-authorized-keys:
+      - "ssh-rsa TODO"
+
+hostname: "FluffyHomeCore"
+
