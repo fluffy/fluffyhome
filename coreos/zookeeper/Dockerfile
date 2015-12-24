@@ -14,4 +14,6 @@ COPY zoo.cfg /etc/zookeeper/conf/zoo.cfg
 EXPOSE 2181
 VOLUME /var/lib/zookeeper
 
-CMD [“/usr/share/zookeeper/bin/zkServer.sh”, “start-foreground”]
+CMD /usr/share/zookeeper/bin/zkServer.sh start-foreground
+
+
