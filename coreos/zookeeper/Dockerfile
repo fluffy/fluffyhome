@@ -11,10 +11,7 @@ RUN apt-get install -y zookeeper
 
 COPY zoo.cfg /etc/zookeeper/conf/zoo.cfg
 
-MKDIR /data
-
 EXPOSE 2181
 VOLUME /var/lib/zookeeper
-
 
 CMD [“/usr/share/zookeeper/bin/zkServer.sh”, “start-foreground”]
