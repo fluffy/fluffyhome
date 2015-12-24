@@ -7,7 +7,7 @@ RUN apt-get install -y emacs24-nox
 
 RUN apt-get install -y openjdk-7-jre-headless
 
-RUN apt-get install -y kafka 
+# RUN apt-get install -y kafka 
 
 #COPY zoo.cfg /etc/zookeeper/conf/zoo.cfg
 
