@@ -7,13 +7,19 @@ RUN apt-get install -y emacs24-nox
 
 RUN apt-get install -y openjdk-7-jre-headless
 
-# RUN apt-get install -y kafka 
+RUN apt-get install -y wget  
+WORKDIR /tmp
+RUN wget -nc  https://archive.apache.org/dist/kafka/0.9.0.0/kafka_2.11-0.9.0.0.tgz
+RUN tar xvfz kafka_2.11-0.9.0.0.tgz
+RUN mv kafka_2.11-0.9.0.0/ /usr/local/kafka
 
-#COPY zoo.cfg /etc/zookeeper/conf/zoo.cfg
+RUN mkdir /var/lib/kafka
+RUN mkdir /var/log/kafka
 
-#EXPOSE 2181
-#VOLUME /var/lib/zookeeper
+COPY kafka.cfg /etc/kafka.cfg
 
-#CMD /usr/share/zookeeper/bin/zkServer.sh start-foreground
+EXPOSE 9092
+VOLUME /var/lib/kafka
 
+CMD /usr/local/kafka/bin/kafka-server-start.sh  -daemon  /etc/kafka.cfg
 
