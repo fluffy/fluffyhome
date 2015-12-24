@@ -21,5 +21,5 @@ COPY kafka.cfg /etc/kafka.cfg
 EXPOSE 9092
 VOLUME /var/lib/kafka
 
-CMD /usr/local/kafka/bin/kafka-server-start.sh  -daemon  /etc/kafka.cfg
+CMD /usr/local/kafka/bin/kafka-server-start.sh /etc/kafka.cfg
 
