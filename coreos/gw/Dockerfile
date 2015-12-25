@@ -5,8 +5,12 @@ RUN apt-get update && apt-get dist-upgrade -y
 RUN apt-get install -y git 
 RUN apt-get install -y emacs24-nox
 
-RUN apt-get install -y wget  
+RUN apt-get install -y wget
+
+RUN apt-get install -y golang
+
 WORKDIR /tmp
+COPY gw.go /tmp/gw.go
 
 
 RUN mkdir /var/log/gw1
