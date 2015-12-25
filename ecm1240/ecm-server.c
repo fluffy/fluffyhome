@@ -174,7 +174,7 @@ void encodeSenMLMsg( char bufData[], int bufSize, int* used, Value* current )
    int i;
    float value;
 
-   len += snprintf(bufData+len,bufSize-len,"[\n");
+   len += snprintf(bufData+len,bufSize-len,"TEST[\n");
 
 # if 0  // send the time 
    len += snprintf(bufData+len,bufSize-len,"{\"n\":\"ECM1240-%d-time\", \"v\":1.0, \"s\":%u },\n",
