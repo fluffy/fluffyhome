@@ -11,6 +11,10 @@ docker run -i -t   fluffy/kafka /bin/bash
 ## create topic
 docker run -i -t  fluffy/kafka /usr/local/kafka/bin/kafka-topics.sh --zookeeper 10.1.3.10:2181 --create --replication-factor 1 --partitions 1 -topic test
 
+## produce data to topic
+docker run -i -t   fluffy/kafka /bin/bash
+echo hi | /usr/local/kafka/bin/kafka-console-producer.sh --broker-list 10.1.3.10:9092 --topic test
+
 ## list topics 
 docker run -i -t  fluffy/kafka /usr/local/kafka/bin/kafka-topics.sh --zookeeper 10.1.3.10:2181 --list
 
