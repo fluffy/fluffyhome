@@ -10,7 +10,7 @@ RUN apt-get install -y wget
 RUN apt-get install -y golang
 
 WORKDIR /tmp
-COPY gw.go /tmp/gw.go
+COPY gw1.go /tmp/gw1.go
 
 
 RUN mkdir /var/log/gw1
