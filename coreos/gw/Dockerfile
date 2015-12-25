@@ -14,9 +14,11 @@ COPY gw.go /tmp/gw.go
 
 
 RUN mkdir /var/log/gw1
+RUN go build gw1.go
+RUN cp /tmp/gw1 /usr/local/bin/gw1
 
 
 EXPOSE 11080
 
-CMD /usr/local/bin/gw1 10.1.3.10:9092
+CMD /usr/local/bin/gw1 -port 11080 -out 10.1.3.10:9092
 

@@ -4,7 +4,7 @@ docker build -t fluffy/gw1 .
 
 # run shell
 
-docker run -i -t  -p 9092:9092   fluffy/gw1 /bin/bash
+docker run -i -t  -p 11080:11080    fluffy/gw1 /bin/bash
 
 # run
 
