@@ -13,7 +13,7 @@ install-mac: ecm-server
 install-fluffy:
 	- launchctl unload /Library/LaunchDaemons/com.fluffyhome.ecm1240-1.plist 
 	- launchctl unload /Library/LaunchDaemons/com.fluffyhome.ecm1240-2.plist 
-	cp ecm-server /usr/bin/ecm-server
+	cp ecm-server /usr/local/bin/ecm-server
 	cp com.fluffyhome.ecm1240-1.plist /Library/LaunchDaemons/com.fluffyhome.ecm1240-1.plist
 	cp com.fluffyhome.ecm1240-2.plist /Library/LaunchDaemons/com.fluffyhome.ecm1240-2.plist
 	launchctl load /Library/LaunchDaemons/com.fluffyhome.ecm1240-1.plist 
