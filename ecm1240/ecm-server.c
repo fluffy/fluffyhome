@@ -264,8 +264,8 @@ void postMsg( char* url1, char* url2, Value* prev, Value* current )
    char bufData[2*1024];
    int len=0;
 
-   //encodeSenMLMsg( bufData, sizeof(bufData), &len, current );
-   encodeLineProtocolMsg( bufData, sizeof(bufData), &len, current );
+   encodeSenMLMsg( bufData, sizeof(bufData), &len, current );
+   //encodeLineProtocolMsg( bufData, sizeof(bufData), &len, current );
          
    if (verbose)
    {
