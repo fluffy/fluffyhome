@@ -189,7 +189,7 @@ void encodeSenMLMsg( char bufData[], int bufSize, int* used, Value* current )
       
        len += snprintf(bufData+len,bufSize-len,"{\"n\":\"ECM1240-%d-ch%d\", ",
                       current->serial,i+1);
-       len += snprintf(bufData+len,bufSize-len,"\"v\":%f },\n",
+       len += snprintf(bufData+len,bufSize-len,"\"v\":%f, ",
                        amps );
       len += snprintf(bufData+len,bufSize-len,"\"s\":%llu },\n",
                       current->energy[i]);
