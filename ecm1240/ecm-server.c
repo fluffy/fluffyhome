@@ -174,7 +174,7 @@ void encodeSenMLMsg( char bufData[], int bufSize, int* used, Value* current )
    int i;
    float value;
 
-   len += snprintf(bufData+len,bufSize-len,"{\"m\":[\n");
+   len += snprintf(bufData+len,bufSize-len,"[\n");
 
 # if 0  // send the time 
    len += snprintf(bufData+len,bufSize-len,"{\"n\":\"ECM1240-%d-time\", \"v\":1.0, \"s\":%u },\n",
@@ -211,7 +211,7 @@ void encodeSenMLMsg( char bufData[], int bufSize, int* used, Value* current )
    len += snprintf(bufData+len,bufSize-len,"{\"n\":\"ECM1240-%d-voltage\", \"v\":%f }\n",
                    current->serial,value);
 
-   len += snprintf(bufData+len,bufSize-len,"]}");
+   len += snprintf(bufData+len,bufSize-len,"]");
 
    *used = len;
 }
