@@ -239,12 +239,12 @@ void encodeLineProtocolMsg( char bufData[], int bufSize, int* used, Value* curre
 
    for( i=0; i < 5 ; i++)
    {
-      len += snprintf(bufData+len,bufSize-len,"senml,ECM1240-%d-aux%d,u=J v=%u\n",
+      len += snprintf(bufData+len,bufSize-len,"senml,n=ECM1240-%d-aux%d,u=J v=%u\n",
                       current->serial, i+1, current->auxEnergy[i]);
    }
 
    value = (float)(current->voltageX10) / 10.0;
-   len += snprintf(bufData+len,bufSize-len,"senml,ECM1240-%d-voltage,u=V v=%f\n",
+   len += snprintf(bufData+len,bufSize-len,"senml,n=ECM1240-%d-voltage,u=V v=%f\n",
                    current->serial, value);
 
    *used = len;
