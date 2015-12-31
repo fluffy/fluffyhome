@@ -233,18 +233,18 @@ void encodeLineProtocolMsg( char bufData[], int bufSize, int* used, Value* curre
 
    for( i=0; i < 2 ; i++)
    {
-      len += snprintf(bufData+len,bufSize-len,"ECM1240-%d-ch%d,u=J energy=%llu\n",
+      len += snprintf(bufData+len,bufSize-len,"senml,n=ECM1240-%d-ch%d,u=J v=%llu\n",
                       current->serial, i+1, current->energy[i]);
    }
 
    for( i=0; i < 5 ; i++)
    {
-      len += snprintf(bufData+len,bufSize-len,"ECM1240-%d-aux%d,u=J energy=%u\n",
+      len += snprintf(bufData+len,bufSize-len,"senml,ECM1240-%d-aux%d,u=J v=%u\n",
                       current->serial, i+1, current->auxEnergy[i]);
    }
 
    value = (float)(current->voltageX10) / 10.0;
-   len += snprintf(bufData+len,bufSize-len,"ECM1240-%d-voltage,u=V voltage=%f\n",
+   len += snprintf(bufData+len,bufSize-len,"senml,ECM1240-%d-voltage,u=V v=%f\n",
                    current->serial, value);
 
    *used = len;
@@ -272,8 +272,8 @@ void postMsg( char* url1, char* url2, Value* prev, Value* current )
    char bufData[2*1024];
    int len=0;
 
-   encodeSenMLMsg( bufData, sizeof(bufData), &len, current );
-   //encodeLineProtocolMsg( bufData, sizeof(bufData), &len, current );
+   //encodeSenMLMsg( bufData, sizeof(bufData), &len, current );
+   encodeLineProtocolMsg( bufData, sizeof(bufData), &len, current );
          
    if (verbose)
    {
