@@ -2,6 +2,25 @@
  * Copyright Cullen Jennings 2009, 2010. All rights reserved.
  */
 
+/* 
+bug as ch1 values wrap ... In influxdb 
+SELECT v  FROM senml WHERE  n = 'ECM1240-42340-ch1'  AND time > 1451662806474986321  AND time < 1451662910498240510
+Returns ime			v
+1451662806474986321	4.23054168481e+11
+1451662822478937581	4.23054206454e+11
+1451662844483847013	4.23054258611e+11
+1451662860487874821	4.18759330796e+11
+1451662878490467941	4.18759375264e+11
+1451662894494360567	4.18759413624e+11
+1451662910498240510	4.18759452054e+11
+
+The  values of v across the drop in hex are 
+
+0062 7FFF B1B3
+0061 8000 4BEC
+
+ */
+
 
 #include <unistd.h>
 
@@ -323,10 +342,17 @@ void parseMsg( int len,  unsigned char msg[] , Value* current )
       current->currentX100[1] = msg[33] + (msg[34]<<8) ;
       current->dcVoltageX100  = msg[58] + (msg[59]<<8) ;
 
-      current->energy[0]      = msg[3 ] + (msg[4 ]<<8) + (msg[5 ]<<16) + (msg[6 ]<<24) + ( ((long long)msg[ 7])<<32);
-      current->energy[1]      = msg[8 ] + (msg[9 ]<<8) + (msg[10]<<16) + (msg[11]<<24) + ( ((long long)msg[12])<<32);
-      current->energyPolar[0] = msg[13] + (msg[14]<<8) + (msg[15]<<16) + (msg[16]<<24) + ( ((long long)msg[17])<<32);
-      current->energyPolar[1] = msg[18] + (msg[19]<<8) + (msg[20]<<16) + (msg[21]<<24) + ( ((long long)msg[22])<<32);
+      fprintf(stderr,"energy[0] hex raw bytes = %x %x %x %x %x\n",
+              (unsigned int)msg[7], (unsigned int)msg[6], (unsigned int)msg[5], (unsigned int)msg[4], (unsigned int)msg[3] );
+       
+      current->energy[0]      = msg[3 ] + (msg[4 ]<<8) + (msg[5 ]<<16) + (msg[6 ]<<24) + ( ((unsigned long long)msg[ 7])<<32);
+
+      fprintf(stderr,"energy[0] %llx \n", current->energy[1] );
+      
+         
+      current->energy[1]      = msg[8 ] + (msg[9 ]<<8) + (msg[10]<<16) + (msg[11]<<24) + ( ((unsigned long long)msg[12])<<32);
+      current->energyPolar[0] = msg[13] + (msg[14]<<8) + (msg[15]<<16) + (msg[16]<<24) + ( ((unsigned long long)msg[17])<<32);
+      current->energyPolar[1] = msg[18] + (msg[19]<<8) + (msg[20]<<16) + (msg[21]<<24) + ( ((unsigned long long)msg[22])<<32);
        
       for ( i=0; i<5; i++ )
       {
