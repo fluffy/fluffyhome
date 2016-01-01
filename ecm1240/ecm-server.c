@@ -345,19 +345,45 @@ void parseMsg( int len,  unsigned char msg[] , Value* current )
       fprintf(stderr,"energy[0] hex raw bytes = %x %x %x %x %x\n",
               (unsigned int)msg[7], (unsigned int)msg[6], (unsigned int)msg[5], (unsigned int)msg[4], (unsigned int)msg[3] );
        
-      current->energy[0]      = msg[3 ] + (msg[4 ]<<8) + (msg[5 ]<<16) + (msg[6 ]<<24) + ( ((unsigned long long)msg[ 7])<<32);
+      current->energy[0]      =
+         ((unsigned long long)msg[3 ])
+         + ( ((unsigned long long)msg[4 ])<<8)
+         + ( ((unsigned long long)msg[5 ])<<16)
+         + ( ((unsigned long long)msg[6 ])<<24)
+         + ( ((unsigned long long)msg[ 7])<<32);
 
-      fprintf(stderr,"energy[0] %llx \n", current->energy[1] );
+      fprintf(stderr,"energy[0] %llx \n", current->energy[0] );
       
          
-      current->energy[1]      = msg[8 ] + (msg[9 ]<<8) + (msg[10]<<16) + (msg[11]<<24) + ( ((unsigned long long)msg[12])<<32);
-      current->energyPolar[0] = msg[13] + (msg[14]<<8) + (msg[15]<<16) + (msg[16]<<24) + ( ((unsigned long long)msg[17])<<32);
-      current->energyPolar[1] = msg[18] + (msg[19]<<8) + (msg[20]<<16) + (msg[21]<<24) + ( ((unsigned long long)msg[22])<<32);
+      current->energy[1]      = // msg[8 ] + (msg[9 ]<<8) + (msg[10]<<16) + (msg[11]<<24) + ( ((unsigned long long)msg[12])<<32);
+         ((unsigned long long)msg[8 ])
+         + ( ((unsigned long long)msg[9 ])<<8)
+         + ( ((unsigned long long)msg[10])<<16)
+         + ( ((unsigned long long)msg[12])<<24)
+         + ( ((unsigned long long)msg[12])<<32);
+
+      current->energyPolar[0] = // msg[13] + (msg[14]<<8) + (msg[15]<<16) + (msg[16]<<24) + ( ((unsigned long long)msg[17])<<32);
+         ((unsigned long long)msg[13])
+         + ( ((unsigned long long)msg[14])<<8)
+         + ( ((unsigned long long)msg[15])<<16)
+         + ( ((unsigned long long)msg[16])<<24)
+         + ( ((unsigned long long)msg[17])<<32);
+
+      current->energyPolar[1] = //msg[18] + (msg[19]<<8) + (msg[20]<<16) + (msg[21]<<24) + ( ((unsigned long long)msg[22])<<32);
+         ((unsigned long long)msg[18])
+         + ( ((unsigned long long)msg[19])<<8)
+         + ( ((unsigned long long)msg[20])<<16)
+         + ( ((unsigned long long)msg[21])<<24)
+         + ( ((unsigned long long)msg[22])<<32);
        
       for ( i=0; i<5; i++ )
       {
          int mOff = 38+4*i;
-         current->auxEnergy[i] = msg[mOff] + (msg[mOff+1]<<8) + (msg[mOff+2]<<16) + (msg[mOff+3]<<24);
+         current->auxEnergy[i] =
+            ( ((unsigned int)msg[mOff])  )+
+            ( ((unsigned int)msg[mOff+1]) << 8) +
+            ( ((unsigned int)msg[mOff+2]) << 16) +
+            ( ((unsigned int)msg[mOff+3]) << 24 );
       }
    }
 }
