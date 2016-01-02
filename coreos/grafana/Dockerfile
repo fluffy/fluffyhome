@@ -22,5 +22,5 @@ EXPOSE 3000
 VOLUME /var/lib/grafana
 VOLUME /var/log/grafana
 
-CMD /usr/local/grafana/bin/grafana-server  /etc/grafana.cfg
+CMD /usr/local/grafana/bin/grafana-server  -homepath /usr/local/grafana/ -config /etc/grafana.cfg
 

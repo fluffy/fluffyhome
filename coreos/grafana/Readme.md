@@ -1,15 +1,15 @@
 # build docker container
 
-docker build -t fluffy/graphana .
+docker build -t fluffy/grafana .
 
 # run shell
 
-docker run -i -t   fluffy/graphana /bin/bash
+docker run -i -t  -p 3000:3000 fluffy/grafana /bin/bash
 
 # test graphana
 
 
 # run
 
-docker run -d -p 3000:3000 --name graphana -v /data/graphana:/var/lib/graphana fluffy/graphana
+docker run -d -p 3000:3000 --name grafana -v /data/graphana:/var/lib/grafana fluffy/grafana
 
