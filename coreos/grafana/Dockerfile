@@ -5,21 +5,22 @@ RUN apt-get update && apt-get dist-upgrade -y
 RUN apt-get install -y git 
 RUN apt-get install -y emacs24-nox
 
-#RUN apt-get install -y openjdk-7-jre-headless
+RUN apt-get install -y libfontconfig
+RUN apt-get install -y wget  
+WORKDIR /tmp
 
-#RUN apt-get install -y wget  
-#WORKDIR /tmp
-#RUN wget -nc  https://archive.apache.org/dist/kafka/0.9.0.0/kafka_2.11-0.9.0.0.tgz
-#RUN tar xvfz kafka_2.11-0.9.0.0.tgz
-#RUN mv kafka_2.11-0.9.0.0/ /usr/local/kafka
+RUN wget -nc https://grafanarel.s3.amazonaws.com/builds/grafana-2.6.0.linux-x64.tar.gz
+RUN tar xvfz grafana-2.6.0.linux-x64.tar.gz
+RUN mv grafana-2.6.0 /usr/local/grafana
 
-#RUN mkdir /var/lib/kafka
-#RUN mkdir /var/log/kafka
+RUN mkdir /var/lib/grafana
+RUN mkdir /var/log/grafana
 
-#COPY kafka.cfg /etc/kafka.cfg
+COPY grafana.cfg /etc/grafana.cfg
 
-#EXPOSE 9092
-#VOLUME /var/lib/kafka
+EXPOSE 3000
+VOLUME /var/lib/grafana
+VOLUME /var/log/grafana
 
-#CMD /usr/local/kafka/bin/kafka-server-start.sh /etc/kafka.cfg
+CMD /usr/local/grafana/bin/grafana-server  /etc/grafana.cfg
 

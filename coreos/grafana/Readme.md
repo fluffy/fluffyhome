@@ -9,8 +9,7 @@ docker run -i -t   fluffy/graphana /bin/bash
 # test graphana
 
 
-
 # run
 
-docker run -d -p 9092:9092 --name graphana -v /data/graphana:/var/lib/graphana fluffy/graphana
+docker run -d -p 3000:3000 --name graphana -v /data/graphana:/var/lib/graphana fluffy/graphana
 
