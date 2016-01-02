@@ -8,6 +8,8 @@ docker run -i -t  -p 3000:3000 fluffy/grafana /bin/bash
 
 # test graphana
 
+Go to  http://10.1.3.10:3000/
+Log on with user admin pwd admin
 
 # run
 
