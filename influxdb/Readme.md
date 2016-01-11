@@ -31,6 +31,8 @@ CREATE CONTINUOUS QUERY total_energy_day ON fh2 BEGIN SELECT max(v) AS "v" INTO
 "fh2"."default".total_energy_day FROM "fh2"."default".senml WHERE n =
 'ECM1240-42340-ch1' AND time > now() - 2d AND time < now() GROUP BY time(1d) END
 
+following does not work
+
 CREATE CONTINUOUS QUERY power_5min_test1 ON fh2 BEGIN SELECT
 non_negative_derivative(max(v), 5m) / 300.000 AS "power" INTO
 "fh2"."default".power_5min_test1 FROM "fh2"."default".total_energy_min WHERE
