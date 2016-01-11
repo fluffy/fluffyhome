@@ -4,6 +4,7 @@ import (
     "fmt"
 	"encoding/json"
     "github.com/influxdb/influxdb/client/v2"
+	"time"
 )
 
 const (
@@ -21,15 +22,23 @@ func main() {
 		fmt.Println("Error creating InfluxDB Client: ", err.Error())
 	}
 	defer c.Close()
-	
-	q := client.NewQuery("SELECT n,v FROM senml WHERE u = 'J' AND time > now() - 2m GROUP BY n",
+
+	q := client.NewQuery("SELECT n,v FROM senml WHERE u = 'J' AND time > now() - 2h GROUP BY n",
 		databaseName, "ns")
 	if response, err := c.Query(q); err == nil && response.Error() == nil {
-
+		
 		fmt.Println( "num results = " , len( response.Results ) )
 		//fmt.Println( response.Results[0] )
-		
 		fmt.Println( "num series = " , len( response.Results[0].Series ) )
+
+		batch, err := client.NewBatchPoints(client.BatchPointsConfig{
+			Database:  databaseName,
+			Precision: "ns",
+		})
+		if err != nil {
+			fmt.Println("problem allocating batch points: ", err.Error() )	
+		}
+		
 		for j, series := range response.Results[0].Series {
 
 			//fmt.Println( series )
@@ -67,6 +76,30 @@ func main() {
 					//fmt.Println( "delta", dt , dv )
 					if (dt > 0.0) && ( dv >= 0.0 ) {
 						fmt.Println( j, i, "watts", dv / dt  )
+
+						tags := map[string]string{
+							"u": "W",
+							"n": series.Tags["n"],
+						}
+						
+						fields := map[string]interface{}{
+							"v": dv / dt ,
+						}
+
+						timeRec := time.Unix( t / 1000000000, t%1000000000)
+						
+						pt, err := client.NewPoint(
+							"synth",
+							tags,
+							fields,
+							timeRec,
+						)
+						if err != nil {
+							println("Error:", err.Error())
+							continue
+						}
+						batch.AddPoint(pt)
+						
 					}
 				}
 
@@ -74,6 +107,11 @@ func main() {
 				pv = v
 			}
 		}
-		
+
+		err = c.Write(batch)
+		if err != nil {
+			fmt.Println("Error writing power points to influxdb: ", err.Error())
+		}
+
 	}
 }
