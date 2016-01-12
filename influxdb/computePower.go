@@ -1,19 +1,26 @@
 package main
 
 import (
-    "fmt"
 	"encoding/json"
-    "github.com/influxdb/influxdb/client/v2"
+	"os"
 	"time"
+    "fmt"
+    "github.com/influxdb/influxdb/client/v2"
 )
 
 const (
     databaseName = "fh2"
-	databaseUrl =  "http://10.1.3.254:8086"
 )
 
 func main() {
 
+	if len(os.Args[1:]) != 1 {
+		fmt.Println("Must pass influxdb server URL on command line")
+		os.Exit(1)
+	}
+	
+	databaseUrl := os.Args[1]
+	
 	// Make client
 	c, err := client.NewHTTPClient(client.HTTPConfig{
 		Addr: databaseUrl,
@@ -23,7 +30,7 @@ func main() {
 	}
 	defer c.Close()
 
-	q := client.NewQuery("SELECT n,v FROM senml WHERE u = 'J' AND time > now() - 2h GROUP BY n",
+	q := client.NewQuery("SELECT v FROM senml WHERE u = 'J' AND time > now() - 30m GROUP BY n",
 		databaseName, "ns")
 	if response, err := c.Query(q); err == nil && response.Error() == nil {
 		
