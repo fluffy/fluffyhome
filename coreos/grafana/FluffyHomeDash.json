@@ -148,7 +148,7 @@
             "threshold2": null,
             "threshold2Color": "rgba(234, 112, 112, 0.22)"
           },
-          "id": 8,
+          "id": 14,
           "isNew": true,
           "legend": {
             "avg": false,
@@ -161,6 +161,7 @@
           },
           "lines": true,
           "linewidth": 2,
+          "links": [],
           "nullPointMode": "connected",
           "percentage": false,
           "pointradius": 5,
@@ -172,12 +173,11 @@
           "steppedLine": false,
           "targets": [
             {
-              "alias": "Total Power",
               "dsType": "influxdb",
               "groupBy": [
                 {
                   "params": [
-                    "5m"
+                    "$interval"
                   ],
                   "type": "time"
                 },
@@ -188,8 +188,8 @@
                   "type": "fill"
                 }
               ],
-              "measurement": "senml",
-              "query": "SELECT non_negative_derivative(max(\"v\"), 5m) / 300 FROM \"senml\" WHERE \"n\" = 'ECM1240-42340-ch1' AND $timeFilter GROUP BY time(5m) fill(null)",
+              "measurement": "synth",
+              "query": "SELECT mean(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42340-ch1' AND $timeFilter GROUP BY time($interval) fill(null)",
               "refId": "A",
               "resultFormat": "time_series",
               "select": [
@@ -202,19 +202,7 @@
                   },
                   {
                     "params": [],
-                    "type": "max"
-                  },
-                  {
-                    "params": [
-                      "5m"
-                    ],
-                    "type": "non_negative_derivative"
-                  },
-                  {
-                    "params": [
-                      "/ 300"
-                    ],
-                    "type": "math"
+                    "type": "mean"
                   }
                 ]
               ],
@@ -229,7 +217,7 @@
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Panel Title",
+          "title": "Total Power (W)",
           "tooltip": {
             "shared": true,
             "value_type": "cumulative"
@@ -243,7 +231,7 @@
           ]
         }
       ],
-      "title": "Total Power"
+      "title": "New row"
     },
     {
       "collapse": false,
@@ -298,45 +286,27 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
+                  "type": "time",
                   "params": [
-                    "5m"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
+                    "$interval"
+                  ]
                 }
               ],
-              "measurement": "senml",
-              "query": "SELECT non_negative_derivative(max(\"v\"), 5m)  / 300 FROM \"senml\" WHERE \"n\" = 'ECM1240-42340-ch2' AND $timeFilter GROUP BY time(5m) fill(null)",
+              "measurement": "synth",
+              "query": "SELECT mean(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42340-ch2' AND $timeFilter GROUP BY time($interval)",
               "refId": "A",
               "resultFormat": "time_series",
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "v"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "max"
-                  },
-                  {
-                    "params": [
-                      "5m"
-                    ],
-                    "type": "non_negative_derivative"
-                  },
-                  {
-                    "params": [
-                      " / 300"
-                    ],
-                    "type": "math"
+                    "type": "mean",
+                    "params": []
                   }
                 ]
               ],
@@ -353,45 +323,27 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
+                  "type": "time",
                   "params": [
-                    "5m"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
+                    "$interval"
+                  ]
                 }
               ],
-              "measurement": "senml",
-              "query": "SELECT non_negative_derivative(max(\"v\"), 5m) /300 FROM \"senml\" WHERE \"n\" = 'ECM1240-42414-ch1' AND $timeFilter GROUP BY time(5m) fill(null)",
+              "measurement": "synth",
+              "query": "SELECT mean(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42414-ch1' AND $timeFilter GROUP BY time($interval)",
               "refId": "B",
               "resultFormat": "time_series",
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "v"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "max"
-                  },
-                  {
-                    "params": [
-                      "5m"
-                    ],
-                    "type": "non_negative_derivative"
-                  },
-                  {
-                    "params": [
-                      "/300"
-                    ],
-                    "type": "math"
+                    "type": "mean",
+                    "params": []
                   }
                 ]
               ],
@@ -408,45 +360,27 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
+                  "type": "time",
                   "params": [
-                    "5m"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
+                    "$interval"
+                  ]
                 }
               ],
-              "measurement": "senml",
-              "query": "SELECT non_negative_derivative(max(\"v\"), 5m) / 300 FROM \"senml\" WHERE \"n\" = 'ECM1240-42414-ch2' AND $timeFilter GROUP BY time(5m) fill(null)",
+              "measurement": "synth",
+              "query": "SELECT mean(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42414-ch2' AND $timeFilter GROUP BY time($interval)",
               "refId": "C",
               "resultFormat": "time_series",
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "v"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "max"
-                  },
-                  {
-                    "params": [
-                      "5m"
-                    ],
-                    "type": "non_negative_derivative"
-                  },
-                  {
-                    "params": [
-                      "/ 300"
-                    ],
-                    "type": "math"
+                    "type": "mean",
+                    "params": []
                   }
                 ]
               ],
@@ -530,45 +464,27 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
+                  "type": "time",
                   "params": [
-                    "5m"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
+                    "$interval"
+                  ]
                 }
               ],
-              "measurement": "senml",
-              "query": "SELECT non_negative_derivative(max(\"v\"), 5m)  / 300 FROM \"senml\" WHERE \"n\" = 'ECM1240-42414-aux1' AND $timeFilter GROUP BY time(5m) fill(null)",
+              "measurement": "synth",
+              "query": "SELECT mean(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42414-aux1' AND $timeFilter GROUP BY time($interval)",
               "refId": "A",
               "resultFormat": "time_series",
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "v"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "max"
-                  },
-                  {
-                    "params": [
-                      "5m"
-                    ],
-                    "type": "non_negative_derivative"
-                  },
-                  {
-                    "params": [
-                      " / 300"
-                    ],
-                    "type": "math"
+                    "type": "mean",
+                    "params": []
                   }
                 ]
               ],
@@ -585,45 +501,27 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
+                  "type": "time",
                   "params": [
-                    "5m"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
+                    "$interval"
+                  ]
                 }
               ],
-              "measurement": "senml",
-              "query": "SELECT non_negative_derivative(max(\"v\"), 5m)  / 300 FROM \"senml\" WHERE \"n\" = 'ECM1240-42414-aux4' AND $timeFilter GROUP BY time(5m) fill(null)",
+              "measurement": "synth",
+              "query": "SELECT mean(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42414-aux4' AND $timeFilter GROUP BY time($interval)",
               "refId": "B",
               "resultFormat": "time_series",
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "v"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "max"
-                  },
-                  {
-                    "params": [
-                      "5m"
-                    ],
-                    "type": "non_negative_derivative"
-                  },
-                  {
-                    "params": [
-                      " / 300"
-                    ],
-                    "type": "math"
+                    "type": "mean",
+                    "params": []
                   }
                 ]
               ],
@@ -640,45 +538,27 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
+                  "type": "time",
                   "params": [
-                    "5m"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
+                    "$interval"
+                  ]
                 }
               ],
-              "measurement": "senml",
-              "query": "SELECT non_negative_derivative(max(\"v\"), 5m)  / 300 FROM \"senml\" WHERE \"n\" = 'ECM1240-42414-aux3' AND $timeFilter GROUP BY time(5m) fill(null)",
+              "measurement": "synth",
+              "query": "SELECT mean(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42414-aux3' AND $timeFilter GROUP BY time($interval)",
               "refId": "C",
               "resultFormat": "time_series",
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "v"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "max"
-                  },
-                  {
-                    "params": [
-                      "5m"
-                    ],
-                    "type": "non_negative_derivative"
-                  },
-                  {
-                    "params": [
-                      " / 300"
-                    ],
-                    "type": "math"
+                    "type": "mean",
+                    "params": []
                   }
                 ]
               ],
@@ -762,45 +642,27 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
+                  "type": "time",
                   "params": [
-                    "5m"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
+                    "$interval"
+                  ]
                 }
               ],
-              "measurement": "senml",
-              "query": "SELECT non_negative_derivative(max(\"v\"), 5m)  / 300 FROM \"senml\" WHERE \"n\" = 'ECM1240-42340-aux3' AND $timeFilter GROUP BY time(5m) fill(null)",
+              "measurement": "synth",
+              "query": "SELECT mean(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42340-aux3' AND $timeFilter GROUP BY time($interval)",
               "refId": "A",
               "resultFormat": "time_series",
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "v"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "max"
-                  },
-                  {
-                    "params": [
-                      "5m"
-                    ],
-                    "type": "non_negative_derivative"
-                  },
-                  {
-                    "params": [
-                      " / 300"
-                    ],
-                    "type": "math"
+                    "type": "mean",
+                    "params": []
                   }
                 ]
               ],
@@ -817,45 +679,27 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
+                  "type": "time",
                   "params": [
-                    "5m"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
+                    "$interval"
+                  ]
                 }
               ],
-              "measurement": "senml",
-              "query": "SELECT non_negative_derivative(max(\"v\"), 5m)  / 300 FROM \"senml\" WHERE \"n\" = 'ECM1240-42340-aux5' AND $timeFilter GROUP BY time(5m) fill(null)",
+              "measurement": "synth",
+              "query": "SELECT mean(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42340-aux5' AND $timeFilter GROUP BY time($interval)",
               "refId": "B",
               "resultFormat": "time_series",
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "v"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "max"
-                  },
-                  {
-                    "params": [
-                      "5m"
-                    ],
-                    "type": "non_negative_derivative"
-                  },
-                  {
-                    "params": [
-                      " / 300"
-                    ],
-                    "type": "math"
+                    "type": "mean",
+                    "params": []
                   }
                 ]
               ],
@@ -939,45 +783,27 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
+                  "type": "time",
                   "params": [
-                    "5m"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
+                    "$interval"
+                  ]
                 }
               ],
-              "measurement": "senml",
-              "query": "SELECT non_negative_derivative(max(\"v\"), 5m)  / 300 FROM \"senml\" WHERE \"n\" = 'ECM1240-42340-aux1' AND $timeFilter GROUP BY time(5m) fill(null)",
+              "measurement": "synth",
+              "query": "SELECT mean(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42340-aux1' AND $timeFilter GROUP BY time($interval)",
               "refId": "A",
               "resultFormat": "time_series",
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "v"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "max"
-                  },
-                  {
-                    "params": [
-                      "5m"
-                    ],
-                    "type": "non_negative_derivative"
-                  },
-                  {
-                    "params": [
-                      " / 300"
-                    ],
-                    "type": "math"
+                    "type": "mean",
+                    "params": []
                   }
                 ]
               ],
@@ -994,45 +820,27 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
+                  "type": "time",
                   "params": [
-                    "5m"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
+                    "$interval"
+                  ]
                 }
               ],
-              "measurement": "senml",
-              "query": "SELECT non_negative_derivative(max(\"v\"), 5m) /300 FROM \"senml\" WHERE \"n\" = 'ECM1240-42340-aux2' AND $timeFilter GROUP BY time(5m) fill(null)",
+              "measurement": "synth",
+              "query": "SELECT mean(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42340-aux2' AND $timeFilter GROUP BY time($interval)",
               "refId": "B",
               "resultFormat": "time_series",
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "v"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "max"
-                  },
-                  {
-                    "params": [
-                      "5m"
-                    ],
-                    "type": "non_negative_derivative"
-                  },
-                  {
-                    "params": [
-                      "/300"
-                    ],
-                    "type": "math"
+                    "type": "mean",
+                    "params": []
                   }
                 ]
               ],
@@ -1116,45 +924,27 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
+                  "type": "time",
                   "params": [
-                    "5m"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
+                    "$interval"
+                  ]
                 }
               ],
-              "measurement": "senml",
-              "query": "SELECT non_negative_derivative(max(\"v\"), 5m)  / 300 FROM \"senml\" WHERE \"n\" = 'ECM1240-42414-aux5' AND $timeFilter GROUP BY time(5m) fill(null)",
+              "measurement": "synth",
+              "query": "SELECT mean(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42414-aux5' AND $timeFilter GROUP BY time($interval)",
               "refId": "A",
               "resultFormat": "time_series",
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "v"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "max"
-                  },
-                  {
-                    "params": [
-                      "5m"
-                    ],
-                    "type": "non_negative_derivative"
-                  },
-                  {
-                    "params": [
-                      " / 300"
-                    ],
-                    "type": "math"
+                    "type": "mean",
+                    "params": []
                   }
                 ]
               ],
@@ -1171,45 +961,27 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
+                  "type": "time",
                   "params": [
-                    "5m"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
+                    "$interval"
+                  ]
                 }
               ],
-              "measurement": "senml",
-              "query": "SELECT non_negative_derivative(max(\"v\"), 5m)  / 300 FROM \"senml\" WHERE \"n\" = 'ECM1240-42340-aux4' AND $timeFilter GROUP BY time(5m) fill(null)",
+              "measurement": "synth",
+              "query": "SELECT mean(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42340-aux4' AND $timeFilter GROUP BY time($interval)",
               "refId": "B",
               "resultFormat": "time_series",
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "v"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "max"
-                  },
-                  {
-                    "params": [
-                      "5m"
-                    ],
-                    "type": "non_negative_derivative"
-                  },
-                  {
-                    "params": [
-                      " / 300"
-                    ],
-                    "type": "math"
+                    "type": "mean",
+                    "params": []
                   }
                 ]
               ],
@@ -1226,45 +998,27 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
+                  "type": "time",
                   "params": [
-                    "5m"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
+                    "$interval"
+                  ]
                 }
               ],
-              "measurement": "senml",
-              "query": "SELECT non_negative_derivative(max(\"v\"), 5m) /300 FROM \"senml\" WHERE \"n\" = 'ECM1240-42414-aux2' AND $timeFilter GROUP BY time(5m) fill(null)",
+              "measurement": "synth",
+              "query": "SELECT mean(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42414-aux2' AND $timeFilter GROUP BY time($interval)",
               "refId": "C",
               "resultFormat": "time_series",
               "select": [
                 [
                   {
+                    "type": "field",
                     "params": [
                       "v"
-                    ],
-                    "type": "field"
+                    ]
                   },
                   {
-                    "params": [],
-                    "type": "max"
-                  },
-                  {
-                    "params": [
-                      "5m"
-                    ],
-                    "type": "non_negative_derivative"
-                  },
-                  {
-                    "params": [
-                      "/300"
-                    ],
-                    "type": "math"
+                    "type": "mean",
+                    "params": []
                   }
                 ]
               ],
@@ -1294,10 +1048,267 @@
         }
       ],
       "title": "C Office"
+    },
+    {
+      "collapse": false,
+      "editable": true,
+      "height": "250px",
+      "panels": [
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "datasource": null,
+          "editable": true,
+          "error": false,
+          "format": "none",
+          "id": 11,
+          "interval": null,
+          "isNew": true,
+          "links": [],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "span": 4,
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "targets": [
+            {
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "senml",
+              "query": "SELECT last(\"v\") FROM \"senml\" WHERE \"n\" = 'ECM1240-42340-ch1' AND $timeFilter GROUP BY time($interval) fill(null)",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "v"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "last"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "n",
+                  "operator": "=",
+                  "value": "ECM1240-42340-ch1"
+                }
+              ]
+            }
+          ],
+          "thresholds": "",
+          "title": "Total Power Used",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "avg"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "datasource": null,
+          "editable": true,
+          "error": false,
+          "format": "none",
+          "id": 12,
+          "interval": null,
+          "isNew": true,
+          "links": [],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "span": 4,
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "targets": [
+            {
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "senml",
+              "query": "SELECT last(\"v\") FROM \"senml\" WHERE \"n\" = 'ECM1240-42340-ch1' AND $timeFilter GROUP BY time($interval) fill(null)",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "v"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "last"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "n",
+                  "operator": "=",
+                  "value": "ECM1240-42340-ch1"
+                }
+              ]
+            }
+          ],
+          "thresholds": "",
+          "timeShift": "1w",
+          "title": "Total Energy Used one week before",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "avg"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "datasource": null,
+          "editable": true,
+          "error": false,
+          "format": "none",
+          "id": 13,
+          "interval": null,
+          "isNew": true,
+          "links": [],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "span": 4,
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "targets": [
+            {
+              "dsType": "influxdb",
+              "groupBy": [],
+              "hide": false,
+              "measurement": "synth",
+              "query": "SELECT \"v\" FROM \"synth\" WHERE \"n\" = 'ECM1240-42340-ch1' AND $timeFilter",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "v"
+                    ],
+                    "type": "field"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "n",
+                  "operator": "=",
+                  "value": "ECM1240-42340-ch1"
+                }
+              ]
+            }
+          ],
+          "thresholds": "",
+          "title": "Power (W)",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "avg"
+        }
+      ],
+      "title": "New row"
     }
   ],
   "time": {
-    "from": "now-24h",
+    "from": "now-12h",
     "to": "now"
   },
   "timepicker": {
@@ -1332,7 +1343,8 @@
   "annotations": {
     "list": []
   },
+  "refresh": false,
   "schemaVersion": 8,
-  "version": 14,
+  "version": 23,
   "links": []
 }
