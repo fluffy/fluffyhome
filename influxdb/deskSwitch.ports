@@ -1,0 +1,8 @@
+# snmp_column label_for_metrics
+Vl1 vlanDefault
+Vl4 vlanBlue
+Vl10 vlanRed
+Gi0/1 DeskGreen
+Gi0/9 DeskUplink
+Gi0/10 FluffyMac234
+
