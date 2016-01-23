@@ -7,4 +7,5 @@ install:
 	sudo cp com.fluffyhome.grafana.plist /Library/LaunchDaemons/com.fluffyhome.grafana.plist
 	- sudo mkdir /var/log/grafana
 	- sudo mkdir /var/grafana
+	sudo cp grafana.cfg /etc/grafana.cfg 
 	sudo launchctl load /Library/LaunchDaemons/com.fluffyhome.grafana.plist

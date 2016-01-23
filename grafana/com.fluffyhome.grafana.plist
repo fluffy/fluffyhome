@@ -9,6 +9,8 @@
 	<string>com.fluffyhome.grafana</string>
 	<key>RunAtLoad</key>
 	<true/>
+<key>WorkingDirectory</key>
+<string>/Users/fluffy/go/src/github.com/grafana/grafana</string>
 	<key>ProgramArguments</key>
 	<array>
 	  <string>/usr/local/bin/grafana</string>
