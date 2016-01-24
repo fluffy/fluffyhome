@@ -103,7 +103,8 @@
                   "operator": "=",
                   "value": "ECM1240-42340-ch1"
                 }
-              ]
+              ],
+              "policy": "default"
             }
           ],
           "timeFrom": null,
@@ -212,7 +213,8 @@
                   "operator": "=",
                   "value": "ECM1240-42340-ch1"
                 }
-              ]
+              ],
+              "policy": "default"
             }
           ],
           "timeFrom": null,
@@ -286,10 +288,10 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
-                  "type": "time",
                   "params": [
                     "$interval"
-                  ]
+                  ],
+                  "type": "time"
                 }
               ],
               "measurement": "synth",
@@ -299,14 +301,14 @@
               "select": [
                 [
                   {
-                    "type": "field",
                     "params": [
                       "v"
-                    ]
+                    ],
+                    "type": "field"
                   },
                   {
-                    "type": "mean",
-                    "params": []
+                    "params": [],
+                    "type": "mean"
                   }
                 ]
               ],
@@ -316,17 +318,18 @@
                   "operator": "=",
                   "value": "ECM1240-42340-ch2"
                 }
-              ]
+              ],
+              "policy": "default"
             },
             {
               "alias": "Oven",
               "dsType": "influxdb",
               "groupBy": [
                 {
-                  "type": "time",
                   "params": [
                     "$interval"
-                  ]
+                  ],
+                  "type": "time"
                 }
               ],
               "measurement": "synth",
@@ -336,14 +339,14 @@
               "select": [
                 [
                   {
-                    "type": "field",
                     "params": [
                       "v"
-                    ]
+                    ],
+                    "type": "field"
                   },
                   {
-                    "type": "mean",
-                    "params": []
+                    "params": [],
+                    "type": "mean"
                   }
                 ]
               ],
@@ -353,17 +356,18 @@
                   "operator": "=",
                   "value": "ECM1240-42414-ch1"
                 }
-              ]
+              ],
+              "policy": "default"
             },
             {
               "alias": "WashingMachine",
               "dsType": "influxdb",
               "groupBy": [
                 {
-                  "type": "time",
                   "params": [
                     "$interval"
-                  ]
+                  ],
+                  "type": "time"
                 }
               ],
               "measurement": "synth",
@@ -373,14 +377,14 @@
               "select": [
                 [
                   {
-                    "type": "field",
                     "params": [
                       "v"
-                    ]
+                    ],
+                    "type": "field"
                   },
                   {
-                    "type": "mean",
-                    "params": []
+                    "params": [],
+                    "type": "mean"
                   }
                 ]
               ],
@@ -390,7 +394,8 @@
                   "operator": "=",
                   "value": "ECM1240-42414-ch2"
                 }
-              ]
+              ],
+              "policy": "default"
             }
           ],
           "timeFrom": null,
@@ -464,10 +469,10 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
-                  "type": "time",
                   "params": [
                     "$interval"
-                  ]
+                  ],
+                  "type": "time"
                 }
               ],
               "measurement": "synth",
@@ -477,14 +482,14 @@
               "select": [
                 [
                   {
-                    "type": "field",
                     "params": [
                       "v"
-                    ]
+                    ],
+                    "type": "field"
                   },
                   {
-                    "type": "mean",
-                    "params": []
+                    "params": [],
+                    "type": "mean"
                   }
                 ]
               ],
@@ -494,17 +499,18 @@
                   "operator": "=",
                   "value": "ECM1240-42414-aux1"
                 }
-              ]
+              ],
+              "policy": "default"
             },
             {
               "alias": "MainBedroom",
               "dsType": "influxdb",
               "groupBy": [
                 {
-                  "type": "time",
                   "params": [
                     "$interval"
-                  ]
+                  ],
+                  "type": "time"
                 }
               ],
               "measurement": "synth",
@@ -514,14 +520,14 @@
               "select": [
                 [
                   {
-                    "type": "field",
                     "params": [
                       "v"
-                    ]
+                    ],
+                    "type": "field"
                   },
                   {
-                    "type": "mean",
-                    "params": []
+                    "params": [],
+                    "type": "mean"
                   }
                 ]
               ],
@@ -531,17 +537,18 @@
                   "operator": "=",
                   "value": "ECM1240-42414-aux4"
                 }
-              ]
+              ],
+              "policy": "default"
             },
             {
               "alias": "LivingRoom",
               "dsType": "influxdb",
               "groupBy": [
                 {
-                  "type": "time",
                   "params": [
                     "$interval"
-                  ]
+                  ],
+                  "type": "time"
                 }
               ],
               "measurement": "synth",
@@ -551,14 +558,14 @@
               "select": [
                 [
                   {
-                    "type": "field",
                     "params": [
                       "v"
-                    ]
+                    ],
+                    "type": "field"
                   },
                   {
-                    "type": "mean",
-                    "params": []
+                    "params": [],
+                    "type": "mean"
                   }
                 ]
               ],
@@ -568,7 +575,8 @@
                   "operator": "=",
                   "value": "ECM1240-42414-aux3"
                 }
-              ]
+              ],
+              "policy": "default"
             }
           ],
           "timeFrom": null,
@@ -642,10 +650,10 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
-                  "type": "time",
                   "params": [
                     "$interval"
-                  ]
+                  ],
+                  "type": "time"
                 }
               ],
               "measurement": "synth",
@@ -655,14 +663,14 @@
               "select": [
                 [
                   {
-                    "type": "field",
                     "params": [
                       "v"
-                    ]
+                    ],
+                    "type": "field"
                   },
                   {
-                    "type": "mean",
-                    "params": []
+                    "params": [],
+                    "type": "mean"
                   }
                 ]
               ],
@@ -672,17 +680,18 @@
                   "operator": "=",
                   "value": "ECM1240-42340-aux3"
                 }
-              ]
+              ],
+              "policy": "default"
             },
             {
               "alias": "KitchenFridge",
               "dsType": "influxdb",
               "groupBy": [
                 {
-                  "type": "time",
                   "params": [
                     "$interval"
-                  ]
+                  ],
+                  "type": "time"
                 }
               ],
               "measurement": "synth",
@@ -692,14 +701,14 @@
               "select": [
                 [
                   {
-                    "type": "field",
                     "params": [
                       "v"
-                    ]
+                    ],
+                    "type": "field"
                   },
                   {
-                    "type": "mean",
-                    "params": []
+                    "params": [],
+                    "type": "mean"
                   }
                 ]
               ],
@@ -709,7 +718,8 @@
                   "operator": "=",
                   "value": "ECM1240-42340-aux5"
                 }
-              ]
+              ],
+              "policy": "default"
             }
           ],
           "timeFrom": null,
@@ -783,10 +793,10 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
-                  "type": "time",
                   "params": [
                     "$interval"
-                  ]
+                  ],
+                  "type": "time"
                 }
               ],
               "measurement": "synth",
@@ -796,14 +806,14 @@
               "select": [
                 [
                   {
-                    "type": "field",
                     "params": [
                       "v"
-                    ]
+                    ],
+                    "type": "field"
                   },
                   {
-                    "type": "mean",
-                    "params": []
+                    "params": [],
+                    "type": "mean"
                   }
                 ]
               ],
@@ -813,17 +823,18 @@
                   "operator": "=",
                   "value": "ECM1240-42340-aux1"
                 }
-              ]
+              ],
+              "policy": "default"
             },
             {
               "alias": "BikeRoomHeater",
               "dsType": "influxdb",
               "groupBy": [
                 {
-                  "type": "time",
                   "params": [
                     "$interval"
-                  ]
+                  ],
+                  "type": "time"
                 }
               ],
               "measurement": "synth",
@@ -833,14 +844,14 @@
               "select": [
                 [
                   {
-                    "type": "field",
                     "params": [
                       "v"
-                    ]
+                    ],
+                    "type": "field"
                   },
                   {
-                    "type": "mean",
-                    "params": []
+                    "params": [],
+                    "type": "mean"
                   }
                 ]
               ],
@@ -850,7 +861,8 @@
                   "operator": "=",
                   "value": "ECM1240-42340-aux2"
                 }
-              ]
+              ],
+              "policy": "default"
             }
           ],
           "timeFrom": null,
@@ -924,10 +936,10 @@
               "dsType": "influxdb",
               "groupBy": [
                 {
-                  "type": "time",
                   "params": [
                     "$interval"
-                  ]
+                  ],
+                  "type": "time"
                 }
               ],
               "measurement": "synth",
@@ -937,14 +949,14 @@
               "select": [
                 [
                   {
-                    "type": "field",
                     "params": [
                       "v"
-                    ]
+                    ],
+                    "type": "field"
                   },
                   {
-                    "type": "mean",
-                    "params": []
+                    "params": [],
+                    "type": "mean"
                   }
                 ]
               ],
@@ -954,17 +966,18 @@
                   "operator": "=",
                   "value": "ECM1240-42414-aux5"
                 }
-              ]
+              ],
+              "policy": "default"
             },
             {
               "alias": "Cullen Office One",
               "dsType": "influxdb",
               "groupBy": [
                 {
-                  "type": "time",
                   "params": [
                     "$interval"
-                  ]
+                  ],
+                  "type": "time"
                 }
               ],
               "measurement": "synth",
@@ -974,14 +987,14 @@
               "select": [
                 [
                   {
-                    "type": "field",
                     "params": [
                       "v"
-                    ]
+                    ],
+                    "type": "field"
                   },
                   {
-                    "type": "mean",
-                    "params": []
+                    "params": [],
+                    "type": "mean"
                   }
                 ]
               ],
@@ -991,17 +1004,18 @@
                   "operator": "=",
                   "value": "ECM1240-42340-aux4"
                 }
-              ]
+              ],
+              "policy": "default"
             },
             {
               "alias": "Cullen Office Two",
               "dsType": "influxdb",
               "groupBy": [
                 {
-                  "type": "time",
                   "params": [
                     "$interval"
-                  ]
+                  ],
+                  "type": "time"
                 }
               ],
               "measurement": "synth",
@@ -1011,14 +1025,14 @@
               "select": [
                 [
                   {
-                    "type": "field",
                     "params": [
                       "v"
-                    ]
+                    ],
+                    "type": "field"
                   },
                   {
-                    "type": "mean",
-                    "params": []
+                    "params": [],
+                    "type": "mean"
                   }
                 ]
               ],
@@ -1028,7 +1042,8 @@
                   "operator": "=",
                   "value": "ECM1240-42414-aux2"
                 }
-              ]
+              ],
+              "policy": "default"
             }
           ],
           "timeFrom": null,
@@ -1126,7 +1141,8 @@
                   "operator": "=",
                   "value": "ECM1240-42340-ch1"
                 }
-              ]
+              ],
+              "policy": "default"
             }
           ],
           "thresholds": "",
@@ -1214,7 +1230,8 @@
                   "operator": "=",
                   "value": "ECM1240-42340-ch1"
                 }
-              ]
+              ],
+              "policy": "default"
             }
           ],
           "thresholds": "",
@@ -1287,7 +1304,8 @@
                   "operator": "=",
                   "value": "ECM1240-42340-ch1"
                 }
-              ]
+              ],
+              "policy": "default"
             }
           ],
           "thresholds": "",

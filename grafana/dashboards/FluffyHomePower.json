@@ -47,9 +47,27 @@
           },
           "targets": [
             {
-              "refId": "B",
               "dsType": "influxdb",
+              "groupBy": [],
+              "hide": false,
+              "measurement": "synth",
+              "query": "SELECT last(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42340-ch1' AND $timeFilter",
+              "refId": "B",
               "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "v"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "last"
+                  }
+                ]
+              ],
               "tags": [
                 {
                   "key": "n",
@@ -57,24 +75,7 @@
                   "value": "ECM1240-42340-ch1"
                 }
               ],
-              "groupBy": [],
-              "select": [
-                [
-                  {
-                    "type": "field",
-                    "params": [
-                      "v"
-                    ]
-                  },
-                  {
-                    "type": "last",
-                    "params": []
-                  }
-                ]
-              ],
-              "measurement": "synth",
-              "query": "SELECT last(\"v\") FROM \"synth\" WHERE \"n\" = 'ECM1240-42340-ch1' AND $timeFilter",
-              "hide": false
+              "policy": "default"
             }
           ],
           "thresholds": "",
