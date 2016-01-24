@@ -118,7 +118,7 @@
           "x-axis": true,
           "y-axis": true,
           "y_formats": [
-            "short",
+            "joule",
             "short"
           ]
         }
@@ -228,7 +228,7 @@
           "x-axis": true,
           "y-axis": true,
           "y_formats": [
-            "short",
+            "watt",
             "short"
           ]
         }
@@ -409,7 +409,7 @@
           "x-axis": true,
           "y-axis": true,
           "y_formats": [
-            "short",
+            "watt",
             "short"
           ]
         }
@@ -590,7 +590,7 @@
           "x-axis": true,
           "y-axis": true,
           "y_formats": [
-            "short",
+            "watt",
             "short"
           ]
         }
@@ -733,7 +733,7 @@
           "x-axis": true,
           "y-axis": true,
           "y_formats": [
-            "short",
+            "watt",
             "short"
           ]
         }
@@ -876,7 +876,7 @@
           "x-axis": true,
           "y-axis": true,
           "y_formats": [
-            "short",
+            "watt",
             "short"
           ]
         }
@@ -1057,7 +1057,7 @@
           "x-axis": true,
           "y-axis": true,
           "y_formats": [
-            "short",
+            "watt",
             "short"
           ]
         }
@@ -1326,7 +1326,7 @@
     }
   ],
   "time": {
-    "from": "now-12h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -1363,6 +1363,6 @@
   },
   "refresh": false,
   "schemaVersion": 8,
-  "version": 23,
+  "version": 25,
   "links": []
 }

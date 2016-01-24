@@ -58,51 +58,6 @@
           "steppedLine": false,
           "targets": [
             {
-              "alias": "waterHeater",
-              "dsType": "influxdb",
-              "groupBy": [
-                {
-                  "params": [
-                    "$interval"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "null"
-                  ],
-                  "type": "fill"
-                }
-              ],
-              "hide": false,
-              "measurement": "senml",
-              "query": "SELECT mean(\"v\") FROM \"senml\" WHERE \"n\" = 'urn:dev:ow:282afdaa0300007b' AND $timeFilter GROUP BY time($interval) fill(null)",
-              "refId": "A",
-              "resultFormat": "time_series",
-              "select": [
-                [
-                  {
-                    "params": [
-                      "v"
-                    ],
-                    "type": "field"
-                  },
-                  {
-                    "params": [],
-                    "type": "mean"
-                  }
-                ]
-              ],
-              "tags": [
-                {
-                  "key": "n",
-                  "operator": "=",
-                  "value": "urn:dev:ow:282afdaa0300007b"
-                }
-              ],
-              "policy": "default"
-            },
-            {
               "alias": "bikeRoomFurnace",
               "dsType": "influxdb",
               "groupBy": [
@@ -121,6 +76,7 @@
               ],
               "hide": false,
               "measurement": "senml",
+              "policy": "default",
               "query": "SELECT mean(\"v\") FROM \"senml\" WHERE \"n\" = 'urn:dev:ow:286cebaa0300005c' AND $timeFilter GROUP BY time($interval) fill(null)",
               "refId": "B",
               "resultFormat": "time_series",
@@ -144,8 +100,7 @@
                   "operator": "=",
                   "value": "urn:dev:ow:286cebaa0300005c"
                 }
-              ],
-              "policy": "default"
+              ]
             },
             {
               "alias": "shopFurnace",
@@ -165,6 +120,7 @@
                 }
               ],
               "measurement": "senml",
+              "policy": "default",
               "query": "SELECT mean(\"v\") FROM \"senml\" WHERE \"n\" = 'urn:dev:ow:2883f4aa03000042' AND $timeFilter GROUP BY time($interval) fill(null)",
               "refId": "C",
               "resultFormat": "time_series",
@@ -188,9 +144,67 @@
                   "operator": "=",
                   "value": "urn:dev:ow:2883f4aa03000042"
                 }
-              ],
-              "policy": "default"
-            },
+              ]
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Furnace Temp Sensors",
+          "tooltip": {
+            "shared": true,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "x-axis": true,
+          "y-axis": true,
+          "y_formats": [
+            "celsius",
+            "short"
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": null,
+          "editable": true,
+          "error": false,
+          "fill": 1,
+          "grid": {
+            "leftLogBase": 1,
+            "leftMax": null,
+            "leftMin": null,
+            "rightLogBase": 1,
+            "rightMax": null,
+            "rightMin": null,
+            "threshold1": null,
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2": null,
+            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          },
+          "id": 2,
+          "isNew": true,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 2,
+          "links": [],
+          "nullPointMode": "connected",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 12,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
             {
               "alias": "shopHumidifier",
               "dsType": "influxdb",
@@ -209,6 +223,7 @@
                 }
               ],
               "measurement": "senml",
+              "policy": "default",
               "query": "SELECT mean(\"v\") FROM \"senml\" WHERE \"n\" = 'urn:dev:ow:2886b9aa030000ac' AND $timeFilter GROUP BY time($interval) fill(null)",
               "refId": "D",
               "resultFormat": "time_series",
@@ -232,8 +247,7 @@
                   "operator": "=",
                   "value": "urn:dev:ow:2886b9aa030000ac"
                 }
-              ],
-              "policy": "default"
+              ]
             },
             {
               "alias": "bikeRoomHumidifier",
@@ -253,6 +267,7 @@
                 }
               ],
               "measurement": "senml",
+              "policy": "default",
               "query": "SELECT mean(\"v\") FROM \"senml\" WHERE \"n\" = 'urn:dev:ow:2889e0aa030000ee' AND $timeFilter GROUP BY time($interval) fill(null)",
               "refId": "E",
               "resultFormat": "time_series",
@@ -276,13 +291,12 @@
                   "operator": "=",
                   "value": "urn:dev:ow:2889e0aa030000ee"
                 }
-              ],
-              "policy": "default"
+              ]
             }
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Temp Sensors",
+          "title": "Humidity Temp Sensors",
           "tooltip": {
             "shared": true,
             "value_type": "cumulative"
@@ -291,7 +305,111 @@
           "x-axis": true,
           "y-axis": true,
           "y_formats": [
-            "short",
+            "celsius",
+            "short"
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": null,
+          "editable": true,
+          "error": false,
+          "fill": 1,
+          "grid": {
+            "leftLogBase": 1,
+            "leftMax": null,
+            "leftMin": null,
+            "rightLogBase": 1,
+            "rightMax": null,
+            "rightMin": null,
+            "threshold1": null,
+            "threshold1Color": "rgba(216, 200, 27, 0.27)",
+            "threshold2": null,
+            "threshold2Color": "rgba(234, 112, 112, 0.22)"
+          },
+          "id": 3,
+          "isNew": true,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 2,
+          "links": [],
+          "nullPointMode": "connected",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 12,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "waterHeater",
+              "dsType": "influxdb",
+              "groupBy": [
+                {
+                  "params": [
+                    "$interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "hide": false,
+              "measurement": "senml",
+              "policy": "default",
+              "query": "SELECT mean(\"v\") FROM \"senml\" WHERE \"n\" = 'urn:dev:ow:282afdaa0300007b' AND $timeFilter GROUP BY time($interval) fill(null)",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "v"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "n",
+                  "operator": "=",
+                  "value": "urn:dev:ow:282afdaa0300007b"
+                }
+              ]
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Water Heater Temp Sensors",
+          "tooltip": {
+            "shared": true,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "x-axis": true,
+          "y-axis": true,
+          "y_formats": [
+            "celsius",
             "short"
           ]
         }
@@ -300,8 +418,8 @@
     }
   ],
   "time": {
-    "from": "now-24h",
-    "to": "now"
+    "from": "2016-01-24T16:05:36.186Z",
+    "to": "2016-01-24T19:01:10.497Z"
   },
   "timepicker": {
     "now": true,
@@ -337,6 +455,6 @@
   },
   "refresh": false,
   "schemaVersion": 8,
-  "version": 5,
+  "version": 8,
   "links": []
 }
