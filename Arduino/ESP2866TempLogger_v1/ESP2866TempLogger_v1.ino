@@ -117,7 +117,7 @@ void setup() {
   }
 
 
-  Serial.print("Wifit SSID=");
+  Serial.print("WIFI SSID=");
   Serial.println( ssid);
   WiFi.begin( ssid, password) ;
   Serial.print("Connecting to WiFi ");
