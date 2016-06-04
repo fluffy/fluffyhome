@@ -6,17 +6,18 @@
 	<key>KeepAlive</key>
 	<true/>
 	<key>Label</key>
-	<string>com.fluffyhome.ecm1240-2</string>
+	<string>com.fluffyhome.influxdb13</string>
 	<key>RunAtLoad</key>
 	<true/>
 	<key>ProgramArguments</key>
 	<array>
-	  <string>/usr/local/bin/ecm-server</string>
-	  <string>-d</string>
-	  <string>/dev/cu.USA19Hfa1212P1.1</string>
-	  <string>-s</string>
-      <!--  <string>http://10.1.3.10:11080</string> -->
-      <string>http://10.1.3.254:9086/write?db=fh2</string> 
-  	</array>
+	  <string>/usr/local/bin/influxd13</string>
+	  <string>-config</string>
+	  <string>/etc/influxdb/influxdb13.conf</string>
+	</array>
+
+  <key>UserName</key>
+  <string>_postgres</string>
+
 </dict>
 </plist>
