@@ -25,6 +25,8 @@ import (
 	"strconv"
 	"time"
 	"runtime/pprof"
+	"flag"
+	"math"
 )
 
 const (
@@ -32,7 +34,17 @@ const (
 )
 
 func main() {
-
+	var startDate string
+	var databaseUrl string
+	var numDays int
+	var numHours int
+	
+	flag.IntVar( &numHours, "step", 1, "number of hours in each dump" )
+	flag.IntVar( &numDays, "days", 2, "number of days to dump" )
+	flag.StringVar( &startDate, "from", "", "date to start dump from ex: 2016-07-08")
+	flag.StringVar( &databaseUrl, "db", "", "URL to indexdb datgabase ex: http://10.1.3.254:8086)")
+	flag.Parse()
+	
 	if false {
         f, err := os.Create( "exportSenml.prof" )
         if err != nil {
@@ -43,15 +55,31 @@ func main() {
         defer pprof.StopCPUProfile()
 	}
 	
-	if len(os.Args[1:]) != 1 {
+	if len( startDate )  > 0 {
+		fmt.Println("Start date is", startDate)
+		t,err := time.Parse( "2006-01-02" , startDate )
+		if err != nil {
+			fmt.Println("Could not parse time", startDate , err)
+			os.Exit(1)
+		}
+		d := time.Since(t)
+		numDays = int( math.Floor( d.Hours() / 24.0  ) )
+	}
+	if numDays < 0 {
+		fmt.Println("Can not dump data in the fture", numDays, "days" )
+		os.Exit(1)
+	}
+	
+	if len(databaseUrl) <= 0 {
 		fmt.Println("Must pass influxdb server URL on command line (example http://10.1.3.254:8086)")
 		os.Exit(1)
 	}
-	databaseUrl := os.Args[1]
-
-	step := time.Duration( 24 * time.Hour )
 	
-	for day := -160 ; day <= 0 ; day ++ {
+	step := time.Duration( time.Hour ) * time.Duration( numHours )
+
+	fmt.Println("Dumping", numDays, "days" )
+	
+	for day := -numDays ; day <= 0 ; day ++ {
 		for h := time.Duration(0) ; h < time.Duration(24 * time.Hour)  ; h = h + step {
 			
 			start := time.Now().Truncate(24*time.Hour).AddDate(0, 0, day ).Add( h ) 
