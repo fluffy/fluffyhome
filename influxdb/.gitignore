@@ -1,6 +1,7 @@
 *~
 influxsnmp
 exportSenml
+exportSnmp
 computePower
 oids.txt
 dump*.jsonl
