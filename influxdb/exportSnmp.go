@@ -181,9 +181,11 @@ func dumpRange(databaseUrl string, start time.Time, end time.Time, seriesName st
 
 				//fmt.Println( "raw val=", t,n,v,u )
 
-				r := senml.SenMLRecord{Time: t, Name: host + string("/") + column + string("/") + seriesName, Value: &v}
-
-				s.Records = append(s.Records, r)
+				if v != 0.0 {
+					r := senml.SenMLRecord{Time: t, Name: host + string("/") + column + string("/") + seriesName, Value: &v}
+					
+					s.Records = append(s.Records, r)
+				}
 
 			}
 		}
