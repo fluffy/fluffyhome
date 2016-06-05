@@ -3,7 +3,7 @@ package main
 /*
 exports senml data from influxdb to JSON file creating one file per day
 
-Dump with something like 
+Dump with something like
 ./exportSnmp http://10.1.3.254:8086
 
 Can load back into influxdb with something like
@@ -17,16 +17,16 @@ Can load back into influxdb with something like
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/cisco/senml"
 	"github.com/influxdata/influxdb/client/v2"
 	"io/ioutil"
+	"math"
 	"os"
+	"runtime/pprof"
 	"strconv"
 	"time"
-	"runtime/pprof"
-	"flag"
-	"math"
 )
 
 const (
@@ -38,71 +38,69 @@ func main() {
 	var databaseUrl string
 	var numDays int
 	var numHours int
-	
-	flag.IntVar( &numHours, "step", 1, "number of hours in each dump" )
-	flag.IntVar( &numDays, "days", 2, "number of days to dump" )
-	flag.StringVar( &startDate, "from", "", "date to start dump from ex: 2016-07-08")
-	flag.StringVar( &databaseUrl, "db", "", "URL to indexdb datgabase ex: http://10.1.3.254:8086)")
+
+	flag.IntVar(&numHours, "step", 1, "number of hours in each dump")
+	flag.IntVar(&numDays, "days", 2, "number of days to dump")
+	flag.StringVar(&startDate, "from", "", "date to start dump from ex: 2016-07-08")
+	flag.StringVar(&databaseUrl, "db", "", "URL to indexdb datgabase ex: http://10.1.3.254:8086)")
 	flag.Parse()
-	
+
 	if false {
-        f, err := os.Create( "exportSenml.prof" )
-        if err != nil {
-            fmt.Println("error opening profile file", err)
+		f, err := os.Create("exportSenml.prof")
+		if err != nil {
+			fmt.Println("error opening profile file", err)
 			os.Exit(1)
-        }
-        pprof.StartCPUProfile(f)
-        defer pprof.StopCPUProfile()
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
 	}
 
-	if len( startDate )  > 0 {
+	if len(startDate) > 0 {
 		fmt.Println("Start date is", startDate)
-		t,err := time.Parse( "2006-01-02" , startDate )
+		t, err := time.Parse("2006-01-02", startDate)
 		if err != nil {
-			fmt.Println("Could not parse time", startDate , err)
+			fmt.Println("Could not parse time", startDate, err)
 			os.Exit(1)
 		}
 		d := time.Since(t)
-		numDays = int( math.Floor( d.Hours() / 24.0  ) )
+		numDays = int(math.Floor(d.Hours() / 24.0))
 	}
 	if numDays < 0 {
-		fmt.Println("Can not dump data in the fture", numDays, "days" )
+		fmt.Println("Can not dump data in the fture", numDays, "days")
 		os.Exit(1)
 	}
-	
+
 	if len(databaseUrl) <= 0 {
 		fmt.Println("Must pass influxdb server URL on command line (example http://10.1.3.254:8086)")
 		os.Exit(1)
 	}
-	
-	step := time.Duration( time.Hour ) * time.Duration( numHours )
 
-	fmt.Println("Dumping", numDays, "days" )
-	
-	for day := -numDays ; day <= 0 ; day ++ {
-		for h := time.Duration(0) ; h < time.Duration(24 * time.Hour)  ; h = h + step {
-			
-			start := time.Now().Truncate(24*time.Hour).AddDate(0, 0, day ).Add( h ) 
-			end := start.Add( step ) 
-					
-			fmt.Println("Dumping ", start.Format("2006-01-02-1504"),  "  (day of year=",start.YearDay(),")")
-			
-			dumpRange( databaseUrl, start, end,  "ifHCInOctets", "dump_" + start.Format("2006-01-02-1504") + "_ifHCInOctets" + ".jsonl" )
-			dumpRange( databaseUrl, start, end,  "ifHCInUcastPkts", "dump_" + start.Format("2006-01-02-1504") + "_ifHCInUcastPkts" + ".jsonl" )
-			dumpRange( databaseUrl, start, end,  "ifHCOutOctets", "dump_" + start.Format("2006-01-02-1504") + "_ifHCOutOctets" + ".jsonl" )
-			dumpRange( databaseUrl, start, end,  "ifHCOutUcastPkts", "dump_" + start.Format("2006-01-02-1504") + "_ifHCOutUcastPkts" + ".jsonl" )
-			dumpRange( databaseUrl, start, end,  "ifInDiscards", "dump_" + start.Format("2006-01-02-1504") + "_ifInDiscards" + ".jsonl" )
-			dumpRange( databaseUrl, start, end,  "ifInErrors", "dump_" + start.Format("2006-01-02-1504") + "_ifInErrors" + ".jsonl" )
-			dumpRange( databaseUrl, start, end,  "ifInErrors", "dump_" + start.Format("2006-01-02-1504") + "_ifInErrors" + ".jsonl" )
-			dumpRange( databaseUrl, start, end,  "ifOutDiscards", "dump_" + start.Format("2006-01-02-1504") + "_ifOutDiscards" + ".jsonl" )
-			dumpRange( databaseUrl, start, end,  "ifOutErrors", "dump_" + start.Format("2006-01-02-1504") + "_ifOutErrors" + ".jsonl" )
+	step := time.Duration(time.Hour) * time.Duration(numHours)
+
+	fmt.Println("Dumping", numDays, "days")
+
+	for day := -numDays; day <= 0; day++ {
+		for h := time.Duration(0); h < time.Duration(24*time.Hour); h = h + step {
+
+			start := time.Now().Truncate(24*time.Hour).AddDate(0, 0, day).Add(h)
+			end := start.Add(step)
+
+			fmt.Println("Dumping ", start.Format("2006-01-02-1504"), "  (day of year=", start.YearDay(), ")")
+
+			dumpRange(databaseUrl, start, end, "ifHCInOctets", "dump_"+start.Format("2006-01-02-1504")+"_ifHCInOctets"+".jsonl")
+			dumpRange(databaseUrl, start, end, "ifHCInUcastPkts", "dump_"+start.Format("2006-01-02-1504")+"_ifHCInUcastPkts"+".jsonl")
+			dumpRange(databaseUrl, start, end, "ifHCOutOctets", "dump_"+start.Format("2006-01-02-1504")+"_ifHCOutOctets"+".jsonl")
+			dumpRange(databaseUrl, start, end, "ifHCOutUcastPkts", "dump_"+start.Format("2006-01-02-1504")+"_ifHCOutUcastPkts"+".jsonl")
+			dumpRange(databaseUrl, start, end, "ifInDiscards", "dump_"+start.Format("2006-01-02-1504")+"_ifInDiscards"+".jsonl")
+			dumpRange(databaseUrl, start, end, "ifInErrors", "dump_"+start.Format("2006-01-02-1504")+"_ifInErrors"+".jsonl")
+			dumpRange(databaseUrl, start, end, "ifInErrors", "dump_"+start.Format("2006-01-02-1504")+"_ifInErrors"+".jsonl")
+			dumpRange(databaseUrl, start, end, "ifOutDiscards", "dump_"+start.Format("2006-01-02-1504")+"_ifOutDiscards"+".jsonl")
+			dumpRange(databaseUrl, start, end, "ifOutErrors", "dump_"+start.Format("2006-01-02-1504")+"_ifOutErrors"+".jsonl")
 		}
 	}
 }
 
-
-func dumpRange( databaseUrl string, start time.Time, end time.Time, seriesName string, fileName string ) error {
-
+func dumpRange(databaseUrl string, start time.Time, end time.Time, seriesName string, fileName string) error {
 
 	// Make client
 	c, err := client.NewHTTPClient(client.HTTPConfig{
@@ -157,7 +155,7 @@ func dumpRange( databaseUrl string, start time.Time, end time.Time, seriesName s
 					fmt.Println("unknown  type for t ", x)
 				}
 
-				switch x := point[1].(type) { 
+				switch x := point[1].(type) {
 				case string:
 					column = string(x)
 				default:
@@ -183,7 +181,7 @@ func dumpRange( databaseUrl string, start time.Time, end time.Time, seriesName s
 
 				//fmt.Println( "raw val=", t,n,v,u )
 
-				r := senml.SenMLRecord{Time: t, Name: host + string("/") + column + string("/") + seriesName , Value: &v }
+				r := senml.SenMLRecord{Time: t, Name: host + string("/") + column + string("/") + seriesName, Value: &v}
 
 				s.Records = append(s.Records, r)
 
@@ -204,7 +202,7 @@ func dumpRange( databaseUrl string, start time.Time, end time.Time, seriesName s
 
 	//fmt.Println("Encode got: " + string(dataOut))
 
-	err = ioutil.WriteFile( fileName, dataOut, 0644)
+	err = ioutil.WriteFile(fileName, dataOut, 0644)
 	if err != nil {
 		fmt.Println("Problem writing file", err)
 		panic(err)
