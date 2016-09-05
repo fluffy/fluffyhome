@@ -24,7 +24,7 @@ func computeBatteryEnergy( databaseUrl string ){
 	}
 	defer c.Close()
 
-	q := client.NewQuery("SELECT cell_voltage, current FROM junk_bat WHERE time > now() - 30d ",
+	q := client.NewQuery("SELECT cell_voltage, current FROM junk_bat WHERE time > now() - 30m ",
 		databaseName, "ns")
 	if response, err := c.Query(q); err == nil && response.Error() == nil {
 
@@ -43,6 +43,7 @@ func computeBatteryEnergy( databaseUrl string ){
 		for j, series := range response.Results[0].Series {
 
 			//fmt.Println( series )
+			_ = j
 
 			//fmt.Println("DOING ", series.Tags["n"])
 
@@ -83,7 +84,7 @@ func computeBatteryEnergy( databaseUrl string ){
 					}
 				}
 
-				fmt.Println( "raw val=", i, t , v, c  )
+				//fmt.Println( "raw val=", i, t , v, c  )
 
 				if i > 0 {
 					dt := float64(t-pt) / 1e9
@@ -105,7 +106,7 @@ func computeBatteryEnergy( databaseUrl string ){
 							totalCharge += -ds
 						}
 						
-						fmt.Println(j, i, "integral", c, "dt=", dt, "s=",s , "per=" , charge )
+						//fmt.Println(j, i, "integral", c, "dt=", dt, "s=",s , "per=" , charge )
 
 						tags := map[string]string{
 							//"u": "Ah",
@@ -267,6 +268,6 @@ func main() {
 
 	databaseUrl := os.Args[1]
 
-	// TODO computePower( databaseUrl )
+	computePower( databaseUrl )
 	computeBatteryEnergy( databaseUrl )
 }
