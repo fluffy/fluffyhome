@@ -24,7 +24,8 @@ func computeBatteryEnergy( databaseUrl string ){
 	}
 	defer c.Close()
 
-	q := client.NewQuery("SELECT cell_voltage, current FROM junk_bat WHERE time > now() - 30m ",
+	// the reason this is 30d is to catch the a previous fully charged point 
+	q := client.NewQuery("SELECT cell_voltage, current FROM junk_bat WHERE time > now() - 30d ",
 		databaseName, "ns")
 	if response, err := c.Query(q); err == nil && response.Error() == nil {
 
@@ -84,7 +85,7 @@ func computeBatteryEnergy( databaseUrl string ){
 					}
 				}
 
-				//fmt.Println( "raw val=", i, t , v, c  )
+				//fmt.Println( "raw val=", i, t , "v=", v, c  )
 
 				if i > 0 {
 					dt := float64(t-pt) / 1e9
@@ -96,6 +97,7 @@ func computeBatteryEnergy( databaseUrl string ){
 						s = ps + ds
 						if ( pv >= 2.350 ) && ( v < 2.350 ) { // fully charged 
 							s = 0.0
+							//fmt.Println( "detect fully charged"  )
 						}
 						
 						charge := 100.0*(410.0 - s) / 410.0
