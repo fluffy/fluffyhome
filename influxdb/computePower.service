@@ -1,0 +1,12 @@
+[Unit]
+Description=Solar Energy Compute Power Service
+
+[Service]
+ExecStart=/usr/local/bin/computePower http://10.1.3.17:8086
+StandardOutput=syslog
+Restart=always
+RestartSec=300
+
+[Install]
+WantedBy=multi-user.target
+

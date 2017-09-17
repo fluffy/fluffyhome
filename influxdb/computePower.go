@@ -270,6 +270,6 @@ func main() {
 
 	databaseUrl := os.Args[1]
 
-	computePower( databaseUrl )
+	//computePower( databaseUrl )
 	computeBatteryEnergy( databaseUrl )
 }
