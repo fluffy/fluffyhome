@@ -7,7 +7,7 @@ celery==3.0.19
 celery-with-redis==3.0
 coverage==3.6
 django-celery==3.0.17
-flower==0.4.3
+flower==0.9.2
 kombu==2.5.10
 newrelic==1.11.0.55
 oauthlib==0.4.0
