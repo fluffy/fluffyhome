@@ -1,13 +1,12 @@
 #include <ESP8266WiFi.h>
+#include <EEPROM.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <EEPROM.h>
 
 char ssid[32];
 char password[32];
 
-const char* host = "10.1.3.254";
-//const char* host = "10.1.3.233";
+const char* host = "10.1.3.17";
 const int port = 8880;
 
 const byte ONE_WIRE_PIN = 0;
@@ -25,7 +24,7 @@ void writeEEProm()
   EEPROM.begin(64);
 
   byte l = 0;
-  char s[] = "YourSSID";
+  char s[] = "FluffyFar2G";
   char c;
 
   c = 1;
@@ -38,7 +37,7 @@ void writeEEProm()
   EEPROM.write(l, 0);
 
   l = 0;
-  char s2[] = "YourWIFIPassword";
+  char s2[] = "TODO";
 
   c = 1;
   while (c) {
@@ -118,8 +117,11 @@ void setup() {
 
 
   Serial.print("WIFI SSID=");
-  Serial.println( ssid);
-  WiFi.begin( ssid, password) ;
+  Serial.println( ssid );
+  WiFi.begin( ssid, password );
+
+  WiFi.softAPdisconnect( true );
+
   Serial.print("Connecting to WiFi ");
   while ( WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
