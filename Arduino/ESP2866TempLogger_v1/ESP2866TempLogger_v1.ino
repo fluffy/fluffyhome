@@ -148,6 +148,9 @@ void setup() {
 
 
 void loop() {
+
+  // TODO - should reserver buffer pace for body and hdr strings 
+  
   String body;
 
   body += "[";

@@ -8,19 +8,19 @@ const char* host = "10.1.3.17";
 const int port = 8880;
 
 const unsigned long bounceTime[2] = {
-  200, 10 // TODO FIX 
+  2, 2
 }; // de bounce time for sensor in ms
 
-
 const float m3PerPulse[2] = {
-  3.785, 0.001 // TODO FIX 
+  0.000000724637, 0.000000724637
 };
+// 0.000000724637 m^3 per tick ( 0.72 mL / tick) seems to read about 20% high
 
 const int sensorPin0 = 4;   // water meter input used for interupt zero
 const int sensorPin1 = 13;   // water meter input used for interupt one
 
-const unsigned long maxSendTime   =  30000; // max time bewteen sends in ms
-const unsigned long minSendTime   =   5000; // min time bewteen sends in ms
+const unsigned long maxSendTime   =  15000; // max time bewteen sends in ms
+const unsigned long minSendTime   =   3000; // min time bewteen sends in ms
 const unsigned long minEepromTime = 600000; // min time bewteen eeprom write
 
 volatile unsigned long globalCount[2];     // counter
@@ -91,19 +91,39 @@ void readEEProm()
 }
 
 
+void ICACHE_RAM_ATTR sensorInt(const int ch) __attribute__((always_inline));
+
+void ICACHE_RAM_ATTR sensorInt(const int ch)
+{
+  unsigned long now;
+
+  now = millis();
+  if ( now > prevTime[ch] + bounceTime[ch] )
+  {
+    noInterrupts();
+    globalCount[ch]++;
+    prevTime[ch] = now;
+    interrupts();
+  }
+
+  if ( prevTime[ch] > now )
+  {
+    prevTime[ch] = now;
+  }
+}
+
+void ICACHE_RAM_ATTR sensorIsr0() __attribute__((always_inline));
+void ICACHE_RAM_ATTR sensorIsr1() __attribute__((always_inline));
+
 void ICACHE_RAM_ATTR sensorIsr0()
 {
-  //noInterrupts();
   sensorInt( 0 );
-  //interrupts();
 }
 
 
 void ICACHE_RAM_ATTR sensorIsr1()
 {
-  //noInterrupts();
   sensorInt( 1 );
-  //interrupts();
 }
 
 
@@ -113,7 +133,6 @@ void setup() {
   Serial.println();
   Serial.println("starting");
 
-#if 1
   writeEEProm();
   readEEProm();
 
@@ -142,7 +161,6 @@ void setup() {
     Serial.print(" ");
   }
   Serial.println();
-#endif
 
   delay( 1000 );
 
@@ -172,6 +190,8 @@ void loop() {
   //Serial.println( globalCount[1] );
 
   checkDataToSend(0);
+
+  delay(500);
   checkDataToSend(1);
 }
 
@@ -190,8 +210,8 @@ void checkDataToSend(int ch)
     if ( now > prevTime[ch] + minSendTime )
     {
 
-      // TODO LOCK out interupts and copy volatile data 
-      
+      // TODO LOCK out interupts and copy volatile data
+
       sendData( globalCount[ch], now - prevTime[ch], globalCount[ch] - prevCount[ch], ch );
       prevTime[ch] = now;
 
@@ -210,7 +230,7 @@ void sendData( unsigned long count,  unsigned long deltaTime,  unsigned long del
   String data;
   data.reserve( 100 );
 
-  float volume = float(count) * m3PerPulse[ch]; //convert to cube meters 
+  float volume = float(count) * m3PerPulse[ch]; //convert to cube meters
 
   float flow = 0.0;
   if ( ( deltaTime > 1000 ) && (deltaTime < 600000 ) )
@@ -223,9 +243,9 @@ void sendData( unsigned long count,  unsigned long deltaTime,  unsigned long del
   // URN defined in draft-ietf-core-dev-urn
   data = "[{\"n\":\"urn:dev:mac:";
 
-  for ( byte i = 0; i < 6; i++) 
+  for ( byte i = 0; i < 6; i++)
   {
-    if ( mac[i] < 16) data += '0'; // add leading 0 if needed 
+    if ( mac[i] < 16) data += '0'; // add leading 0 if needed
     data += String( mac[i], HEX);
   }
 
@@ -238,26 +258,45 @@ void sendData( unsigned long count,  unsigned long deltaTime,  unsigned long del
   data += String( volume , 7 );
   data += ",\"u\":\"m3/s\"}]";
 
-  Serial.println( data );
-  delay( 1000 );
-}
+  Serial.print("connecting to ");
+  Serial.print(host);
+  Serial.print(":");
+  Serial.print(port);
+  Serial.print(" ... ");
+  WiFiClient client;
+  if (!client.connect( host, port )) {
+    Serial.println("connection failed");
+    delay( 10000 );
+    return;
+  }
+  Serial.println();
 
+  String hdr;
+  hdr += "POST / HTTP/1.1\r\n";
+  hdr += String("Host: ") + host + "\r\n";
+  hdr += "Connection: close\r\n";
+  hdr += String("Content-Length: ") + data.length() + "\r\n";
+  hdr += "Content-Type: application/senml+json\r\n";
+  client.print( hdr + "\r\n" + data );
 
-void sensorInt(int ch)
-{
-  unsigned long now;
+  Serial.println("SENT HTTP");
+  Serial.println( hdr + "\r\n" + data );
 
-  now = millis();
-  if ( now > prevTime[ch] + bounceTime[ch] )
-  {
-    globalCount[ch]++;
-
-    //digitalWrite(ledPin, (globalCount[ch]%2)?HIGH:LOW);
-    prevTime[ch] = now;
+  unsigned long txStart = millis();
+  while ( client.connected() ) {
+    if ( client.available()) {
+      String line = client.readStringUntil('\r');
+      Serial.print(line);
+    }
+    yield();
+    unsigned long now = millis();
+    if ( now > txStart + 15000 ) {
+      Serial.println("HTTP transaction timeed out");
+      break ; // timeout transaction after 15 seconds
+    }
   }
 
-  if ( prevTime[ch] > now )
-  {
-    prevTime[ch] = now;
-  }
+  Serial.println();
+  Serial.println("closing connection");
+  client.stop();
 }
