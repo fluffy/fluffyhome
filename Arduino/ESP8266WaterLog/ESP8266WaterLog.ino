@@ -3,7 +3,7 @@
 #include <String.h>
 #include <Wire.h>
 
-const char* version = "Fluffy ESP2866 Water Log ver 1.0";
+const char* version = "Fluffy ESP2866 Water Log ver 1.01";
 
 const char* host = "10.1.3.17";
 const int port = 8880;
@@ -11,12 +11,12 @@ const int port = 8880;
 const float m3PerPulse[2] = {
   0.000000724637, 0.000000724637
 };
-// 0.000000724637 m^3 per tick ( 0.72 mL / tick) seems to read about 20% high
+// 0.000000724637 m^3 per tick ( 0.72 mL / tick) seems to read about 30 % high
 
-const unsigned char i2cAddr = 0x42; // i2c address for counter chip 
+const unsigned char i2cAddr = 0x42; // i2c address for counter chip
 
-const unsigned long maxSendTime   =  60*1000; // max time bewteen sends in ms
-const unsigned long minSendTime   =   5*1000; // min time bewteen sends in ms
+const unsigned long maxSendTime   =  60 * 1000; // max time bewteen sends in ms
+const unsigned long minSendTime   =   5 * 1000; // min time bewteen sends in ms
 
 volatile unsigned long count[2];     // counter
 volatile unsigned long prevTime[2]; // time counter was last sent
@@ -150,24 +150,51 @@ unsigned long getCount( int ch )
   Wire.write(ch);
   Wire.endTransmission();
 
-  Wire.requestFrom( i2cAddr, 4);  // get 4 bytes 
+  Wire.requestFrom( i2cAddr, 5);  // get 4 bytes
   for ( int i = 0;  i < 4; i++ ) {
-    //Serial.print( "i=" );  Serial.println( i );  
+    //Serial.print( "i=" );  Serial.println( i );
     if (Wire.available() ) {
       *ptr++ =  Wire.read();
-      //Serial.println( *(ptr-1) );   
+      //Serial.println( *(ptr-1) );
     }
+    else
+    {
+      return 0;
+    }
+  }
+  if (Wire.available() ) {
+    byte checkSumRecv =  Wire.read();
+    byte checkSum = 0x42;
+    checkSum ^= data;
+    checkSum ^= data >> 8;
+    checkSum ^= data >> 16;
+    checkSum ^= data >> 24;
+
+    if ( checkSumRecv != checkSum )
+    {
+      return 0;
+    }
+  }
+  else
+  {
+    return 0;
   }
 
   return data;
 }
 
 
-void loop() 
+void loop()
 {
-  for ( int ch=0; ch <= 1; ch++ ) {
-    count[ch] = getCount( ch );
-    //Serial.print( "ch" ); Serial.print( ch) ; Serial.print("="); Serial.println( count[ch] );
+  for ( int ch = 0; ch <= 1; ch++ ) {
+    unsigned long data = getCount( ch );
+    if ( data != 0 ) // 0 indicates error on i2c read
+    {
+      count[ch] = data;
+    }
+#if 1
+    Serial.print( "ch" ); Serial.print( ch) ; Serial.print("="); Serial.println( data );
+#endif
   }
 
   delay(500);
@@ -193,7 +220,7 @@ void checkDataToSend(int ch)
     {
       sendData( count[ch], now - prevTime[ch], count[ch] - prevCount[ch], ch );
       prevTime[ch] = now;
-      prevCount[ch] = count[ch];     
+      prevCount[ch] = count[ch];
     }
   }
 }
@@ -259,13 +286,13 @@ void sendData( unsigned long count,  unsigned long deltaTime,  unsigned long del
 
   Serial.print( " --> " );
   unsigned long txStart = millis();
-  bool firstLine=true;
+  bool firstLine = true;
   while ( client.connected() ) {
     if ( client.available()) {
       String line = client.readStringUntil('\r');
       if ( firstLine ) {
         Serial.print(line);
-        firstLine = false; 
+        firstLine = false;
       }
     }
     yield();
