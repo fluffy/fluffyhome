@@ -1,10 +1,10 @@
 #include <EEPROM.h>
 #include <Wire.h>
 
-const char* version = "Fluffy Pulse Counter ver 0.01";
+const char* version = "Fluffy Pulse Counter ver 1.01";
 
 // arduino eeprom rted at 100k write cycles
-const unsigned long minEepromTime = 3600*1000; // (1hour) min time bewteen eeprom write in ms
+const unsigned long minEepromTime = 3600 * 1000; // (1hour) min time bewteen eeprom write in ms
 
 const int sensorPin0 = 2;   // water meter input used for interupt zero
 const int sensorPin1 = 3;   // water meter input used for interupt one
@@ -82,8 +82,8 @@ void setup()
 
 #if 0
   // initialze values in EEPROM
-  count[0] = 0; storeEEPROM( count[0], 0 );
-  count[1] = 0; storeEEPROM( count[1], 1 );
+  count[0] = 1; storeEEPROM( count[0], 0 );
+  count[1] = 1; storeEEPROM( count[1], 1 );
 #endif
 
   count[0] = loadEEPROM(0);
@@ -158,14 +158,12 @@ void loop()
   checkUpdateEeprom( 0 );
   checkUpdateEeprom( 1 );
 
-#if 0
-  count[0]++;
-  delay( 5000 );
-  Serial.print( millis() ) ; Serial.print( " -> " ); 
-#endif
-
-#if 0
-  Serial.print( regVal[0] , HEX ); Serial.print(' ');  Serial.println( regVal[1] , HEX );
+#if 1
+  static int loopCount = 0;
+  if ( (loopCount++ % 10) == 0 ) {
+    Serial.print( "time=" ); Serial.print( millis() / 1000 ) ; Serial.print( " -> " );
+    Serial.print( regVal[0] , HEX ); Serial.print(' ');  Serial.println( regVal[1] , HEX );
+  }
 #endif
 }
 
@@ -182,5 +180,11 @@ void i2cBusRecv(int num)
 void i2cBusRead()
 {
   unsigned long data = regVal[readReg];
+  byte checkSum = 0x42;
+  checkSum ^= data;
+  checkSum ^= data>>8;
+  checkSum ^= data>>16;
+  checkSum ^= data>>24;
   Wire.write( (char*)(&data), sizeof( data ) );
+  Wire.write( checkSum );
 }

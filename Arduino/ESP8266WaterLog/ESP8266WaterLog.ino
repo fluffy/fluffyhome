@@ -3,7 +3,7 @@
 #include <String.h>
 #include <Wire.h>
 
-const char* version = "Fluffy ESP2866 Water Log ver 0.03";
+const char* version = "Fluffy ESP2866 Water Log ver 1.0";
 
 const char* host = "10.1.3.17";
 const int port = 8880;
