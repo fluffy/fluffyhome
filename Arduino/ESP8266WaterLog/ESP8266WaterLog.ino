@@ -1,6 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <EEPROM.h>
 #include <String.h>
+#include <Wire.h>
 
 const char* version = "Fluffy ESP2866 Water Log ver 0.02";
 
@@ -128,11 +129,14 @@ void ICACHE_RAM_ATTR sensorIsr1()
 
 
 void setup() {
+  Wire.begin();
+
   Serial.begin(115200);
   delay(100);
   Serial.println();
   Serial.println("starting");
 
+#if 0
   writeEEProm();
   readEEProm();
 
@@ -161,6 +165,7 @@ void setup() {
     Serial.print(" ");
   }
   Serial.println();
+#endif
 
   delay( 1000 );
 
@@ -183,16 +188,44 @@ void setup() {
 }
 
 
+unsigned long getCount( int ch )
+{
+  unsigned long data = 0;
+  unsigned char* ptr = (unsigned char*)&data;
+
+  Wire.beginTransmission(0x42); // send to dev at addr 42
+  Wire.write(ch);
+  Wire.endTransmission();
+
+  Wire.requestFrom( 0x42, 4);  // get 4 bytes from dev with addr 42
+  for ( int i = 0;  i < 4; i++ ) {
+    //Serial.print( "i=" );  Serial.println( i );  
+    if (Wire.available() ) {
+      *ptr++ =  Wire.read();
+      //Serial.println( *(ptr-1) );   
+    }
+  }
+
+  return data;
+}
+
+
 void loop() {
+
+  for ( int ch=0; ch <= 1; ch++ ) {
+    unsigned long data = getCount( ch );
+    Serial.print( "ch" ); Serial.print( ch) ; Serial.print("="); Serial.println( data , HEX );
+  }
   delay(500);
 
   //Serial.println( globalCount[0] );
   //Serial.println( globalCount[1] );
 
-  checkDataToSend(0);
+  //delay(500);
+  //checkDataToSend(0);
 
-  delay(500);
-  checkDataToSend(1);
+  //delay(500);
+  //checkDataToSend(1);
 }
 
 
