@@ -3,28 +3,22 @@
 #include <String.h>
 #include <Wire.h>
 
-const char* version = "Fluffy ESP2866 Water Log ver 0.02";
+const char* version = "Fluffy ESP2866 Water Log ver 0.03";
 
 const char* host = "10.1.3.17";
 const int port = 8880;
-
-const unsigned long bounceTime[2] = {
-  2, 2
-}; // de bounce time for sensor in ms
 
 const float m3PerPulse[2] = {
   0.000000724637, 0.000000724637
 };
 // 0.000000724637 m^3 per tick ( 0.72 mL / tick) seems to read about 20% high
 
-const int sensorPin0 = 4;   // water meter input used for interupt zero
-const int sensorPin1 = 13;   // water meter input used for interupt one
+const unsigned char i2cAddr = 0x42; // i2c address for counter chip 
 
-const unsigned long maxSendTime   =  15000; // max time bewteen sends in ms
-const unsigned long minSendTime   =   3000; // min time bewteen sends in ms
-const unsigned long minEepromTime = 600000; // min time bewteen eeprom write
+const unsigned long maxSendTime   =  60*1000; // max time bewteen sends in ms
+const unsigned long minSendTime   =   1*1000; // min time bewteen sends in ms
 
-volatile unsigned long globalCount[2];     // counter
+volatile unsigned long count[2];     // counter
 volatile unsigned long prevTime[2]; // time counter was last sent
 volatile unsigned long prevCount[2]; // value of counter when last sent
 
@@ -92,40 +86,6 @@ void readEEProm()
 }
 
 
-void ICACHE_RAM_ATTR sensorInt(const int ch) __attribute__((always_inline));
-
-void ICACHE_RAM_ATTR sensorInt(const int ch)
-{
-  unsigned long now;
-
-  now = millis();
-  if ( now > prevTime[ch] + bounceTime[ch] )
-  {
-    noInterrupts();
-    globalCount[ch]++;
-    prevTime[ch] = now;
-    interrupts();
-  }
-
-  if ( prevTime[ch] > now )
-  {
-    prevTime[ch] = now;
-  }
-}
-
-void ICACHE_RAM_ATTR sensorIsr0() __attribute__((always_inline));
-void ICACHE_RAM_ATTR sensorIsr1() __attribute__((always_inline));
-
-void ICACHE_RAM_ATTR sensorIsr0()
-{
-  sensorInt( 0 );
-}
-
-
-void ICACHE_RAM_ATTR sensorIsr1()
-{
-  sensorInt( 1 );
-}
 
 
 void setup() {
@@ -134,9 +94,9 @@ void setup() {
   Serial.begin(115200);
   delay(100);
   Serial.println();
-  Serial.println("starting");
+  Serial.println("version");
 
-#if 0
+#if 1
   writeEEProm();
   readEEProm();
 
@@ -169,22 +129,15 @@ void setup() {
 
   delay( 1000 );
 
-  globalCount[0] = 0;
-  prevCount[0] = globalCount[0];
-  globalCount[1] = 0;
-  prevCount[1] = globalCount[1];
+  count[0] = 0;
+  prevCount[0] = 0;
+  count[1] = 0;
+  prevCount[1] = 0;
 
   unsigned long now;
   now = millis();
   prevTime[0] = now;
   prevTime[1] = now;
-
-
-  pinMode(sensorPin0, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(sensorPin0), sensorIsr0, FALLING);
-
-  pinMode(sensorPin1, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(sensorPin1), sensorIsr1, FALLING);
 }
 
 
@@ -197,7 +150,7 @@ unsigned long getCount( int ch )
   Wire.write(ch);
   Wire.endTransmission();
 
-  Wire.requestFrom( 0x42, 4);  // get 4 bytes from dev with addr 42
+  Wire.requestFrom( i2cAddr, 4);  // get 4 bytes 
   for ( int i = 0;  i < 4; i++ ) {
     //Serial.print( "i=" );  Serial.println( i );  
     if (Wire.available() ) {
@@ -210,22 +163,18 @@ unsigned long getCount( int ch )
 }
 
 
-void loop() {
-
+void loop() 
+{
   for ( int ch=0; ch <= 1; ch++ ) {
-    unsigned long data = getCount( ch );
-    Serial.print( "ch" ); Serial.print( ch) ; Serial.print("="); Serial.println( data , HEX );
+    count[ch] = getCount( ch );
+    Serial.print( "ch" ); Serial.print( ch) ; Serial.print("="); Serial.println( count[ch] );
   }
+
   delay(500);
+  checkDataToSend(0);
 
-  //Serial.println( globalCount[0] );
-  //Serial.println( globalCount[1] );
-
-  //delay(500);
-  //checkDataToSend(0);
-
-  //delay(500);
-  //checkDataToSend(1);
+  delay(500);
+  checkDataToSend(1);
 }
 
 
@@ -238,21 +187,13 @@ void checkDataToSend(int ch)
   now = millis();
   //digitalWrite(flashPin, ( (flash++)%2) ? HIGH : LOW);
 
-  if ( (globalCount[ch] != prevCount[ch]) || ( now > prevTime[ch] + maxSendTime ) )
+  if ( (count[ch] != prevCount[ch]) || ( now > prevTime[ch] + maxSendTime ) )
   {
     if ( now > prevTime[ch] + minSendTime )
     {
-
-      // TODO LOCK out interupts and copy volatile data
-
-      sendData( globalCount[ch], now - prevTime[ch], globalCount[ch] - prevCount[ch], ch );
+      sendData( count[ch], now - prevTime[ch], count[ch] - prevCount[ch], ch );
       prevTime[ch] = now;
-
-      if (globalCount[ch] != prevCount[ch])
-      {
-        prevCount[ch] = globalCount[ch];
-      }
-
+      prevCount[ch] = count[ch];     
     }
   }
 }
@@ -291,7 +232,7 @@ void sendData( unsigned long count,  unsigned long deltaTime,  unsigned long del
   data += String( volume , 7 );
   data += ",\"u\":\"m3/s\"}]";
 
-  Serial.print("connecting to ");
+  Serial.print("SEND to");
   Serial.print(host);
   Serial.print(":");
   Serial.print(port);
