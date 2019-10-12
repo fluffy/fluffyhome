@@ -16,7 +16,7 @@ const float m3PerPulse[2] = {
 const unsigned char i2cAddr = 0x42; // i2c address for counter chip 
 
 const unsigned long maxSendTime   =  60*1000; // max time bewteen sends in ms
-const unsigned long minSendTime   =   1*1000; // min time bewteen sends in ms
+const unsigned long minSendTime   =   5*1000; // min time bewteen sends in ms
 
 volatile unsigned long count[2];     // counter
 volatile unsigned long prevTime[2]; // time counter was last sent
@@ -167,7 +167,7 @@ void loop()
 {
   for ( int ch=0; ch <= 1; ch++ ) {
     count[ch] = getCount( ch );
-    Serial.print( "ch" ); Serial.print( ch) ; Serial.print("="); Serial.println( count[ch] );
+    //Serial.print( "ch" ); Serial.print( ch) ; Serial.print("="); Serial.println( count[ch] );
   }
 
   delay(500);
@@ -232,7 +232,7 @@ void sendData( unsigned long count,  unsigned long deltaTime,  unsigned long del
   data += String( volume , 7 );
   data += ",\"u\":\"m3/s\"}]";
 
-  Serial.print("SEND to");
+  Serial.print("SEND to ");
   Serial.print(host);
   Serial.print(":");
   Serial.print(port);
@@ -243,7 +243,7 @@ void sendData( unsigned long count,  unsigned long deltaTime,  unsigned long del
     delay( 10000 );
     return;
   }
-  Serial.println();
+  //Serial.println();
 
   String hdr;
   hdr += "POST / HTTP/1.1\r\n";
@@ -253,14 +253,20 @@ void sendData( unsigned long count,  unsigned long deltaTime,  unsigned long del
   hdr += "Content-Type: application/senml+json\r\n";
   client.print( hdr + "\r\n" + data );
 
-  Serial.println("SENT HTTP");
-  Serial.println( hdr + "\r\n" + data );
+  //Serial.println("SENT HTTP");
+  //Serial.print( hdr + "\r\n"  );
+  Serial.print( data );
 
+  Serial.print( " --> " );
   unsigned long txStart = millis();
+  bool firstLine=true;
   while ( client.connected() ) {
     if ( client.available()) {
       String line = client.readStringUntil('\r');
-      Serial.print(line);
+      if ( firstLine ) {
+        Serial.print(line);
+        firstLine = false; 
+      }
     }
     yield();
     unsigned long now = millis();
@@ -271,6 +277,6 @@ void sendData( unsigned long count,  unsigned long deltaTime,  unsigned long del
   }
 
   Serial.println();
-  Serial.println("closing connection");
+  //Serial.println("closing connection");
   client.stop();
 }
