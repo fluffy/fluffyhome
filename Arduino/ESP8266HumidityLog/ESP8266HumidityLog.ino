@@ -220,11 +220,11 @@ void sendInfo( float temperature, float humdity, float pressure, float voc )
   //Serial.println();
 
   String hdr;
-  hdr += "POST / HTTP / 1.1\r\n";
+  hdr += "POST / HTTP/1.1\r\n";
   hdr += String("Host: ") + host + "\r\n";
   hdr += "Connection: close\r\n";
-  hdr += String("Content - Length: ") + data.length() + "\r\n";
-  hdr += "Content - Type: application / senml + json\r\n";
+  hdr += String("Content-Length: ") + data.length() + "\r\n";
+  hdr += "Content-Type: application/senml+json\r\n";
   client.print( hdr + "\r\n" + data );
 
   //Serial.println("SENT HTTP");
