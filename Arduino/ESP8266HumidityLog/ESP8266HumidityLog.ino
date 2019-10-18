@@ -8,11 +8,11 @@
 const char* version = "Fluffy ESP2866 Humidity Log ver 0.03";
 
 const char* host = "10.1.3.17";
-const int port = 8881;
+const int port = 8880;
 
 const unsigned char i2cAddr = 0x42; // i2c address for counter chip
 
-const unsigned long sendTime   =  5 * 1000; // max time bewteen sends in ms
+const unsigned long sendTime   =  60 * 1000; // max time bewteen sends in ms
 
 byte mac[6];
 
@@ -145,7 +145,6 @@ void sendInfo( float temperature, float humdity, float pressure, float voc )
   String data;
   data.reserve( 100 );
 
-#if 0
   // SENML format in rfc8428
   // URN defined in draft-ietf-core-dev-urn
   data = "[{\"bn\":\"urn:dev:mac:";
@@ -160,31 +159,15 @@ void sendInfo( float temperature, float humdity, float pressure, float voc )
   data += "\"n\":\"";
   data += "temp";
   data += "\",\"v\":";
-  data += String( temperature , 7 ) ;
+  data += String( temperature , 2 ) ;
   data += ",\"u\":\"C\"";
-#else
- // SENML format in rfc8428
-  // URN defined in draft-ietf-core-dev-urn
-  data = "[{\"n\":\"urn:dev:mac:";
 
-  for ( byte i = 0; i < 6; i++)
-  {
-    if ( mac[i] < 16) data += '0'; // add leading 0 if needed
-    data += String( mac[i], HEX);
-  }
-  data += "_temp";
-  data += "\",\"v\":";
-  data += String( temperature , 7 ) ;
-  data += ",\"u\":\"C\"";
-#endif
-
-#if 0
   data += "},{";
 
   data += "\"n\":\"";
   data += "hum";
   data += "\",\"v\":";
-  data += String( humdity , 7 ) ;
+  data += String( humdity , 2 ) ;
   data += ",\"u\":\"%RH\"";
 
   data += "},{";
@@ -192,7 +175,7 @@ void sendInfo( float temperature, float humdity, float pressure, float voc )
   data += "\"n\":\"";
   data += "pres";
   data += "\",\"v\":";
-  data += String( pressure , 7 ) ;
+  data += String( pressure , 3 ) ;
   data += ",\"u\":\"Pa\"";
 
   data += "},{";
@@ -200,9 +183,8 @@ void sendInfo( float temperature, float humdity, float pressure, float voc )
   data += "\"n\":\"";
   data += "voc";
   data += "\",\"v\":";
-  data += String( voc , 7 ) ;
+  data += String( voc , 3 ) ;
   data += ",\"u\":\"ohm\"";
-#endif
 
   data += "}]";
 
