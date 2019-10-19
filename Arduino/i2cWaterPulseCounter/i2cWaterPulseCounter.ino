@@ -1,10 +1,10 @@
 #include <EEPROM.h>
 #include <Wire.h>
 
-const char* version = "Fluffy Pulse Counter ver 1.01";
+const char* version = "Fluffy Pulse Counter ver 1.02";
 
 // arduino eeprom rted at 100k write cycles
-const unsigned long minEepromTime = 3600 * 1000; // (1hour) min time bewteen eeprom write in ms
+const unsigned long minEepromTime = 3600000ul; // (1hour) min time bewteen eeprom write in ms
 
 const int sensorPin0 = 2;   // water meter input used for interupt zero
 const int sensorPin1 = 3;   // water meter input used for interupt one
