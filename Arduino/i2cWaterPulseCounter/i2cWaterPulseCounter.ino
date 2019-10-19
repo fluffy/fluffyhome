@@ -1,7 +1,7 @@
 #include <EEPROM.h>
 #include <Wire.h>
 
-const char* version = "Fluffy Pulse Counter ver 1.02";
+const char* version = "Fluffy Pulse Counter ver 1.03";
 
 // arduino eeprom rted at 100k write cycles
 const unsigned long minEepromTime = 3600000ul; // (1hour) min time bewteen eeprom write in ms
