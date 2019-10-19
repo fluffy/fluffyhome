@@ -1,22 +1,25 @@
+//  Copyright 2019, Cullen Jennings
+
 #include <ESP8266WiFi.h>
 #include <EEPROM.h>
 #include <String.h>
 #include <Wire.h>
 
-const char* version = "Fluffy ESP2866 Water Log ver 1.01";
+const char* version = "Fluffy ESP2866 Water Log ver 1.02";
 
 const char* host = "10.1.3.17";
 const int port = 8880;
 
 const float m3PerPulse[2] = {
-  0.000000724637, 0.000000724637
+  0.000000724637 * 0.7 , 0.000000724637 * 0.7 
 };
 // 0.000000724637 m^3 per tick ( 0.72 mL / tick) seems to read about 30 % high
+// added a 0.7 correction factor after calibration Oct 19, 20119 
 
 const unsigned char i2cAddr = 0x42; // i2c address for counter chip
 
 const unsigned long maxSendTime   =  60 * 1000; // max time bewteen sends in ms
-const unsigned long minSendTime   =   5 * 1000; // min time bewteen sends in ms
+const unsigned long minSendTime   =  10 * 1000; // min time bewteen sends in ms
 
 volatile unsigned long count[2];     // counter
 volatile unsigned long prevTime[2]; // time counter was last sent
@@ -94,7 +97,7 @@ void setup() {
   Serial.begin(115200);
   delay(100);
   Serial.println();
-  Serial.println("version");
+  Serial.println(version);
 
 #if 1
   writeEEProm();
@@ -150,7 +153,8 @@ unsigned long getCount( int ch )
   Wire.write(ch);
   Wire.endTransmission();
 
-  Wire.requestFrom( i2cAddr, 5);  // get 4 bytes
+  const unsigned char len = 5; // get 4 bytes + 1 checksum byte 
+  Wire.requestFrom( i2cAddr, len);  
   for ( int i = 0;  i < 4; i++ ) {
     //Serial.print( "i=" );  Serial.println( i );
     if (Wire.available() ) {
