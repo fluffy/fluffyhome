@@ -4,6 +4,7 @@
 #include <Wire.h>
 #include <Adafruit_Sensor.h> // From https://github.com/adafruit/Adafruit_Sensor 
 #include <Adafruit_BME680.h> // From https://github.com/adafruit/Adafruit_BME680
+#include <Adafruit_CCS811.h> // From https://github.com/adafruit/Adafruit_CCS811 
 
 const char* version = "Fluffy ESP2866 Humidity Log ver 0.03";
 
@@ -20,7 +21,7 @@ char ssid[32];
 char password[32];
 
 Adafruit_BME680 bme;
-
+Adafruit_CCS811 ccs; // I2C addr 0x5A
 
 void writeEEProm()
 {
@@ -121,8 +122,9 @@ void setup() {
 
   delay( 1000 );
 
+#if 1
   if (!bme.begin()) {
-    Serial.println(F("Could not find a valid BME680 sensor, check wiring!"));
+    Serial.println(F("Failed BME680 sensor"));
   }
 
   bme.setTemperatureOversampling(BME680_OS_8X);
@@ -130,6 +132,18 @@ void setup() {
   bme.setPressureOversampling(BME680_OS_4X);
   bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
   bme.setGasHeater(320 /* degree C */ , 150 /* ms */ );
+#endif
+
+#if 0
+  if (!ccs.begin()) {
+    Serial.println("Failed CCS811 sensor");
+  }
+
+  while ( !ccs.available() ) {
+    yield();
+    delay(5);
+  }
+#endif
 }
 
 
@@ -137,6 +151,21 @@ void loop()
 {
   delay(100);
   checkDataToSend();
+
+#if 0
+  if (ccs.available()) {
+    if (!ccs.readData()) {
+      Serial.print("CO2: ");
+      Serial.print(ccs.geteCO2());
+      Serial.print("ppm, TVOC: ");
+      Serial.print(ccs.getTVOC());
+    }
+    else {
+      Serial.println("ERROR!");
+      while (1);
+    }
+  }
+#endif
 }
 
 
@@ -178,13 +207,15 @@ void sendInfo( float temperature, float humdity, float pressure, float voc )
   data += String( pressure , 3 ) ;
   data += ",\"u\":\"Pa\"";
 
-  data += "},{";
+  if ( voc > 0.0 ) {
+    data += "},{";
 
-  data += "\"n\":\"";
-  data += "voc";
-  data += "\",\"v\":";
-  data += String( voc , 3 ) ;
-  data += ",\"u\":\"ohm\"";
+    data += "\"n\":\"";
+    data += "voc";
+    data += "\",\"v\":";
+    data += String( voc , 3 ) ;
+    data += ",\"u\":\"ohm\"";
+  }
 
   data += "}]";
 
