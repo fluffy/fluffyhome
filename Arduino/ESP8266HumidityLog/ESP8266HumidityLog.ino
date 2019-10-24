@@ -134,8 +134,8 @@ void setup() {
   bme.setGasHeater(320 /* degree C */ , 150 /* ms */ );
 #endif
 
-#if 0
-  if (!ccs.begin()) {
+#if 1
+  if (!ccs.begin( 0x5B /*i2c addr*/ )) {
     Serial.println("Failed CCS811 sensor");
   }
 
@@ -152,13 +152,13 @@ void loop()
   delay(100);
   checkDataToSend();
 
-#if 0
+#if 1
   if (ccs.available()) {
     if (!ccs.readData()) {
       Serial.print("CO2: ");
       Serial.print(ccs.geteCO2());
       Serial.print("ppm, TVOC: ");
-      Serial.print(ccs.getTVOC());
+      Serial.println(ccs.getTVOC());
     }
     else {
       Serial.println("ERROR!");
