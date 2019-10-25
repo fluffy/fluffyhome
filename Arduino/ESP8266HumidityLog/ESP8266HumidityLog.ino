@@ -5,13 +5,16 @@
 #include <Adafruit_Sensor.h> // From https://github.com/adafruit/Adafruit_Sensor 
 #include <Adafruit_BME680.h> // From https://github.com/adafruit/Adafruit_BME680
 #include <Adafruit_CCS811.h> // From https://github.com/adafruit/Adafruit_CCS811 
+#include <Adafruit_HTU21DF.h> // From https://github.com/adafruit/Adafruit_HTU21DF_Library
 
-const char* version = "Fluffy ESP2866 Humidity Log ver 1.01";
+const char* version = "Fluffy ESP2866 Humidity Log ver 1.02";
 
 const char* host = "10.1.3.17";
 const int port = 8880;
 
-#define HAVE_CCS811
+//#define HAVE_CCS811
+#define HAVE_HTU21DF
+
 
 const unsigned long sendTime   =  60 * 1000; // max time bewteen sends in ms
 
@@ -27,6 +30,12 @@ Adafruit_BME680 bme;
 bool ccsValid = false;
 Adafruit_CCS811 ccs; // I2C addr 0x5A
 #endif
+
+
+#ifdef  HAVE_HTU21DF
+Adafruit_HTU21DF htu = Adafruit_HTU21DF();
+#endif
+
 
 void writeEEProm()
 {
@@ -163,8 +172,17 @@ void setup() {
       break;
     }
   }
-
 #endif
+
+#ifdef HAVE_HTU21DF
+  if (!htu.begin()) {
+    Serial.println("Could not find HTU21DF sensor");
+  }
+  else {
+    Serial.println("HTU21DF sensor ready");
+  }
+#endif
+
 }
 
 
@@ -188,7 +206,9 @@ void loop()
 }
 
 
-void sendInfo( float temperature, float humdity, float pressure, float voc , uint16_t eCO2, uint16_t tVOC )
+void sendInfo( float temperature, float humdity, float pressure, float voc ,
+               uint16_t eCO2, uint16_t tVOC,
+               float temp2, float hum2)
 {
   String data;
   data.reserve( 100 );
@@ -236,6 +256,28 @@ void sendInfo( float temperature, float humdity, float pressure, float voc , uin
     data += ",\"u\":\"ohm\"";
   }
 
+
+  if ( (temp2 >= -273.0) ) {
+    data += "},{";
+
+    data += "\"n\":\"";
+    data += "temp2";
+    data += "\",\"v\":";
+    data += String( temp2, 2 ) ;
+    data += ",\"u\":\"C\"";
+  }
+
+  if ( ( hum2 > 0.0) )  {
+    data += "},{";
+
+    data += "\"n\":\"";
+    data += "hum2";
+    data += "\",\"v\":";
+    data += String( hum2 , 2 ) ;
+    data += ",\"u\":\"%RH\"";
+  }
+
+
   if ( (eCO2 >= 400) && ( eCO2 <= 64000u ) ) { // range from datasheet is 400 to 8192 - firmware update says 64000
     data += "},{";
 
@@ -255,6 +297,7 @@ void sendInfo( float temperature, float humdity, float pressure, float voc , uin
     data += String( tVOC  ) ;
     data += ",\"u\":\"ppm\"";
   }
+
 
   data += "}]";
 
@@ -336,19 +379,28 @@ void checkDataToSend()
       return;
     }
 
+    uint16_t eCO2 = 0 ;
+    uint16_t tVOC = 0xFFFFu;
+
+    float hum2 = -1.0;
+    float temp2 = -500.0;
+
 #ifdef HAVE_CCS811
-    if ( ccsValid ) {
-
-      sendInfo(  bme.temperature,  bme.humidity,  bme.pressure,  bme.gas_resistance  , ccs.geteCO2() , ccs.getTVOC()  );
-
+    if ( ccsValid )
+    {
+      eCO2 = ccs.geteCO2();
+      tVOC = ccs.getTVOC() ;
       ccs.setEnvironmentalData( int( bme.humidity ) /*uint8_t humidity*/,  bme.temperature /* double temperature*/ );
     }
-    else
-    {
-      sendInfo(  bme.temperature,  bme.humidity,  bme.pressure,  bme.gas_resistance , 0, 0 );
-    }
-#else
-    sendInfo(  bme.temperature,  bme.humidity,  bme.pressure,  bme.gas_resistance , 0, 0 );
 #endif
+
+#ifdef HAVE_HTU21DF
+    temp2 = htu.readTemperature();
+    hum2 = htu.readHumidity();
+
+    //Serial.print("Temp2: "); Serial.print(temp2); Serial.print(" "); Serial.print("Hum2: "); Serial.println(hum2);
+#endif
+
+    sendInfo(  bme.temperature,  bme.humidity,  bme.pressure,  bme.gas_resistance  , eCO2 , tVOC , temp2, hum2  );
   }
 }
