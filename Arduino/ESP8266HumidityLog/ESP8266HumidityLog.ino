@@ -6,12 +6,12 @@
 #include <Adafruit_BME680.h> // From https://github.com/adafruit/Adafruit_BME680
 #include <Adafruit_CCS811.h> // From https://github.com/adafruit/Adafruit_CCS811 
 
-const char* version = "Fluffy ESP2866 Humidity Log ver 0.04";
+const char* version = "Fluffy ESP2866 Humidity Log ver 1.01";
 
 const char* host = "10.1.3.17";
 const int port = 8880;
 
-const unsigned char i2cAddr = 0x42; // i2c address for counter chip
+#define HAVE_CCS811
 
 const unsigned long sendTime   =  60 * 1000; // max time bewteen sends in ms
 
@@ -20,11 +20,11 @@ byte mac[6];
 char ssid[32];
 char password[32];
 
+
 Adafruit_BME680 bme;
 
-#define HAVE_CCS811
-
 #ifdef  HAVE_CCS811
+bool ccsValid = false;
 Adafruit_CCS811 ccs; // I2C addr 0x5A
 #endif
 
@@ -92,7 +92,7 @@ void setup() {
   Serial.begin(115200);
   delay(100);
   Serial.println();
-  Serial.println("version");
+  Serial.println(version);
 
 #if 1
   writeEEProm();
@@ -131,45 +131,57 @@ void setup() {
   if (!bme.begin()) {
     Serial.println(F("Failed BME680 sensor"));
   }
+  else
+  {
+    bme.setTemperatureOversampling(BME680_OS_8X);
+    bme.setHumidityOversampling(BME680_OS_2X);
+    bme.setPressureOversampling(BME680_OS_4X);
+    bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
+    bme.setGasHeater(320 /* degree C */ , 150 /* ms */ );
 
-  bme.setTemperatureOversampling(BME680_OS_8X);
-  bme.setHumidityOversampling(BME680_OS_2X);
-  bme.setPressureOversampling(BME680_OS_4X);
-  bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
-  bme.setGasHeater(320 /* degree C */ , 150 /* ms */ );
+    Serial.println("BME680 sensor ready");
+  }
+
 #endif
 
 #ifdef HAVE_CCS811
-  if (!ccs.begin( 0x5B /*i2c addr*/ ))
-  {
-    Serial.println("Failed CCS811 sensor");
-  }
-  else
-  {
-    while ( !ccs.available() ) {
-      yield();
-      delay(5);
+  for ( byte i2cAddr = 0x5A; i2cAddr <= 0x5B; i2cAddr++ ) {
+    if (!ccs.begin( i2cAddr /*i2c addr*/ )) // address is 5A or 5B
+    {
+      Serial.print("No CCS811 sensor at 0x");  Serial.println( i2cAddr , HEX);
+    }
+    else
+    {
+      while ( !ccs.available() ) {
+        yield();
+        delay(5);
+      }
+
+      ccs.setDriveMode( CCS811_DRIVE_MODE_10SEC );
+      Serial.print("CCS811 sensor ready at i2c addr 0x"); Serial.println( i2cAddr, HEX);
+      ccsValid = true;
+      break;
     }
   }
 
-  ccs.setDriveMode( CCS811_DRIVE_MODE_10SEC );
-  Serial.println("CCS811 sensor ready");
 #endif
 }
 
 
 void loop()
 {
-  delay(100);
+  delay(500);
   checkDataToSend();
 
 #ifdef HAVE_CCS811
-  if (ccs.available()) {
-    if (!ccs.readData()) {
-      Serial.print("CO2: "); Serial.print(ccs.geteCO2()); Serial.print("ppm, TVOC: "); Serial.println(ccs.getTVOC());
-    }
-    else {
-      Serial.println("ERROR Reading CSS811");
+  if ( ccsValid ) {
+    if (ccs.available()) {
+      if (!ccs.readData()) {
+        Serial.print("CO2: "); Serial.print(ccs.geteCO2()); Serial.print(" ppm, TVOC: "); Serial.println(ccs.getTVOC());
+      }
+      else {
+        Serial.println("ERROR Reading CSS811");
+      }
     }
   }
 #endif
@@ -220,7 +232,7 @@ void sendInfo( float temperature, float humdity, float pressure, float voc , uin
     data += "\"n\":\"";
     data += "voc";
     data += "\",\"v\":";
-    data += String( voc ,3  ) ;
+    data += String( voc , 3  ) ;
     data += ",\"u\":\"ohm\"";
   }
 
@@ -325,10 +337,16 @@ void checkDataToSend()
     }
 
 #ifdef HAVE_CCS811
-    sendInfo(  bme.temperature,  bme.humidity,  bme.pressure,  bme.gas_resistance  , ccs.geteCO2() , ccs.getTVOC()  );
+    if ( ccsValid ) {
 
-    ccs.setEnvironmentalData( int( bme.humidity ) /*uint8_t humidity*/,  bme.temperature /* double temperature*/ );
+      sendInfo(  bme.temperature,  bme.humidity,  bme.pressure,  bme.gas_resistance  , ccs.geteCO2() , ccs.getTVOC()  );
 
+      ccs.setEnvironmentalData( int( bme.humidity ) /*uint8_t humidity*/,  bme.temperature /* double temperature*/ );
+    }
+    else
+    {
+      sendInfo(  bme.temperature,  bme.humidity,  bme.pressure,  bme.gas_resistance , 0, 0 );
+    }
 #else
     sendInfo(  bme.temperature,  bme.humidity,  bme.pressure,  bme.gas_resistance , 0, 0 );
 #endif
