@@ -7,13 +7,13 @@
 #include <Adafruit_CCS811.h> // From https://github.com/adafruit/Adafruit_CCS811 
 #include <Adafruit_HTU21DF.h> // From https://github.com/adafruit/Adafruit_HTU21DF_Library
 
-const char* version = "Fluffy ESP2866 Humidity Log ver 1.02";
+const char* version = "Fluffy ESP2866 Humidity Log ver 1.03";
 
 const char* host = "10.1.3.17";
 const int port = 8880;
 
-//#define HAVE_CCS811
-#define HAVE_HTU21DF
+#define HAVE_CCS811
+//#define HAVE_HTU21DF
 
 
 const unsigned long sendTime   =  60 * 1000; // max time bewteen sends in ms
