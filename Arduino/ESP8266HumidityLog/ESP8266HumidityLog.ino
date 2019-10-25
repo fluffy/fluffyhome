@@ -6,7 +6,7 @@
 #include <Adafruit_BME680.h> // From https://github.com/adafruit/Adafruit_BME680
 #include <Adafruit_CCS811.h> // From https://github.com/adafruit/Adafruit_CCS811 
 
-const char* version = "Fluffy ESP2866 Humidity Log ver 0.03";
+const char* version = "Fluffy ESP2866 Humidity Log ver 0.04";
 
 const char* host = "10.1.3.17";
 const int port = 8880;
@@ -21,7 +21,12 @@ char ssid[32];
 char password[32];
 
 Adafruit_BME680 bme;
+
+#define HAVE_CCS811
+
+#ifdef  HAVE_CCS811
 Adafruit_CCS811 ccs; // I2C addr 0x5A
+#endif
 
 void writeEEProm()
 {
@@ -134,15 +139,21 @@ void setup() {
   bme.setGasHeater(320 /* degree C */ , 150 /* ms */ );
 #endif
 
-#if 1
-  if (!ccs.begin( 0x5B /*i2c addr*/ )) {
+#ifdef HAVE_CCS811
+  if (!ccs.begin( 0x5B /*i2c addr*/ ))
+  {
     Serial.println("Failed CCS811 sensor");
   }
-
-  while ( !ccs.available() ) {
-    yield();
-    delay(5);
+  else
+  {
+    while ( !ccs.available() ) {
+      yield();
+      delay(5);
+    }
   }
+
+  ccs.setDriveMode( CCS811_DRIVE_MODE_10SEC );
+  Serial.println("CCS811 sensor ready");
 #endif
 }
 
@@ -152,24 +163,20 @@ void loop()
   delay(100);
   checkDataToSend();
 
-#if 1
+#ifdef HAVE_CCS811
   if (ccs.available()) {
     if (!ccs.readData()) {
-      Serial.print("CO2: ");
-      Serial.print(ccs.geteCO2());
-      Serial.print("ppm, TVOC: ");
-      Serial.println(ccs.getTVOC());
+      Serial.print("CO2: "); Serial.print(ccs.geteCO2()); Serial.print("ppm, TVOC: "); Serial.println(ccs.getTVOC());
     }
     else {
-      Serial.println("ERROR!");
-      while (1);
+      Serial.println("ERROR Reading CSS811");
     }
   }
 #endif
 }
 
 
-void sendInfo( float temperature, float humdity, float pressure, float voc )
+void sendInfo( float temperature, float humdity, float pressure, float voc , uint16_t eCO2, uint16_t tVOC )
 {
   String data;
   data.reserve( 100 );
@@ -213,8 +220,28 @@ void sendInfo( float temperature, float humdity, float pressure, float voc )
     data += "\"n\":\"";
     data += "voc";
     data += "\",\"v\":";
-    data += String( voc , 3 ) ;
+    data += String( voc ,3  ) ;
     data += ",\"u\":\"ohm\"";
+  }
+
+  if ( (eCO2 >= 400) && ( eCO2 <= 64000u ) ) { // range from datasheet is 400 to 8192 - firmware update says 64000
+    data += "},{";
+
+    data += "\"n\":\"";
+    data += "eCO2";
+    data += "\",\"v\":";
+    data += String( eCO2 ) ;
+    data += ",\"u\":\"ppm\"";
+  }
+
+  if ( ( tVOC >= 0 ) && ( tVOC <= 64000u ))  { // range from datasheet is 0 to 1187 - firmware update says 64000
+    data += "},{";
+
+    data += "\"n\":\"";
+    data += "tVOC";
+    data += "\",\"v\":";
+    data += String( tVOC  ) ;
+    data += ",\"u\":\"ppm\"";
   }
 
   data += "}]";
@@ -297,7 +324,13 @@ void checkDataToSend()
       return;
     }
 
-    sendInfo(  bme.temperature,  bme.humidity,  bme.pressure,  bme.gas_resistance );
+#ifdef HAVE_CCS811
+    sendInfo(  bme.temperature,  bme.humidity,  bme.pressure,  bme.gas_resistance  , ccs.geteCO2() , ccs.getTVOC()  );
 
+    ccs.setEnvironmentalData( int( bme.humidity ) /*uint8_t humidity*/,  bme.temperature /* double temperature*/ );
+
+#else
+    sendInfo(  bme.temperature,  bme.humidity,  bme.pressure,  bme.gas_resistance , 0, 0 );
+#endif
   }
 }
