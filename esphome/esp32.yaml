@@ -1,0 +1,78 @@
+esphome:
+  name: esp32
+  friendly_name: Esp32
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+  level: DEBUG # Required for the tracker to show the device
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "CN96897Zg157tr6yQcVec6kvvU6ylF01yaxRFYBP7tA="
+
+ota:
+  password: "2fb2633bd8805e57db6c96cda4875633"
+
+ble_client:
+  - mac_address: 7C:E2:69:7C:0F:50
+    id: airthings01
+  - mac_address: 24:4C:AB:32:EA:2A
+    id: radoneye01
+
+#esp32_ble_tracker:
+
+#text_sensor:
+#  - platform: ble_scanner
+#    name: "BLE Devices Scanner"
+
+airthings_ble:
+
+radon_eye_ble:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  use_address: 10.2.3.50
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esp32 Fallback Hotspot"
+    password: "LeYA9MfkvwmQ"
+
+captive_portal:
+    
+sensor:
+  - platform: airthings_wave_plus
+    name: wave_plus
+    ble_client_id: airthings01
+    update_interval: 5min # default
+    battery_update_interval: 24h # default
+    temperature:
+      name: "WavePlus Temperature"
+    radon:
+      name: "WavePlus Radon"
+    radon_long_term:
+      name: "WavePlus Radon Long Term"
+    pressure:
+      name: "WavePlus Pressure"
+    humidity:
+      name: "WavePlus Humidity"
+    co2:
+      name: "WavePlus CO2"
+    tvoc:
+      name: "WavePlus VOC"
+    battery_voltage:
+      name: "WavePlus Battery Voltage"
+  - platform: radon_eye_rd200
+    ble_client_id: radoneye01
+    update_interval: 5min # default
+    radon:
+      name: "Radon"
+    radon_long_term:
+      name: "Radon Long Term"
