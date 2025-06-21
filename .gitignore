@@ -22,3 +22,4 @@ venv
 energygraph/old/
 *~
 celerybeat-schedule
+.DS_Store
